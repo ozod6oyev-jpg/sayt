@@ -111,6 +111,8 @@ export async function publishThreadsMedia(options: {
   text: string;
   videoUrl?: string;
   imageUrl?: string;
+  replyControl?: string;
+  topicTag?: string;
 }): Promise<ThreadsResult<{ id: string }>> {
   const row = await prisma.metaIntegration.findUnique({ where: { id: "default" } });
   const token = row?.threadsToken ? decryptSecret(row.threadsToken) : null;
@@ -134,6 +136,8 @@ export async function publishThreadsMedia(options: {
       media_type: isVideo ? "VIDEO" : "IMAGE",
       ...(isVideo ? { video_url: options.videoUrl } : { image_url: options.imageUrl }),
       text,
+      ...(options.replyControl ? { reply_control: options.replyControl } : {}),
+      ...(options.topicTag ? { topic_tag: options.topicTag } : {}),
     },
   });
 

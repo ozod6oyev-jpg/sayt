@@ -28,6 +28,27 @@ export type SocialMedia = {
 
 export type PublishResult = { ok: true; id: string | null } | { ok: false; error: string };
 
+/** Meta ilovasi so'raydigan qo'shimcha maydonlar */
+export type PublishOptions = {
+  /** Instagram/Facebook joylashuv ID */
+  locationId?: string;
+  /** Rasm uchun muqobil matn */
+  altText?: string;
+  /** Reels muqovasi — videoning nechanchi sekundidan olinadi */
+  coverOffset?: number | null;
+  /** Reels feed'da ham ko'rinsinmi */
+  shareToFeed?: boolean;
+  /** Instagram hamkorlari (@username, vergul bilan) */
+  collaborators?: string;
+  /** Facebook uchun alohida tavsif va video sarlavhasi */
+  captionFb?: string;
+  fbTitle?: string;
+  /** Threads: kimlar javob yozishi mumkin */
+  threadsReply?: string;
+  /** Threads mavzu tegi */
+  threadsTopic?: string;
+};
+
 const GRAPH_VERSION = process.env.META_GRAPH_VERSION?.trim() || "v21.0";
 const GRAPH = `https://graph.facebook.com/${GRAPH_VERSION}`;
 const RUPLOAD = `https://rupload.facebook.com/video-upload/${GRAPH_VERSION}`;
@@ -132,6 +153,7 @@ async function publishInstagram(
   kind: "ig_reel" | "ig_post" | "ig_story",
   media: SocialMedia,
   caption: string,
+  options: PublishOptions,
 ): Promise<PublishResult> {
   const settings = await getMetaSettings();
   if (!settings.igUserId || !settings.pageToken) {
@@ -148,8 +170,21 @@ async function publishInstagram(
     params.image_url = publicMediaUrl(media.url);
   }
   if (!isStory && caption) params.caption = caption;
-  // Reels feed'da ham ko'rinsin
-  if (kind === "ig_reel") params.share_to_feed = "true";
+  if (options.locationId) params.location_id = options.locationId;
+  if (options.altText && media.type === "image") params.alt_text = options.altText;
+
+  // Reels feed'da ham ko'rinsin va muqova sekundi
+  if (kind === "ig_reel") {
+    params.share_to_feed = options.shareToFeed === false ? "false" : "true";
+    if (typeof options.coverOffset === "number" && options.coverOffset >= 0) {
+      params.thumb_offset = String(options.coverOffset * 1000);
+    }
+  }
+
+  // Hamkorlar (collab) — story uchun qo'llanmaydi
+  if (!isStory && options.collaborators) {
+    params.collaborators = options.collaborators;
+  }
 
   const container = await graphPost(`${settings.igUserId}/media`, settings.pageToken, params);
   if (!container.ok) return { ok: false, error: container.error };
@@ -209,12 +244,15 @@ async function publishFacebookVideo(
   token: string,
   media: SocialMedia,
   caption: string,
+  options: PublishOptions,
 ): Promise<PublishResult> {
   if (kind === "fb_post") {
     // Feed'dagi video: sahifa o'zi URL'dan yuklab oladi
     const result = await graphPost(`${pageId}/videos`, token, {
       file_url: publicMediaUrl(media.url),
       description: caption,
+      ...(options.fbTitle ? { title: options.fbTitle } : {}),
+      ...(options.locationId ? { place: options.locationId } : {}),
     });
     return result.ok ? { ok: true, id: result.data.id ?? null } : { ok: false, error: result.error };
   }
@@ -248,11 +286,13 @@ async function publishFacebookImage(
   token: string,
   media: SocialMedia,
   caption: string,
+  options: PublishOptions,
 ): Promise<PublishResult> {
   if (kind === "fb_post") {
     const result = await graphPost(`${pageId}/photos`, token, {
       url: publicMediaUrl(media.url),
       message: caption,
+      ...(options.locationId ? { place: options.locationId } : {}),
     });
     return result.ok ? { ok: true, id: result.data.id ?? null } : { ok: false, error: result.error };
   }
@@ -276,8 +316,10 @@ export async function publishToTarget(
   kind: SocialKind,
   media: SocialMedia,
   caption: string,
+  options: PublishOptions = {},
 ): Promise<PublishResult> {
   const settings = await getMetaSettings();
+  const fbCaption = options.captionFb?.trim() || caption;
 
   if (kind === "threads_post") {
     const result = await publishThreadsMedia({
@@ -285,6 +327,8 @@ export async function publishToTarget(
       ...(media.type === "video"
         ? { videoUrl: publicMediaUrl(media.url) }
         : { imageUrl: publicMediaUrl(media.url) }),
+      ...(options.threadsReply ? { replyControl: options.threadsReply } : {}),
+      ...(options.threadsTopic ? { topicTag: options.threadsTopic } : {}),
     });
 
     return result.ok
@@ -293,7 +337,7 @@ export async function publishToTarget(
   }
 
   if (kind.startsWith("ig_")) {
-    return publishInstagram(kind as "ig_reel" | "ig_post" | "ig_story", media, caption);
+    return publishInstagram(kind as "ig_reel" | "ig_post" | "ig_story", media, caption, options);
   }
 
   if (!settings.pageId || !settings.pageToken) {
@@ -306,7 +350,8 @@ export async function publishToTarget(
       settings.pageId,
       settings.pageToken,
       media,
-      caption,
+      fbCaption,
+      options,
     );
   }
 
@@ -314,7 +359,14 @@ export async function publishToTarget(
     return { ok: false, error: "Reels uchun video kerak" };
   }
 
-  return publishFacebookImage(kind as "fb_post" | "fb_story", settings.pageId, settings.pageToken, media, caption);
+  return publishFacebookImage(
+    kind as "fb_post" | "fb_story",
+    settings.pageId,
+    settings.pageToken,
+    media,
+    fbCaption,
+    options,
+  );
 }
 
 /** /uploads/xxx → diskdagi to'liq yo'l */

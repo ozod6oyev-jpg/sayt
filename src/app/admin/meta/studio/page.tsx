@@ -142,6 +142,21 @@ export default async function StudioPage({ searchParams }: PageProps) {
           <p className="mt-1 text-[11px] text-slate-500">{c.captionHint}</p>
         </div>
 
+        <div>
+          <label className="label" htmlFor="social-caption-fb">
+            {c.fbCaptionTitle}
+          </label>
+          <textarea
+            id="social-caption-fb"
+            name="captionFb"
+            rows={3}
+            maxLength={5000}
+            className="field resize-y"
+            placeholder={c.fbCaptionPlaceholder}
+          />
+          <p className="mt-1 text-[11px] text-slate-500">{c.fbCaptionHint}</p>
+        </div>
+
         <fieldset>
           <legend className="label">{c.targetsTitle}</legend>
           <p className="mb-2 text-[11px] text-slate-500">{c.targetsHint}</p>
@@ -180,6 +195,126 @@ export default async function StudioPage({ searchParams }: PageProps) {
             ))}
           </div>
         </fieldset>
+
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs font-semibold text-slate-900">{c.extraTitle}</p>
+          <p className="mt-0.5 text-[11px] text-slate-500">{c.extraHint}</p>
+
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="label" htmlFor="social-location">
+                {c.locationLabel}
+              </label>
+              <input
+                id="social-location"
+                name="locationId"
+                className="field"
+                autoComplete="off"
+                inputMode="numeric"
+              />
+              <p className="mt-1 text-[11px] text-slate-500">{c.locationHint}</p>
+            </div>
+
+            <div>
+              <label className="label" htmlFor="social-cover">
+                {c.coverLabel}
+              </label>
+              <input
+                id="social-cover"
+                name="coverOffset"
+                type="number"
+                min={0}
+                max={3600}
+                className="field"
+                placeholder="0"
+              />
+              <p className="mt-1 text-[11px] text-slate-500">{c.coverHint}</p>
+            </div>
+
+            <div>
+              <label className="label" htmlFor="social-alt">
+                {c.altLabel}
+              </label>
+              <input
+                id="social-alt"
+                name="altText"
+                className="field"
+                autoComplete="off"
+                maxLength={1000}
+              />
+              <p className="mt-1 text-[11px] text-slate-500">{c.altHint}</p>
+            </div>
+
+            <div>
+              <label className="label" htmlFor="social-collab">
+                {c.collabLabel}
+              </label>
+              <input
+                id="social-collab"
+                name="collaborators"
+                className="field"
+                autoComplete="off"
+                placeholder="@hamkor1, @hamkor2"
+              />
+              <p className="mt-1 text-[11px] text-slate-500">{c.collabHint}</p>
+            </div>
+
+            <div>
+              <label className="label" htmlFor="social-fb-title">
+                {c.fbTitleLabel}
+              </label>
+              <input
+                id="social-fb-title"
+                name="fbTitle"
+                className="field"
+                autoComplete="off"
+                maxLength={200}
+              />
+              <p className="mt-1 text-[11px] text-slate-500">{c.fbTitleHint}</p>
+            </div>
+
+            <div>
+              <label className="label" htmlFor="social-threads-reply">
+                {c.threadsReplyLabel}
+              </label>
+              <select id="social-threads-reply" name="threadsReply" className="field">
+                <option value="">—</option>
+                <option value="everyone">{c.replyEveryone}</option>
+                <option value="followers_only">{c.replyFollowers}</option>
+                <option value="mentioned_only">{c.replyMentioned}</option>
+              </select>
+              <p className="mt-1 text-[11px] text-slate-500">{c.threadsReplyHint}</p>
+            </div>
+
+            <div>
+              <label className="label" htmlFor="social-threads-topic">
+                {c.topicLabel}
+              </label>
+              <input
+                id="social-threads-topic"
+                name="threadsTopic"
+                className="field"
+                autoComplete="off"
+                maxLength={50}
+              />
+              <p className="mt-1 text-[11px] text-slate-500">{c.topicHint}</p>
+            </div>
+
+            <div className="flex items-start gap-2 pt-6">
+              <input
+                id="social-share-feed"
+                name="shareToFeed"
+                type="checkbox"
+                defaultChecked
+                className="mt-0.5 size-4 rounded border-slate-300"
+              />
+              <label htmlFor="social-share-feed" className="text-sm text-slate-700">
+                {c.shareFeedLabel}
+                <span className="mt-0.5 block text-[11px] text-slate-500">{c.shareFeedHint}</span>
+              </label>
+            </div>
+          </div>
+        </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <button type="submit" className="btn-primary text-xs">

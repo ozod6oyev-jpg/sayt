@@ -41,6 +41,7 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
   await requireOwner();
 
   const caption = text(formData, "caption");
+  const captionFb = text(formData, "captionFb");
   const hashtags = normalizeHashtags(text(formData, "hashtags"));
   const file = formData.get("media");
   const targets = formData
@@ -63,18 +64,58 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
   }
 
   const fullCaption = [caption, hashtags.join(" ")].filter(Boolean).join("\n\n");
+  const fullCaptionFb = captionFb
+    ? [captionFb, hashtags.join(" ")].filter(Boolean).join("\n\n")
+    : undefined;
+
+  const rawCover = Number.parseInt(text(formData, "coverOffset"), 10);
+  const coverOffset = Number.isFinite(rawCover) && rawCover >= 0 && rawCover <= 3600 ? rawCover : null;
+
+  const collaborators = text(formData, "collaborators")
+    .split(/[\s,]+/)
+    .map((name) => name.replace(/^@+/, "").trim())
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(",");
+
+  const threadsTopic = text(formData, "threadsTopic")
+    .replace(/^#+/, "")
+    .replace(/[^\p{L}\p{N}_ ]/gu, "")
+    .trim()
+    .slice(0, 50);
+
+  const options = {
+    captionFb: fullCaptionFb,
+    locationId: text(formData, "locationId") || undefined,
+    altText: text(formData, "altText") || undefined,
+    coverOffset,
+    shareToFeed: formData.get("shareToFeed") === "on",
+    collaborators: collaborators || undefined,
+    fbTitle: text(formData, "fbTitle") || undefined,
+    threadsReply: text(formData, "threadsReply") || undefined,
+    threadsTopic: threadsTopic || undefined,
+  };
 
   const post = await prisma.socialPost.create({
     data: {
       caption,
+      captionFb: captionFb || null,
       hashtags: hashtags.join(" "),
       mediaType: media.type,
       mediaUrl: media.url,
+      locationId: options.locationId ?? null,
+      altText: options.altText ?? null,
+      coverOffset,
+      shareToFeed: options.shareToFeed,
+      collaborators: collaborators || null,
+      fbTitle: options.fbTitle ?? null,
+      threadsReply: options.threadsReply ?? null,
+      threadsTopic: threadsTopic || null,
     },
   });
 
   for (const kind of targets) {
-    const result = await publishToTarget(kind, media, fullCaption);
+    const result = await publishToTarget(kind, media, fullCaption, options);
 
     await prisma.socialTarget.create({
       data: {

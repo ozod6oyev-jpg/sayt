@@ -224,13 +224,22 @@ model MetaChat {
 
 /// Ijtimoiy tarmoqlar uchun tayyorlangan post (reels, post yoki story)
 model SocialPost {
-  id        String         @id @default(cuid())
-  caption   String
-  hashtags  String
-  mediaType String
-  mediaUrl  String
-  createdAt DateTime       @default(now())
-  targets   SocialTarget[]
+  id            String         @id @default(cuid())
+  caption       String
+  captionFb     String?
+  hashtags      String
+  mediaType     String
+  mediaUrl      String
+  locationId    String?
+  altText       String?
+  coverOffset   Int?
+  shareToFeed   Boolean        @default(true)
+  collaborators String?
+  fbTitle       String?
+  threadsReply  String?
+  threadsTopic  String?
+  createdAt     DateTime       @default(now())
+  targets       SocialTarget[]
 
   @@index([createdAt])
 }
