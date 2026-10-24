@@ -38,7 +38,10 @@ const uz = {
     cta: "E'lonlarni ko'rish",
   },
   slider: {
-    view: "Ko'rish",
+    view: "Batafsil ko'rish",
+    featured: "Tanlangan e'lon",
+    prev: "Oldingi e'lon",
+    next: "Keyingi e'lon",
   },
   common: {
     loadMore: "Yana 5 ta ko'rsatish",
@@ -222,7 +225,10 @@ const ru: Dict = {
     cta: "Смотреть объявления",
   },
   slider: {
-    view: "Смотреть",
+    view: "Подробнее",
+    featured: "Избранное объявление",
+    prev: "Предыдущее объявление",
+    next: "Следующее объявление",
   },
   common: {
     loadMore: "Показать ещё 5",
