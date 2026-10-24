@@ -37,14 +37,14 @@ export function LoadMoreListings({
 
   return (
     <>
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((listing) => (
           <ListingCard key={listing.id} listing={listing} locale={locale} />
         ))}
       </div>
 
       {hasMore && (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-6 flex justify-center">
           <Button
             type="button"
             variant="outline"

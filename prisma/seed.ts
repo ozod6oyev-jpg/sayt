@@ -341,17 +341,22 @@ async function main() {
       create: option,
     });
     saleOptions[option.slug] = saved.id;
-  }
+  }  const demoImages: Record<string, string> = {
+    "chilonzor-3-xonali-kvartira": "chilonzor.jpg",
+    "yunusobod-2-xonali-kvartira": "yunusobod.jpg",
+    "mirzo-ulugbek-hovli-uy": "mirzo-ulugbek.jpg",
+    "sergeli-1-xonali-kvartira": "sergeli.jpg",
+    "shayxontohur-yer-uchastkasi": "shayxontohur.jpg",
+    "samarqand-markaz-3-xonali": "samarqand.jpg",
+  };
 
   for (const item of listings) {
     const saleOptionSlug =
       item.slug === "chilonzor-3-xonali-kvartira" || item.slug === "samarqand-markaz-3-xonali"
         ? "ipoteka"
         : "naqd";
-    const images = [
-      await makeImage(`${item.slug}-1`, "Tashqi ko'rinish", "#0e634b", "#43b88c"),
-      await makeImage(`${item.slug}-2`, "Ichki ko'rinish", "#1e3a5f", "#5b8db8"),
-    ];
+    const demoImage = demoImages[item.slug] ?? "chilonzor.jpg";
+
 
     await prisma.listing.upsert({
       where: { slug: item.slug },
@@ -390,13 +395,15 @@ async function main() {
         status: item.status,
         views: item.views,
         photos: {
-          create: images.map((image, index) => ({
-            url: image.url,
-            alt: `${item.titleUz} — ${index === 0 ? "tashqi ko'rinish" : "ichki ko'rinish"}`,
-            width: image.width,
-            height: image.height,
-            sort: index,
-          })),
+          create: [
+            {
+              url: `/demo/${demoImage}`,
+              alt: `${item.titleUz} — asosiy rasm`,
+              width: 1600,
+              height: 1000,
+              sort: 0,
+            },
+          ],
         },
       },
     });

@@ -11,7 +11,7 @@ const badgeVariants = cva(
         default: "border-transparent bg-primary text-primary-foreground",
         secondary: "border-transparent bg-secondary text-secondary-foreground",
         outline: "border-border bg-background text-foreground",
-        glass: "border-white/40 bg-white/90 text-slate-700 backdrop-blur",
+        glass: "border-white/40 bg-white/90 text-[#334155] backdrop-blur",
         dark: "border-transparent bg-slate-900/90 text-white backdrop-blur",
         accent: "border-transparent bg-brand-50 text-brand-700",
         success: "border-transparent bg-emerald-50 text-emerald-700",

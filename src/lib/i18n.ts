@@ -39,6 +39,9 @@ const uz = {
   },
   slider: {
     view: "Batafsil ko'rish",
+    detail: "Batafsil",
+    contact: "Egasi bilan bog'lanish",
+    views: (n: number) => `${n} marta ko'rilgan`,
     featured: "Tanlangan e'lon",
     prev: "Oldingi e'lon",
     next: "Keyingi e'lon",
@@ -226,6 +229,9 @@ const ru: Dict = {
   },
   slider: {
     view: "Подробнее",
+    detail: "Подробнее",
+    contact: "Связаться с владельцем",
+    views: (n: number) => `${n} просмотров`,
     featured: "Избранное объявление",
     prev: "Предыдущее объявление",
     next: "Следующее объявление",

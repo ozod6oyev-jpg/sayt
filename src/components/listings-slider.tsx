@@ -3,24 +3,28 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { contact } from "@/lib/contact";
+import { formatNumber } from "@/lib/format";
 import { getDict, type Locale } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
+import { TelegramIcon } from "./icons";
 
 export type SliderSlide = {
   id: string;
   href: string;
   title: string;
   price: string;
+  metric: string | null;
   location: string;
+  views: number;
+  phoneHref: string;
   saleLabel: string;
   propertyTypeLabel: string;
   image: { url: string; width: number; height: number; alt: string | null } | null;
 };
 
-const AUTOPLAY_MS = 6000;
+const SLIDE_MS = 6000;
 
 export function ListingsSlider({
   items,
@@ -36,18 +40,14 @@ export function ListingsSlider({
   useEffect(() => {
     if (items.length < 2 || paused) return;
 
-    const timer = window.setInterval(() => {
+    const timer = window.setTimeout(() => {
       setIndex((current) => (current + 1) % items.length);
-    }, AUTOPLAY_MS);
+    }, SLIDE_MS);
 
-    return () => window.clearInterval(timer);
-  }, [items.length, paused, index]);
+    return () => window.clearTimeout(timer);
+  }, [items.length, index, paused]);
 
   if (items.length === 0) return null;
-
-  const active = items[index];
-  const current = String(index + 1).padStart(2, "0");
-  const total = String(items.length).padStart(2, "0");
 
   function goTo(next: number) {
     setIndex((next + items.length) % items.length);
@@ -61,22 +61,20 @@ export function ListingsSlider({
         aria-label={locale === "ru" ? "Слайдер объявлений" : "E'lonlar slayderi"}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
-        onFocus={() => setPaused(true)}
-        onBlur={() => setPaused(false)}
+        onFocusCapture={() => setPaused(true)}
+        onBlurCapture={() => setPaused(false)}
       >
-        <div className="relative h-[540px] sm:h-[520px] lg:h-[560px]">
-          {/* Rasmlar */}
-          {items.map((item, slideIndex) => {
-            const isActive = slideIndex === index;
-
-            return (
+        <div className="relative h-[300px] sm:h-[330px] lg:h-[360px]">
+          {/* Yumshoq siljiydigan lenta */}
+          <div
+            className="flex h-full transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+            style={{ transform: `translate3d(-${index * 100}%, 0, 0)` }}
+          >
+            {items.map((item, slideIndex) => (
               <div
                 key={item.id}
-                aria-hidden={!isActive}
-                className={cn(
-                  "absolute inset-0 transition-opacity duration-[1200ms] ease-out motion-reduce:transition-none",
-                  isActive ? "opacity-100" : "pointer-events-none opacity-0",
-                )}
+                aria-hidden={slideIndex !== index}
+                className="relative h-full w-full shrink-0 overflow-hidden"
               >
                 {item.image ? (
                   <Image
@@ -85,108 +83,140 @@ export function ListingsSlider({
                     fill
                     priority={slideIndex === 0}
                     sizes="(max-width: 1152px) 100vw, 1152px"
-                    className={cn(
-                      "object-cover transition-transform duration-[7000ms] ease-out motion-reduce:transition-none",
-                      isActive ? "scale-105" : "scale-100",
-                    )}
+                    className="object-cover"
                   />
                 ) : (
                   <div className="h-full w-full bg-neutral-900" />
                 )}
+
+                {/* O'qish uchun gradientlar */}
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/45 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[72%] bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
+
+                {/* Tepa/past blur */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-black/10 backdrop-blur-md [mask-image:linear-gradient(to_bottom,black,transparent)]"
+                />
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-black/10 backdrop-blur-sm [mask-image:linear-gradient(to_top,black,transparent)]"
+                />
+
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3 sm:p-4">
+                  <div className="max-w-2xl">
+                    <div className="pointer-events-auto flex flex-wrap items-center gap-1">
+                      <span className="rounded-full border border-white/20 bg-black/35 px-1.5 py-0.5 text-[9.5px] font-semibold text-white backdrop-blur-md sm:px-2 sm:text-[10px]">
+                        {item.saleLabel}
+                      </span>
+                      <span className="rounded-full border border-white/20 bg-black/35 px-1.5 py-0.5 text-[9.5px] font-semibold text-white/90 backdrop-blur-md sm:px-2 sm:text-[10px]">
+                        {item.propertyTypeLabel}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/25 px-1.5 py-0.5 text-[9.5px] font-medium text-white/75 backdrop-blur-md sm:px-2 sm:text-[10px]">
+                        <Eye className="size-2.5" />
+                        {formatNumber(item.views, locale)}
+                      </span>
+                    </div>
+
+                    <Link
+                      href={item.href}
+                      tabIndex={slideIndex === index ? 0 : -1}
+                      className="pointer-events-auto mt-1 line-clamp-1 block max-w-xl text-[12.5px] leading-[1.3] font-bold tracking-tight text-white transition-colors hover:text-white/85 sm:line-clamp-2 sm:text-[14px]"
+                    >
+                      {item.title}
+                    </Link>
+
+                    <div className="mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                      <p className="font-display text-[15px] font-extrabold tracking-tight text-white sm:text-base">
+                        {item.price}
+                      </p>
+                      <p className="flex items-center gap-1 text-[10px] text-white/65 sm:text-[10.5px]">
+                        <MapPin className="size-2.5 shrink-0 text-white/50" />
+                        <span className="max-w-[46vw] truncate sm:max-w-none">{item.location}</span>
+                      </p>
+                      {item.metric && (
+                        <p className="hidden text-[10px] font-medium text-white/50 md:block">
+                          {item.metric}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="pointer-events-auto mt-2 flex flex-wrap items-center gap-1.5">
+                      <Button
+                        asChild
+                        className="h-7 rounded-lg bg-white px-2.5 text-[10.5px] font-semibold text-[#0b0b0d] shadow-sm hover:bg-neutral-200 sm:text-[11px]"
+                      >
+                        <a href={item.phoneHref} tabIndex={slideIndex === index ? 0 : -1}>
+                          <Phone className="size-3" />
+                          {t.slider.contact}
+                        </a>
+                      </Button>
+
+                      <Button
+                        asChild
+                        variant="subtle"
+                        className="h-7 rounded-lg border border-white/20 bg-white/10 px-2.5 text-[10.5px] text-white hover:bg-white/20 sm:text-[11px]"
+                      >
+                        <a
+                          href={contact.telegramUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          tabIndex={slideIndex === index ? 0 : -1}
+                        >
+                          <TelegramIcon className="size-3" />
+                          Telegram
+                        </a>
+                      </Button>
+
+                      <Button
+                        asChild
+                        variant="ghost"
+                        className="hidden h-7 rounded-lg px-2 text-[10.5px] text-white/65 hover:bg-white/10 hover:text-white sm:inline-flex"
+                      >
+                        <Link href={item.href} tabIndex={slideIndex === index ? 0 : -1}>
+                          {t.slider.detail}
+                          <ArrowUpRight className="size-3.5" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            );
-          })}
-
-          {/* Chetlarni yumshatuvchi blur */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/35 via-black/10 to-transparent backdrop-blur-md [mask-image:linear-gradient(to_bottom,black,transparent)]"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/45 via-black/10 to-transparent backdrop-blur-lg [mask-image:linear-gradient(to_top,black,transparent)]"
-          />
-
-          {/* Yuqori boshqaruv */}
-          <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 p-4 sm:p-5 lg:p-6">
-            <span className="rounded-full bg-black/25 px-3 py-1.5 text-[11px] font-semibold tracking-[0.18em] text-white ring-1 ring-white/20 backdrop-blur-md">
-              {current} <span className="text-white/50">/ {total}</span>
-            </span>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => goTo(index - 1)}
-                aria-label={t.slider.prev}
-                className="flex size-9 items-center justify-center rounded-full bg-black/25 text-white ring-1 ring-white/20 backdrop-blur-md transition-colors hover:bg-black/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:size-10"
-              >
-                <ChevronLeft className="size-5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => goTo(index + 1)}
-                aria-label={t.slider.next}
-                className="flex size-9 items-center justify-center rounded-full bg-black/25 text-white ring-1 ring-white/20 backdrop-blur-md transition-colors hover:bg-black/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:size-10"
-              >
-                <ChevronRight className="size-5" />
-              </button>
-            </div>
+            ))}
           </div>
 
-          {/* Suzuvchi ma'lumot kartasi */}
-          <div className="absolute inset-x-4 bottom-4 z-20 sm:inset-x-6 sm:bottom-6 lg:left-8 lg:bottom-8 lg:max-w-[430px]">
-            <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xl sm:p-6">
-              <p className="text-[10px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-                {t.slider.featured}
-              </p>
+          {/* Qo'lda aylantirish: yon zonalar */}
+          <button
+            type="button"
+            onClick={() => goTo(index - 1)}
+            aria-label={t.slider.prev}
+            className="absolute inset-y-0 left-0 z-10 w-[18%] cursor-w-resize focus-visible:outline-none"
+          />
+          <button
+            type="button"
+            onClick={() => goTo(index + 1)}
+            aria-label={t.slider.next}
+            className="absolute inset-y-0 right-0 z-10 w-[18%] cursor-e-resize focus-visible:outline-none"
+          />
 
-              <div key={active.id} className="mt-3 animate-in fade-in duration-500">
-                <div className="flex flex-wrap gap-1.5">
-                  <Badge>{active.saleLabel}</Badge>
-                  <Badge variant="secondary">{active.propertyTypeLabel}</Badge>
-                </div>
-
-                <h2 className="mt-3 line-clamp-2 text-xl leading-snug font-extrabold tracking-tight text-foreground sm:text-2xl">
-                  {active.title}
-                </h2>
-
-                <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground sm:text-sm">
-                  <MapPin className="size-4 shrink-0 text-brand-500" />
-                  {active.location}
-                </p>
-
-                <p className="font-display mt-3 text-2xl font-extrabold tracking-tight text-foreground">
-                  {active.price}
-                </p>
-              </div>
-
-              <div className="mt-5 flex items-center justify-between gap-4 border-t border-border pt-4">
-                <Button asChild size="sm" className="h-10 px-4">
-                  <Link href={active.href}>
-                    {t.slider.view}
-                    <ArrowUpRight className="size-4" />
-                  </Link>
-                </Button>
-
-                <div className="flex items-center gap-1">
-                  {items.map((item, dotIndex) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => goTo(dotIndex)}
-                      aria-label={`${dotIndex + 1} / ${items.length}`}
-                      aria-current={dotIndex === index}
-                      className={cn(
-                        "h-1 rounded-full transition-all duration-300",
-                        dotIndex === index
-                          ? "w-5 bg-foreground"
-                          : "w-1.5 bg-foreground/20 hover:bg-foreground/40",
-                      )}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+          {/* Strelkalar */}
+          <div className="absolute top-3 right-3 z-30 flex gap-1.5">
+            <button
+              type="button"
+              onClick={() => goTo(index - 1)}
+              aria-label={t.slider.prev}
+              className="flex size-8 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-md transition-colors hover:bg-white/25 focus-visible:outline-none"
+            >
+              <ChevronLeft className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => goTo(index + 1)}
+              aria-label={t.slider.next}
+              className="flex size-8 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-md transition-colors hover:bg-white/25 focus-visible:outline-none"
+            >
+              <ChevronRight className="size-4" />
+            </button>
           </div>
         </div>
       </div>

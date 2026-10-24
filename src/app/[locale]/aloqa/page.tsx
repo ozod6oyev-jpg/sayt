@@ -43,13 +43,13 @@ export default async function ContactPage({ params }: Props) {
     <div>
       <section className="bg-brand-900 py-10 text-white sm:py-14">
         <div className="container-page max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <p className="text-xs font-bold tracking-[0.18em] text-brand-200 uppercase">
+          <p className="text-xs font-bold tracking-[0.18em] text-white/60 uppercase">
             {siteName}
           </p>
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             {t.nav.contact}
           </h1>
-          <p className="mt-3 max-w-xl text-sm leading-7 text-brand-100/85">
+          <p className="mt-3 max-w-xl text-sm leading-7 text-white/75">
             {locale === "ru"
               ? "Позвоните или напишите в Telegram — ответим на вопросы по объектам и сделке."
               : "Qo'ng'iroq qiling yoki Telegramda yozing — obyekt va bitim bo'yicha savollarga javob beramiz."}

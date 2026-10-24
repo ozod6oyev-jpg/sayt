@@ -21,7 +21,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
 
   return (
     <>
-      <div className="hidden bg-brand-900 text-brand-100 sm:block">
+      <div className="hidden bg-brand-900 text-white/75 sm:block">
         <div className="container-page flex h-10 items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-4">
             <a
@@ -30,11 +30,11 @@ export function SiteHeader({ locale }: { locale: Locale }) {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 transition-colors hover:text-white"
             >
-              <MapPinIcon className="h-3.5 w-3.5 text-brand-300" />
+              <MapPinIcon className="h-3.5 w-3.5 text-white/50" />
               {contact.address[locale]}
             </a>
-            <span className="hidden text-brand-400 md:inline">·</span>
-            <span className="hidden text-brand-100/80 md:inline">{contact.hours[locale]}</span>
+            <span className="hidden text-white/35 md:inline">·</span>
+            <span className="hidden text-white/60 md:inline">{contact.hours[locale]}</span>
           </div>
 
           <div className="flex items-center gap-5">
@@ -49,7 +49,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             </a>
             <a
               href={contact.phoneHref}
-              className="inline-flex items-center gap-1.5 font-semibold text-white transition-colors hover:text-brand-200"
+              className="inline-flex items-center gap-1.5 font-semibold text-white transition-colors hover:text-white/80"
             >
               <PhoneIcon className="h-3.5 w-3.5" />
               {contact.phoneDisplay}

@@ -81,11 +81,27 @@ export default async function HomePage({ params }: Props) {
     .map((listing) => {
       const photo = listing.photos[0];
 
+      const priceNumber = Number(listing.price);
+      const units =
+        listing.propertyType === "land"
+          ? listing.area
+            ? listing.area / 100
+            : null
+          : listing.area;
+      const perUnit = units && units > 0 ? Math.round(priceNumber / units) : null;
+      const unitLabel = listing.propertyType === "land" ? "sotix" : "m²";
+
       return {
         id: listing.id,
         href: localePath(locale, `/elonlar/${listing.slug}`),
         title: listingTitle(listing, locale),
         price: formatPrice(listing.price, listing.currency, locale),
+        metric:
+          perUnit != null
+            ? `1 ${unitLabel} = ${formatPrice(BigInt(perUnit), listing.currency, locale)}`
+            : null,
+        views: listing.views,
+        phoneHref: `tel:${listing.phone.replace(/[^\d+]/g, "")}`,
         location: `${listing.district}, ${listing.region}`,
         saleLabel: saleOptionLabel(listing.saleOption, locale) ?? t.listing.forSale,
         propertyTypeLabel:
@@ -116,30 +132,30 @@ export default async function HomePage({ params }: Props) {
 
       <ListingsSlider items={slides} locale={locale} />
 
-      <section className="container-page pt-8 sm:pt-10">
+      <section className="container-page pt-6 sm:pt-8">
         <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <Badge variant="secondary" className="gap-1.5 border-brand-100 bg-brand-50 text-brand-700">
+          <Badge variant="secondary" className="gap-1.5 border-brand-100 bg-brand-50 py-0.5 text-[11px] text-brand-700">
             <MapPin className="size-3" />
             {locale === "ru" ? "Ташкент · Узбекистан" : "Toshkent · O'zbekiston"}
           </Badge>
-          <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-[2.75rem] lg:leading-[1.1]">
+          <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-[1.7rem] lg:text-3xl lg:leading-[1.15]">
             {t.hero.title}
           </h1>
-          <p className="mt-3 text-base leading-7 text-muted-foreground sm:text-lg">
+          <p className="mt-1.5 text-sm leading-6 text-muted-foreground sm:text-[15px]">
             {t.hero.subtitle}
           </p>
         </div>
 
-        <div className="mt-6 animate-in fade-in slide-in-from-bottom-3 duration-700">
+        <div className="mt-4 animate-in fade-in slide-in-from-bottom-3 duration-700">
           <SearchForm locale={locale} districts={districts} />
         </div>
       </section>
 
-      <section className="container-page mt-12">
+      <section className="container-page mt-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="section-heading">{t.nav.listings}</h2>
-            <p className="mt-1 text-sm text-slate-500">{t.search.results(totalActive)}</p>
+            <p className="mt-0.5 text-[13px] text-slate-500">{t.search.results(totalActive)}</p>
           </div>
           <Link href={localePath(locale, "/elonlar")} className="link-more">
             {locale === "ru" ? "Все объявления" : "Barcha e'lonlar"} →
@@ -147,7 +163,7 @@ export default async function HomePage({ params }: Props) {
         </div>
 
         {listingCards.length > 0 ? (
-          <div className="mt-6">
+          <div className="mt-4">
             <LoadMoreListings
               initial={listingCards}
               hasMore={listingCards.length < totalActive}
@@ -161,7 +177,7 @@ export default async function HomePage({ params }: Props) {
         )}
       </section>
 
-      <section className="mt-16 bg-slate-50 py-14">
+      <section className="mt-8 border-y border-border/60 bg-slate-50 py-8 sm:py-10">
         <div className="container-page">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <h2 className="section-heading">{t.nav.blog}</h2>
@@ -184,7 +200,7 @@ export default async function HomePage({ params }: Props) {
         </div>
       </section>
 
-      <section className="container-page mt-16">
+      <section className="container-page mt-10">
         <div className="grid gap-4 sm:grid-cols-3">
           {[
             {

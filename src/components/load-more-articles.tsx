@@ -41,7 +41,7 @@ export function LoadMoreArticles({
       </div>
 
       {hasMore && (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-6 flex justify-center">
           <Button
             type="button"
             variant="outline"
