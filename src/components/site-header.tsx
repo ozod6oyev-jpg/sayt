@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BrandRotator } from "./brand-rotator";
 import { MapPinIcon, PhoneIcon, TelegramIcon } from "./icons";
 import { LocaleSwitcher } from "./locale-switcher";
 import { MobileNav } from "./mobile-nav";
@@ -59,7 +60,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
       </div>
 
       <header className="site-header sticky top-0 z-40 border-b border-border/70 bg-white/85 backdrop-blur-xl">
-        <div className="container-page flex h-16 items-center justify-between gap-4 sm:h-[4.5rem]">
+        <div className="container-page relative flex h-16 items-center justify-between gap-4 sm:h-[4.5rem]">
           <Link href={localePath(locale)} className="flex items-center gap-2.5">
             <Image
               src="/logo-mark.png"
@@ -71,7 +72,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             />
             <span className="flex flex-col leading-tight">
               <span className="text-sm font-extrabold tracking-tight text-foreground sm:text-base">
-                {siteName}
+                <BrandRotator locale={locale} />
               </span>
               <span className="hidden text-[11px] font-medium text-muted-foreground sm:block">
                 {locale === "ru" ? "Недвижимость в Узбекистане" : "O'zbekistonda ko'chmas mulk"}
@@ -79,7 +80,11 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             </span>
           </Link>
 
-          <NavLinks links={links} homeHref={localePath(locale)} />
+          <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden -translate-x-1/2 lg:block">
+            <div className="pointer-events-auto flex h-full items-center">
+              <NavLinks links={links} homeHref={localePath(locale)} />
+            </div>
+          </div>
 
           <div className="flex items-center gap-2">
             <ThemeToggle label={locale === "ru" ? "Тёмная тема" : "Tungi rejim"} />

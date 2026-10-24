@@ -24,7 +24,8 @@ export function SiteFooter({ locale }: { locale: Locale }) {
             <span className="text-lg font-bold text-white">{siteName}</span>
           </div>
 
-          <p className="mt-4 max-w-md text-sm leading-7 text-white/70">{t.footer.about}</p>            <p className="mt-6 text-[11px] font-semibold tracking-wide text-white/50 uppercase">
+          <p className="mt-4 max-w-md text-sm leading-7 text-white/70">{t.footer.about}</p>
+          <p className="mt-6 text-[11px] font-semibold tracking-wide text-white/50 uppercase">
             {locale === "ru" ? "Наши соцсети" : "Ijtimoiy tarmoqlarimiz"}
           </p>
           <div className="mt-3 flex flex-wrap gap-3">
@@ -114,16 +115,19 @@ export function SiteFooter({ locale }: { locale: Locale }) {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="container-page flex flex-col gap-2 py-5 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between">
+        <div className="container-page flex flex-col gap-3 py-5 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {year} {siteName}. {t.footer.rights}
           </p>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5">
             <Link href={localePath(locale, "/maxfiylik")} className="hover:text-white">
               {t.footer.privacy}
             </Link>
-            <Link href="/admin" className="hover:text-white">
-              {t.nav.admin}
+            <Link href={localePath(locale, "/qoidalar")} className="hover:text-white">
+              {t.footer.rules}
+            </Link>
+            <Link href={localePath(locale, "/mualliflik")} className="hover:text-white">
+              {t.footer.copyright}
             </Link>
           </div>
         </div>

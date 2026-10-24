@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   ]);
 
-  const staticPaths = ["", "/elonlar", "/blog", "/aloqa", "/maxfiylik"];
+  const staticPaths = ["", "/elonlar", "/blog", "/aloqa", "/maxfiylik", "/qoidalar", "/mualliflik"];
   const now = new Date();
 
   const entries: MetadataRoute.Sitemap = [];

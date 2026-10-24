@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AdminUser } from "@prisma/client";
 import { prisma } from "./prisma";
@@ -50,11 +50,17 @@ function readToken(token: string | undefined): string | null {
   return userId;
 }
 
-function cookieOptions(maxAge: number) {
+async function cookieOptions(maxAge: number) {
+  // https orqali kelganda secure, http (masalan IP:port) orqali kelganda oddiy cookie
+  const requestHeaders = await headers();
+  const proto = requestHeaders.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const host = requestHeaders.get("host") ?? "";
+  const secure = proto ? proto === "https" : !host.startsWith("localhost") && !/^\d+(\.\d+){3}/.test(host);
+
   return {
     httpOnly: true,
     sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
+    secure,
     path: "/",
     maxAge,
   };
@@ -66,7 +72,7 @@ export async function createSession(userId: string): Promise<void> {
   cookieStore.set(
     SESSION_COOKIE,
     createToken(userId, SESSION_TTL_SECONDS),
-    cookieOptions(SESSION_TTL_SECONDS),
+    await cookieOptions(SESSION_TTL_SECONDS),
   );
 }
 
@@ -76,7 +82,7 @@ export async function createPendingSession(userId: string): Promise<void> {
   cookieStore.set(
     PENDING_COOKIE,
     createToken(userId, PENDING_TTL_SECONDS),
-    cookieOptions(PENDING_TTL_SECONDS),
+    await cookieOptions(PENDING_TTL_SECONDS),
   );
 }
 

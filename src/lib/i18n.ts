@@ -11,7 +11,7 @@ export const localeNames: Record<Locale, string> = {
   ru: "Русский",
 };
 
-export const siteName = "Uy-joylar sotamiz";
+export const siteName = "Real sotamiz";
 
 const uz = {
   meta: {
@@ -130,6 +130,8 @@ const uz = {
     contact: "Bog'lanish",
     rights: "Barcha huquqlar himoyalangan.",
     privacy: "Maxfiylik siyosati",
+    rules: "Sayt qoidalari",
+    copyright: "Mualliflik huquqi",
   },
   admin: {
     title: "Boshqaruv paneli",
@@ -320,6 +322,8 @@ const ru: Dict = {
     contact: "Связаться",
     rights: "Все права защищены.",
     privacy: "Политика конфиденциальности",
+    rules: "Правила сайта",
+    copyright: "Авторские права",
   },
   admin: {
     title: "Панель управления",

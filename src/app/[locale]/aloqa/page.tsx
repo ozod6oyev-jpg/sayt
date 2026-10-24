@@ -22,8 +22,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = t.nav.contact;
   const description =
     locale === "ru"
-      ? "Телефон, Telegram и адрес офиса Uy-joylar sotamiz в Ташкенте."
-      : "Uy-joylar sotamiz bilan bog'lanish: telefon, Telegram va Toshkentdagi manzil.";
+      ? "Телефон, Telegram и адрес офиса Real sotamiz в Ташкенте."
+      : "Real sotamiz bilan bog'lanish: telefon, Telegram va Toshkentdagi manzil.";
 
   return {
     title,

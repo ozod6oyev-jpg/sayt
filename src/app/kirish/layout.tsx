@@ -3,7 +3,7 @@ import "../globals.css";
 import { fontDisplay, fontSans } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-  title: "Kirish | Uy-joylar sotamiz",
+  title: "Kirish | Real sotamiz",
   robots: { index: false, follow: false },
 };
 
