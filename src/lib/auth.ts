@@ -1,9 +1,13 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import type { AdminUser } from "@prisma/client";
+import { prisma } from "./prisma";
 
-const COOKIE_NAME = "admin_session";
+const SESSION_COOKIE = "admin_session";
+const PENDING_COOKIE = "admin_pending";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 kun
+const PENDING_TTL_SECONDS = 60 * 10; // 2FA kiritish uchun 10 daqiqa
 
 function getSecret(): string {
   const secret = process.env.SESSION_SECRET;
@@ -24,49 +28,97 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(bufA, bufB);
 }
 
-/** Parolni tekshiradi (vaqt bo'yicha doimiy taqqoslash) */
-export function checkPassword(input: string): boolean {
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) return false;
-  return safeEqual(input, expected);
+function createToken(userId: string, ttlSeconds: number): string {
+  const expires = Date.now() + ttlSeconds * 1000;
+  const payload = `${userId}.${expires}`;
+  return `${payload}.${sign(payload)}`;
 }
 
-export async function createSession(): Promise<void> {
-  const expires = Date.now() + SESSION_TTL_SECONDS * 1000;
-  const payload = String(expires);
-  const value = `${payload}.${sign(payload)}`;
+function readToken(token: string | undefined): string | null {
+  if (!token) return null;
 
-  const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, value, {
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+
+  const [userId, expires, signature] = parts;
+  if (!userId || !expires || !signature) return null;
+
+  const payload = `${userId}.${expires}`;
+  if (!safeEqual(signature, sign(payload))) return null;
+  if (!Number.isFinite(Number(expires)) || Number(expires) < Date.now()) return null;
+
+  return userId;
+}
+
+function cookieOptions(maxAge: number) {
+  return {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: SESSION_TTL_SECONDS,
-  });
+    maxAge,
+  };
+}
+
+/** To'liq kirgandan keyin (parol + 2FA) sessiya yaratadi */
+export async function createSession(userId: string): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(
+    SESSION_COOKIE,
+    createToken(userId, SESSION_TTL_SECONDS),
+    cookieOptions(SESSION_TTL_SECONDS),
+  );
+}
+
+/** Parol to'g'ri, lekin 2FA kodi hali kiritilmagan holat */
+export async function createPendingSession(userId: string): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(
+    PENDING_COOKIE,
+    createToken(userId, PENDING_TTL_SECONDS),
+    cookieOptions(PENDING_TTL_SECONDS),
+  );
+}
+
+export async function readPendingUserId(): Promise<string | null> {
+  const cookieStore = await cookies();
+  return readToken(cookieStore.get(PENDING_COOKIE)?.value);
+}
+
+export async function destroyPendingSession(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete(PENDING_COOKIE);
 }
 
 export async function destroySession(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
+  cookieStore.delete(SESSION_COOKIE);
+  cookieStore.delete(PENDING_COOKIE);
 }
 
-export async function isAdmin(): Promise<boolean> {
+export async function getCurrentUser(): Promise<AdminUser | null> {
   const cookieStore = await cookies();
-  const raw = cookieStore.get(COOKIE_NAME)?.value;
-  if (!raw) return false;
+  const userId = readToken(cookieStore.get(SESSION_COOKIE)?.value);
+  if (!userId) return null;
 
-  const [payload, signature] = raw.split(".");
-  if (!payload || !signature) return false;
-  if (!safeEqual(signature, sign(payload))) return false;
+  const user = await prisma.adminUser.findUnique({ where: { id: userId } });
+  if (!user || !user.isActive) return null;
 
-  const expires = Number(payload);
-  return Number.isFinite(expires) && expires > Date.now();
+  return user;
 }
 
-/** Admin sahifalari uchun: kirmagan bo'lsa /kirish ga yo'naltiradi */
-export async function requireAdmin(): Promise<void> {
-  if (!(await isAdmin())) {
+export async function requireAdmin(): Promise<AdminUser> {
+  const user = await getCurrentUser();
+  if (!user) {
     redirect("/kirish");
   }
+  return user;
+}
+
+export async function requireOwner(): Promise<AdminUser> {
+  const user = await requireAdmin();
+  if (user.role !== "owner") {
+    redirect("/admin");
+  }
+  return user;
 }

@@ -125,7 +125,10 @@ mumkin. Shuning uchun e'lonlar (Search) va maqolalar (Discover) ikkalasi ham ker
 
 ## 8. Admin panel
 
-- Kirish: email + parol (keyin 2FA).
+- Kirish: email + parol + Google Authenticator kodi (TOTP 2FA).
+- Rollar: **owner** (adminlarni qo'shadi, kalitlarini beradi) va **admin**.
+- Owner har bir admin uchun authenticator kalitini yaratadi va topshiradi;
+  kalitni qayta yaratish, parolni yangilash, adminni bloklash mumkin.
 - E'lon qo'shish: forma + rasm yuklash + xaritada joy belgilash.
 - Qoralama → nashr qilish, sotilgan deb belgilash.
 - Maqola yozish: Markdown/MDX muharriri, muqova rasm, kategoriya.

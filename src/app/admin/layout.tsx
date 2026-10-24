@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "../globals.css";
-import { logout } from "@/app/actions/admin";
+import { logout } from "@/app/actions/auth";
 import { requireAdmin } from "@/lib/auth";
 import { getDict } from "@/lib/i18n";
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAdmin();
+  const user = await requireAdmin();
 
   const t = getDict("uz");
   const links = [
@@ -19,6 +19,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/listings", label: t.admin.listings },
     { href: "/admin/articles", label: t.admin.articles },
     { href: "/admin/leads", label: t.admin.leads },
+    ...(user.role === "owner" ? [{ href: "/admin/users", label: "Adminlar" }] : []),
+    { href: "/admin/profil", label: "Profil" },
   ];
 
   return (
@@ -37,6 +39,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </Link>
 
             <div className="flex items-center gap-3">
+              <div className="hidden text-right sm:block">
+                <p className="text-xs font-semibold text-slate-900">{user.name}</p>
+                <p className="text-[11px] text-slate-500">
+                  {user.role === "owner" ? "Owner" : "Admin"}
+                </p>
+              </div>
               <Link
                 href="/uz"
                 className="hidden text-xs font-medium text-slate-500 hover:text-slate-800 sm:inline"

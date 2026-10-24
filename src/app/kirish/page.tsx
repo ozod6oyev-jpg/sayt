@@ -1,21 +1,26 @@
 import { redirect } from "next/navigation";
-import { login } from "@/app/actions/admin";
-import { isAdmin } from "@/lib/auth";
+import { login } from "@/app/actions/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { getDict } from "@/lib/i18n";
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function LoginPage({ searchParams }: PageProps) {
-  if (await isAdmin()) {
+  if ((await prisma.adminUser.count()) === 0) {
+    redirect("/kirish/sozlash");
+  }
+
+  if (await getCurrentUser()) {
     redirect("/admin");
   }
 
   const params = await searchParams;
-  const error = params.error;
-  const hasError = Array.isArray(error) ? error[0] === "1" : error === "1";
-
+  const error = Array.isArray(params.error) ? params.error[0] : params.error;
   const t = getDict("uz");
 
   return (
@@ -32,16 +37,32 @@ export default async function LoginPage({ searchParams }: PageProps) {
 
       <h1 className="text-lg font-semibold text-slate-900">{t.admin.login}</h1>
       <p className="mt-1 text-sm text-slate-500">
-        Davom etish uchun boshqaruv paneli parolini kiriting.
+        Email va parolni kiriting, keyin authenticator kodi so'raladi.
       </p>
 
-      {hasError && (
+      {error && (
         <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-          Parol noto'g'ri. Qayta urinib ko'ring.
+          Email yoki parol noto'g'ri. Qayta urinib ko'ring.
         </p>
       )}
 
       <form action={login} className="mt-6 space-y-4">
+        <div>
+          <label className="label" htmlFor="email">
+            Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoFocus
+            autoComplete="username"
+            className="field"
+            placeholder="admin@tezsotamiz.uz"
+          />
+        </div>
+
         <div>
           <label className="label" htmlFor="password">
             {t.admin.password}
@@ -51,7 +72,6 @@ export default async function LoginPage({ searchParams }: PageProps) {
             name="password"
             type="password"
             required
-            autoFocus
             autoComplete="current-password"
             className="field"
           />

@@ -25,7 +25,7 @@ npm run dev                 # http://localhost:3000
 | O'zgaruvchi | Ma'nosi |
 |---|---|
 | `DATABASE_URL` | `file:./dev.db` (SQLite) yoki Postgres ulanish satri |
-| `ADMIN_PASSWORD` | Admin panel paroli |
+| `ADMIN_PASSWORD` | Birinchi sozlash kaliti (owner yaratilgach ishlatilmaydi) |
 | `SESSION_SECRET` | Cookie imzosi uchun tasodifiy satr |
 | `NEXT_PUBLIC_SITE_URL` | Saytning to'liq manzili (sitemap, OG uchun) |
 
@@ -33,10 +33,25 @@ npm run dev                 # http://localhost:3000
 
 ## Admin panel
 
-- Manzil: `/kirish`
-- Parol: `.env` dagi `ADMIN_PASSWORD`
-- Imkoniyatlar: e'lon qo'shish/tahrirlash/o'chirish, bir nechta rasm yuklash,
-  qoralama/faol/sotilgan holati, maqola yozish va nashr qilish, kelgan so'rovlar.
+Kirish: `/kirish` — email + parol, so'ngra Google Authenticator'dagi 6 xonali kod.
+
+**Birinchi sozlash:** baza bo'sh bo'lsa `/kirish` avtomatik `/kirish/sozlash` ga
+yo'naltiradi. U yerda owner hisobi yaratiladi. Sozlash kaliti — `.env` dagi
+`ADMIN_PASSWORD` (owner yaratilgach bu qiymat login uchun ishlatilmaydi).
+
+**Owner imkoniyatlari:**
+- `/admin/users` — admin qo'shish, bloklash, parolni yangilash
+- har bir admin uchun authenticator kaliti avtomatik yaratiladi va owner uni
+  adminga beradi (kalitni qayta yaratish ham mumkin)
+- `/admin/profil` — o'z parolini almashtirish va authenticator kalitini ko'rish
+
+**Admin imkoniyatlari:** e'lon qo'shish/tahrirlash/o'chirish, bir nechta rasm
+yuklash, qoralama/faol/sotilgan holati, maqola yozish va nashr qilish, so'rovlar.
+Adminlar `/admin/users` bo'limiga kira olmaydi.
+
+**Xavfsizlik:** parollar scrypt bilan hash qilinadi, sessiya cookie HMAC bilan
+imzolanadi va 7 kun amal qiladi. 2FA kodlari RFC 6238 (TOTP, SHA1, 30 soniya)
+bo'yicha tekshiriladi.
 
 Yuklangan rasmlar `uploads/` papkasida saqlanadi va `/uploads/<fayl>` route orqali
 beriladi (papka `.gitignore` da).

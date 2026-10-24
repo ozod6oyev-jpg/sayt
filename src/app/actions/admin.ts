@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { checkPassword, createSession, destroySession, requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { saveImage } from "@/lib/uploads";
 
@@ -181,26 +181,6 @@ async function uploadListingPhotos(
       console.error("Rasm yuklanmadi:", error);
     }
   }
-}
-
-/* ------------------------------------------------------------------ */
-/* Kirish / chiqish                                                    */
-/* ------------------------------------------------------------------ */
-
-export async function login(formData: FormData): Promise<void> {
-  const password = text(formData, "password");
-
-  if (!checkPassword(password)) {
-    redirect("/kirish?error=1");
-  }
-
-  await createSession();
-  redirect("/admin");
-}
-
-export async function logout(): Promise<void> {
-  await destroySession();
-  redirect("/kirish");
 }
 
 /* ------------------------------------------------------------------ */

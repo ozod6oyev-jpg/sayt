@@ -11,6 +11,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  // owner | admin
+  role         String   @default("admin")
+  totpSecret   String
+  totpEnabled  Boolean  @default(true)
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+
+  createdById String?
+  createdBy   AdminUser?  @relation("AdminCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdUsers AdminUser[] @relation("AdminCreator")
+}
+
 model Listing {
   id           String   @id @default(cuid())
   slug         String   @unique
