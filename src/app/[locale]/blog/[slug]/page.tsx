@@ -7,7 +7,7 @@ import { ArticleCard } from "@/components/article-card";
 import { JsonLd } from "@/components/json-ld";
 import { articleBody, articleExcerpt, articleTitle } from "@/lib/content";
 import { formatDate } from "@/lib/format";
-import { getDict, isLocale, localePath } from "@/lib/i18n";
+import { getDict, isLocale, localePath, siteName } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import {
   absoluteUrl,
@@ -98,7 +98,7 @@ export default async function ArticlePage({ params }: PageProps) {
       },
       publisher: {
         "@type": "Organization",
-        name: "UyJoy",
+        name: siteName,
         logo: {
           "@type": "ImageObject",
           url: `${siteUrl}/favicon.svg`,

@@ -1,5 +1,7 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { setupOwner } from "@/app/actions/auth";
+import { siteName } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -27,11 +29,15 @@ export default async function SetupPage({ searchParams }: PageProps) {
   return (
     <div className="card w-full max-w-md p-8">
       <div className="mb-6 flex items-center gap-2">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-lg font-bold text-white">
-          U
-        </span>
+        <Image
+          src="/logo-mark.png"
+          alt={siteName}
+          width={36}
+          height={36}
+          className="h-9 w-9 rounded-lg object-cover"
+        />
         <div>
-          <p className="text-sm font-semibold text-slate-900">UyJoy</p>
+          <p className="text-sm font-semibold text-slate-900">{siteName}</p>
           <p className="text-xs text-slate-500">Birinchi sozlash</p>
         </div>
       </div>

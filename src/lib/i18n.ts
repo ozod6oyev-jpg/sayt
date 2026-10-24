@@ -11,7 +11,7 @@ export const localeNames: Record<Locale, string> = {
   ru: "Русский",
 };
 
-export const siteName = "UyJoy";
+export const siteName = "Uy-joylar sotamiz";
 
 const uz = {
   meta: {
@@ -116,7 +116,7 @@ const uz = {
   } as Record<string, string>,
   footer: {
     about:
-      "UyJoy — O'zbekistonda uy-joy sotib olish va sotish uchun qulay platforma. Har bir e'lon tekshiriladi.",
+      "Uy-joylar sotamiz — O'zbekistonda uy-joy sotib olish va sotish uchun qulay platforma. Har bir e'lon tekshiriladi.",
     navigation: "Bo'limlar",
     contact: "Bog'lanish",
     rights: "Barcha huquqlar himoyalangan.",
@@ -290,7 +290,7 @@ const ru: Dict = {
   },
   footer: {
     about:
-      "UyJoy — удобная платформа для покупки и продажи недвижимости в Узбекистане. Каждое объявление проверяется.",
+      "Uy-joylar sotamiz — удобная платформа для покупки и продажи недвижимости в Узбекистане. Каждое объявление проверяется.",
     navigation: "Разделы",
     contact: "Связаться",
     rights: "Все права защищены.",

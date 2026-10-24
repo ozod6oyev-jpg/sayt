@@ -1,7 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { verifyTwoFactor } from "@/app/actions/auth";
 import { readPendingUserId } from "@/lib/auth";
+import { siteName } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,13 @@ export default async function TwoFactorPage({ searchParams }: PageProps) {
 
   return (
     <div className="card w-full max-w-sm p-8">
+      <Image
+        src="/logo-mark.png"
+        alt={siteName}
+        width={36}
+        height={36}
+        className="mb-4 h-9 w-9 rounded-lg object-cover"
+      />
       <p className="text-xs font-semibold tracking-wide text-brand-700 uppercase">
         Ikkinchi bosqich
       </p>

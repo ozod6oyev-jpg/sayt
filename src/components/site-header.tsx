@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { getDict, localePath, type Locale } from "@/lib/i18n";
+import { getDict, localePath, siteName, type Locale } from "@/lib/i18n";
 import { LocaleSwitcher } from "./locale-switcher";
 
 export function SiteHeader({ locale }: { locale: Locale }) {
@@ -16,10 +17,17 @@ export function SiteHeader({ locale }: { locale: Locale }) {
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <Link href={localePath(locale)} className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-lg font-bold text-white">
-            U
+          <Image
+            src="/logo-mark.png"
+            alt={siteName}
+            width={36}
+            height={36}
+            priority
+            className="h-9 w-9 rounded-lg object-cover"
+          />
+          <span className="hidden text-sm font-bold tracking-tight text-slate-900 sm:inline">
+            {siteName}
           </span>
-          <span className="text-lg font-bold tracking-tight text-slate-900">UyJoy</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Asosiy menyu">

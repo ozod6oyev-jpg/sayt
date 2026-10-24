@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { HeadphonesIcon, InstagramIcon, TelegramIcon } from "@/components/icons";
 import { contact } from "@/lib/contact";
 import { getDict, isLocale } from "@/lib/i18n";
 import { alternatesFor, robotsMeta, socialMetadata } from "@/lib/seo";
@@ -57,6 +58,56 @@ export default async function ContactPage({ params }: Props) {
           <p className="mt-1 text-xs text-slate-500">
             {locale === "ru" ? "Ответим в течение рабочего дня" : "Ish kuni ichida javob beramiz"}
           </p>
+        </div>
+
+        <div className="card p-5 sm:col-span-2">
+          <h2 className="text-sm font-semibold text-slate-900">Telegram</h2>
+          <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <a
+              href={contact.telegramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-lg font-semibold text-brand-700 hover:underline"
+            >
+              <TelegramIcon className="h-6 w-6 text-[#229ED9]" />
+              {contact.telegramHandle}
+            </a>
+            <a
+              href={contact.telegramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary"
+            >
+              <HeadphonesIcon className="h-4 w-4" />
+              {locale === "ru" ? "Связаться" : "Bog'lanish"}
+            </a>
+          </div>
+        </div>
+
+        <div className="card p-5 sm:col-span-2">
+          <h2 className="text-sm font-semibold text-slate-900">
+            {locale === "ru" ? "Наши соцсети" : "Ijtimoiy tarmoqlarimiz"}
+          </h2>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:gap-8">
+            <a
+              href={contact.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-brand-700"
+            >
+              <InstagramIcon className="h-5 w-5 text-[#E1306C]" />
+              {contact.instagramHandle}
+            </a>
+            <a
+              href={contact.telegramChannelUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-brand-700"
+            >
+              <TelegramIcon className="h-5 w-5 text-[#229ED9]" />
+              {contact.telegramChannelHandle}
+            </a>
+          </div>
         </div>
 
         <div className="card p-5 sm:col-span-2">

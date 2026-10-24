@@ -54,6 +54,7 @@ export function socialMetadata(options: {
   } = options;
 
   const ogLocale = locale === "uz" ? "uz_UZ" : "ru_RU";
+  const ogImage = image ?? "/og-default.jpg";
 
   return {
     openGraph: {
@@ -63,7 +64,12 @@ export function socialMetadata(options: {
       url: absoluteUrl(path),
       siteName,
       locale: ogLocale,
-      ...(image ? { images: [{ url: absoluteUrl(image), width: 1200, height: 800 }] } : {}),
+      images: [
+        {
+          url: absoluteUrl(ogImage),
+          ...(image ? {} : { width: 1200, height: 630 }),
+        },
+      ],
       ...(type === "article" && publishedTime
         ? { publishedTime, modifiedTime, authors: author ? [author] : undefined }
         : {}),
@@ -72,7 +78,7 @@ export function socialMetadata(options: {
       card: "summary_large_image",
       title,
       description,
-      ...(image ? { images: [absoluteUrl(image)] } : {}),
+      images: [absoluteUrl(ogImage)],
     },
   };
 }

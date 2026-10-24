@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import "../globals.css";
 import { logout } from "@/app/actions/auth";
 import { requireAdmin } from "@/lib/auth";
-import { getDict } from "@/lib/i18n";
+import { getDict, siteName } from "@/lib/i18n";
 
 export const metadata: Metadata = {
-  title: "Boshqaruv paneli | UyJoy",
+  title: `Boshqaruv paneli | ${siteName}`,
   robots: { index: false, follow: false },
 };
 
@@ -29,10 +30,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <header className="border-b border-slate-200 bg-white">
           <div className="container-page flex h-16 items-center justify-between gap-4">
             <Link href="/admin" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
-                U
-              </span>
-              <span className="text-sm font-bold text-slate-900">UyJoy</span>
+              <Image
+                src="/logo-mark.png"
+                alt={siteName}
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-lg object-cover"
+              />
+              <span className="text-sm font-bold text-slate-900">{siteName}</span>
               <span className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500 sm:inline">
                 {t.admin.title}
               </span>

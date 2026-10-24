@@ -29,7 +29,7 @@ async function makeImage(
       <circle cx="${width * 0.82}" cy="${height * 0.2}" r="${height * 0.22}" fill="#ffffff" opacity="0.12"/>
       <rect x="${width * 0.08}" y="${height * 0.62}" width="${width * 0.84}" height="${height * 0.22}" rx="24" fill="#0d4134" opacity="0.55"/>
       <text x="${width * 0.12}" y="${height * 0.72}" font-family="DejaVu Sans, Arial, sans-serif" font-size="${Math.round(width / 26)}" fill="#ffffff">${label}</text>
-      <text x="${width * 0.12}" y="${height * 0.79}" font-family="DejaVu Sans, Arial, sans-serif" font-size="${Math.round(width / 45)}" fill="#d5f2e6">UyJoy demo rasmi</text>
+      <text x="${width * 0.12}" y="${height * 0.79}" font-family="DejaVu Sans, Arial, sans-serif" font-size="${Math.round(width / 45)}" fill="#d5f2e6">Uy-joylar sotamiz demo rasmi</text>
     </svg>`;
 
   const buffer = await sharp(Buffer.from(svg)).webp({ quality: 80 }).toBuffer();
@@ -381,7 +381,7 @@ async function main() {
   }
 
   for (const article of articles) {
-    const cover = await makeImage(`${article.slug}-cover`, "UyJoy", "#0f4f3e", "#d99a2b", 1600, 900);
+    const cover = await makeImage(`${article.slug}-cover`, "Uy-joylar sotamiz", "#0f4f3e", "#d99a2b", 1600, 900);
 
     await prisma.article.upsert({
       where: { slug: article.slug },
