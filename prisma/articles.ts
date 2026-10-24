@@ -3,6 +3,12 @@
  * Matn formati: `## sarlavha`, `### kichik sarlavha`, `- ro'yxat`, `> iqtibos`,
  * oddiy paragraflar esa bo'sh qator bilan ajratiladi.
  */
+/** Muqova rasmlari (bo'lmasa seed o'zi gradient rasm yasaydi) */
+export const articleCovers: Record<string, string> = {
+  "toshkent-kvartira-narxlari-2026": "/demo/yunusobod.jpg",
+  "uy-sotib-olishda-7-xato": "/demo/mirzo-ulugbek.jpg",
+};
+
 export const articles = [
   {
     slug: "toshkent-kvartira-narxlari-2026",
@@ -45,6 +51,8 @@ Hisoblashda ikki narsaga e'tibor bering:
 - Hovli va avtoturargoh: mashina to'xtash joyi bor-yo'qligi kundalik hayotda katta farq qiladi.
 - Kommunikatsiya: gaz, suv, isitish tizimi va elektr quvvati barqarorligi.
 - Sotuvchining holati: tez sotishga shoshilayotgan sotuvchi ko'pincha savdolashishga tayyor bo'ladi.
+
+![Ta'mir, jihozlanish va kommunikatsiya holati ham narxga ta'sir qiladi.](/demo/chilonzor.jpg)
 
 ## Tumanlarni qanday solishtirish kerak
 
@@ -124,6 +132,8 @@ Narxni solishtirishning eng ishonchli usuli — uchta oddiy qadam: kvadrat metr 
 - Двор и парковка: наличие места для машины заметно меняет повседневную жизнь.
 - Коммуникации: газ, вода, отопление и стабильность электричества.
 - Состояние продавца: тот, кто торопится продать, чаще готов торговаться.
+
+![Ремонт, оснащение и состояние коммуникаций тоже влияют на цену.](/demo/chilonzor.jpg)
 
 ## Как сравнивать районы
 
@@ -208,6 +218,8 @@ Rasmlar keng burchakli obyektiv bilan olinadi, kamchiliklar esa kadrga tushmaydi
 
 To'g'ri yo'l: uyni kunduzi va kechqurun, ish kunida va dam olish kunida ko'ring. Lift, podval, tom va hovli holatini ham tekshiring.
 
+![Uyni kunduzi va kechqurun ko'rish — kamchiliklarni payqashning eng oson yo'li.](/demo/sergeli.jpg)
+
 ## 5. Uyning texnik holatini tekshirmaslik
 
 Devorlardagi yoriqlar, namlik izlari, eski elektr simlari va kanalizatsiya — bularning barchasi keyinchalik katta xarajatga aylanishi mumkin.
@@ -278,6 +290,8 @@ Yettita xatoning umumiy sababi bitta: jarayonni bosqichlarga bo'lmaslik. Hujjatl
 Фотографии снимают широкоугольным объективом, а недостатки в кадр не попадают. Освещение, запах, шум и соседи понятны только на месте.
 
 Правильный путь: смотрите объект днём и вечером, в будни и выходные. Проверьте лифт, подвал, крышу и состояние двора.
+
+![Осматривать жильё днём и вечером — самый простой способ заметить недостатки.](/demo/sergeli.jpg)
 
 ## 5. Не проверить техническое состояние
 

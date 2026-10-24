@@ -193,27 +193,27 @@
 
 /* Maqola matni — o'qish uchun qulay tipografiya */
 .article-body {
-  @apply text-[1.0625rem] leading-8 text-slate-700;
+  @apply text-[0.9375rem] leading-[1.7] text-slate-700;
 }
 
 .article-body p {
-  @apply mb-5;
+  @apply mb-3.5;
 }
 
 .article-body h2 {
-  @apply mt-10 mb-3 text-2xl font-bold text-slate-900;
+  @apply mt-7 mb-2 text-xl font-bold text-slate-900;
 }
 
 .article-body h3 {
-  @apply mt-8 mb-2 text-xl font-semibold text-slate-900;
+  @apply mt-5 mb-1.5 text-[1.0625rem] font-semibold text-slate-900;
 }
 
 .article-body ul {
-  @apply mb-5 list-disc space-y-2 pl-6;
+  @apply mb-3.5 list-disc space-y-1 pl-5;
 }
 
 .article-body ol {
-  @apply mb-5 list-decimal space-y-2 pl-6;
+  @apply mb-3.5 list-decimal space-y-1 pl-5;
 }
 
 .article-body a {
@@ -221,11 +221,23 @@
 }
 
 .article-body img {
-  @apply my-6 w-full rounded-xl;
+  @apply w-full rounded-xl object-cover;
+}
+
+.article-body figure {
+  @apply my-5;
+}
+
+.article-body figure img {
+  @apply h-[220px] w-full sm:h-[300px];
+}
+
+.article-body figcaption {
+  @apply mt-2 text-center text-[11px] leading-5 text-slate-500;
 }
 
 .article-body blockquote {
-  @apply my-6 border-l-4 border-brand-300 bg-brand-50 px-5 py-3 text-slate-700 italic;
+  @apply my-5 border-l-4 border-brand-300 bg-brand-50 px-4 py-2.5 text-[0.9375rem] text-slate-700 italic;
 }
 
 .article-body strong {

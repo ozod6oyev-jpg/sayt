@@ -140,7 +140,7 @@ export default async function ArticlePage({ params }: PageProps) {
   ];
 
   return (
-    <article className="container-page py-10">
+    <article className="container-page py-8">
       <JsonLd data={jsonLd} />
 
       <nav aria-label="Breadcrumb" className="text-xs text-slate-500">
@@ -153,16 +153,16 @@ export default async function ArticlePage({ params }: PageProps) {
         </Link>
       </nav>
 
-      <header className="mx-auto mt-6 max-w-3xl">
+      <header className="mx-auto mt-4 max-w-3xl">
         <Badge variant="secondary">{t.category[article.category] ?? article.category}</Badge>
 
-        <h1 className="mt-4 text-3xl leading-tight font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="mt-3 text-2xl leading-snug font-extrabold tracking-tight text-slate-900 sm:text-[2rem]">
           {title}
         </h1>
 
-        <p className="mt-4 text-lg leading-8 text-slate-600">{description}</p>
+        <p className="mt-3 text-[0.95rem] leading-6 text-slate-600">{description}</p>
 
-        <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-y border-slate-200 py-4 text-sm text-slate-600">
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-slate-200 py-3 text-[13px] text-slate-600">
           <div className="flex items-center gap-3">
             <Avatar className="size-9">
               <AvatarFallback>{article.authorName.charAt(0).toUpperCase()}</AvatarFallback>
@@ -191,7 +191,7 @@ export default async function ArticlePage({ params }: PageProps) {
         </div>
       </header>
 
-      <figure className="mx-auto mt-8 max-w-4xl overflow-hidden rounded-2xl bg-muted shadow-float">
+      <figure className="mx-auto mt-6 max-w-4xl overflow-hidden rounded-2xl bg-muted shadow-float">
         <Image
           src={article.coverImage}
           alt={title}
@@ -199,11 +199,11 @@ export default async function ArticlePage({ params }: PageProps) {
           height={article.coverHeight}
           priority
           sizes="(max-width: 1024px) 100vw, 896px"
-          className="w-full object-cover"
+          className="h-[200px] w-full object-cover sm:h-[320px]"
         />
       </figure>
 
-      <div className="mx-auto mt-10 max-w-3xl">
+      <div className="mx-auto mt-8 max-w-3xl">
         <ArticleBody body={body} />
       </div>
 
@@ -214,7 +214,7 @@ export default async function ArticlePage({ params }: PageProps) {
       </footer>
 
       {related.length > 0 && (
-        <section className="mx-auto mt-14 max-w-5xl">
+        <section className="mx-auto mt-12 max-w-5xl">
           <h2 className="text-xl font-bold text-slate-900">{t.blog.related}</h2>
           <div className="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((item) => (

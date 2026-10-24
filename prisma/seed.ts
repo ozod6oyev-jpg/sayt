@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
 import sharp from "sharp";
-import { articles } from "./articles";
+import { articleCovers, articles } from "./articles";
 
 const prisma = new PrismaClient();
 
@@ -291,6 +291,7 @@ async function main() {
 
   for (const article of articles) {
     const cover = await makeImage(`${article.slug}-cover`, "Uy-joylar sotamiz", "#0f4f3e", "#d99a2b", 1600, 900);
+    const coverUrl = articleCovers[article.slug];
 
     await prisma.article.upsert({
       where: { slug: article.slug },
@@ -304,13 +305,16 @@ async function main() {
         category: article.category,
         authorName: article.authorName,
         authorRole: article.authorRole,
+        ...(coverUrl
+          ? { coverImage: coverUrl, coverWidth: 1600, coverHeight: 1000 }
+          : {}),
         published: true,
       },
       create: {
         ...article,
-        coverImage: cover.url,
-        coverWidth: cover.width,
-        coverHeight: cover.height,
+        coverImage: coverUrl ?? cover.url,
+        coverWidth: coverUrl ? 1600 : cover.width,
+        coverHeight: coverUrl ? 1000 : cover.height,
         published: true,
         publishedAt: new Date(),
       },

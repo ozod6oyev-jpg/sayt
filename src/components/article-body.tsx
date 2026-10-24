@@ -1,6 +1,7 @@
 type Block =
   | { type: "h2" | "h3" | "p" | "quote"; text: string }
-  | { type: "ul"; items: string[] };
+  | { type: "ul"; items: string[] }
+  | { type: "figure"; src: string; caption: string };
 
 function parseBlocks(body: string): Block[] {
   const chunks = body
@@ -13,6 +14,13 @@ function parseBlocks(body: string): Block[] {
 
   for (const chunk of chunks) {
     const lines = chunk.split("\n");
+
+    // Rasm: ![izoh](/rasm.jpg)
+    const image = chunk.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
+    if (image) {
+      blocks.push({ type: "figure", caption: image[1].trim(), src: image[2].trim() });
+      continue;
+    }
 
     if (lines.every((line) => line.trim().startsWith("- "))) {
       blocks.push({
@@ -62,7 +70,17 @@ export function ArticleBody({ body }: { body: string }) {
           );
         }
 
-        if (block.type === "h2") {
+        if (block.type === "figure") {
+      return (
+        <figure key={index}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={block.src} alt={block.caption} loading="lazy" decoding="async" />
+          {block.caption && <figcaption>{block.caption}</figcaption>}
+        </figure>
+      );
+    }
+
+    if (block.type === "h2") {
           return <h2 key={index}>{block.text}</h2>;
         }
 
