@@ -132,4 +132,19 @@ npm run db:seed    # demo ma'lumotlar
 npm run db:studio  # Prisma Studio
 ```
 
+## Xavfsizlik: sirlar va loglar
+
+- **`.env` hech qachon git'ga tushmaydi.** `.gitignore` da `.env*` yopilgan, faqat
+  `.env.example` (qiymatlarsiz namuna) repoda turadi. `.env` fayl ruxsati `600`.
+- **Sirlar loglarga yozilmaydi.** Parollar, TOTP kodlari va kalitlar hech qayerga
+  `console.log` qilinmaydi; nginx faqat URL'ni yozadi, forma ma'lumotlarini emas.
+  Login va sozlash formasi POST orqali ishlaydi, shuning uchun parol URL'ga tushmaydi.
+- **Sirlar faqat shu yerda:** `.env` (SESSION_SECRET, ADMIN_PASSWORD) va bazadagi
+  `AdminUser` jadvali (parol hashlari, TOTP sirlari). Bazani backup qilishda u ham
+  shifrlanmagan holda nusxalanadi — backup faylini ochiq joyda saqlamang.
+- **Kalit oshkor bo'lsa:** `SESSION_SECRET` ni almashtiring (barcha sessiyalar bekor
+  bo'ladi), adminga `/admin/profil` da «Yangi kalit yaratish» ni bosing va parolni
+  almashtiring. TOTP sirini qayta yaratish eski kalitni darhol ishlamay qo'yadi.
+- **Qayta ishga tushirish:** `sudo systemctl restart uyjoy`.
+
 Batafsil reja: [REJA.md](REJA.md)

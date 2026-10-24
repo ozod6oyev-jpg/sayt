@@ -3,10 +3,9 @@ node_modules/
 out/
 build/
 
-# Atrof-muhit o'zgaruvchilari va sirlar
-.env
-.env.local
-.env*.local
+# Atrof-muhit o'zgaruvchilari va sirlar — barcha .env* fayllar yopiq,
+# faqat namuna (.env.example) repoda turadi.
+.env*
 !.env.example
 
 # Ma'lumotlar bazasi (lokal)
@@ -21,6 +20,8 @@ uploads/*
 # Tizim fayllari
 .DS_Store
 *.pem
+*.key
+*.p12
 npm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
