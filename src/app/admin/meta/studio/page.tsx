@@ -137,7 +137,16 @@ export default async function StudioPage({ searchParams }: PageProps) {
                       {post.caption || post.captionFb || post.captionThreads || "—"}
                     </p>
                     <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-                      {post.hashtags || "—"} ·{" "}
+                      {[
+                        ...new Set(
+                          [post.hashtags, post.hashtagsFb, post.hashtagsThreads]
+                            .filter(Boolean)
+                            .join(" ")
+                            .split(" ")
+                            .filter(Boolean),
+                        ),
+                      ].join(" ") || "—"}{" "}
+                      ·{" "}
                       {new Intl.DateTimeFormat("uz-UZ", {
                         dateStyle: "short",
                         timeStyle: "short",

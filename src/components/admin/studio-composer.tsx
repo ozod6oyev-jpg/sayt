@@ -199,7 +199,17 @@ function LocationPicker({
 
 type TagSuggestion = { tag: string; uses: number };
 
-function HashtagPicker({ copy }: { copy: Copy }) {
+function HashtagPicker({
+  copy,
+  id,
+  name,
+  platform,
+}: {
+  copy: Copy;
+  id: string;
+  name: string;
+  platform: "ig" | "fb" | "threads";
+}) {
   const [tags, setTags] = useState<string[]>([]);
   const [value, setValue] = useState("");
   const [items, setItems] = useState<TagSuggestion[]>([]);
@@ -216,7 +226,9 @@ function HashtagPicker({ copy }: { copy: Copy }) {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/admin/hashtags?q=${encodeURIComponent(query)}`);
+        const response = await fetch(
+          `/api/admin/hashtags?q=${encodeURIComponent(query)}&platform=${platform}`,
+        );
         const data = (await response.json()) as { items?: TagSuggestion[] };
         if (alive) setItems(data.items ?? []);
       } catch {
@@ -244,13 +256,13 @@ function HashtagPicker({ copy }: { copy: Copy }) {
 
   return (
     <div>
-      <label className="label" htmlFor="studio-hashtags">
+      <label className="label" htmlFor={id}>
         {copy.hashtagsTitle}
       </label>
 
       <div className="relative">
         <input
-          id="studio-hashtags"
+          id={id}
           value={value}
           onChange={(event) => setValue(event.target.value)}
           onKeyDown={(event) => {
@@ -316,7 +328,7 @@ function HashtagPicker({ copy }: { copy: Copy }) {
       )}
 
       <p className="mt-1 text-[11px] text-muted-foreground">{copy.hashtagsHint}</p>
-      <input type="hidden" name="hashtags" value={hidden.join(" ")} />
+      <input type="hidden" name={name} value={hidden.join(" ")} />
     </div>
   );
 }
@@ -472,9 +484,6 @@ export function StudioComposer({
           </div>
         </div>
 
-        <div className="card p-4">
-          <HashtagPicker copy={copy} />
-        </div>
       </div>
 
       <div className="card flex flex-col">
@@ -608,6 +617,19 @@ export function StudioComposer({
                       {copy.charsSuffix}
                     </p>
                   </div>
+
+                  <HashtagPicker
+                    copy={copy}
+                    id={`hashtags-${platform.id}`}
+                    name={
+                      platform.id === "ig"
+                        ? "hashtags"
+                        : platform.id === "fb"
+                          ? "hashtags_fb"
+                          : "hashtags_threads"
+                    }
+                    platform={platform.id}
+                  />
 
                   {(platform.id === "ig" || platform.id === "fb") && (
                     <LocationPicker

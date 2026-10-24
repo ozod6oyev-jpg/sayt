@@ -224,31 +224,33 @@ model MetaChat {
 
 /// Ijtimoiy tarmoqlar uchun tayyorlangan post (reels, post yoki story)
 model SocialPost {
-  id             String         @id @default(cuid())
-  caption        String
-  captionFb      String?
-  captionThreads String?
-  hashtags       String
-  mediaType      String
-  mediaUrl       String
-  igLocationId   String?
-  igLocationName String?
-  fbLocationId   String?
-  fbLocationName String?
-  altText        String?
-  coverUrl       String?
-  shareToFeed    Boolean        @default(true)
-  collaborators  String?
-  fbTitle        String?
-  threadsReply   String?
-  threadsTopic   String?
-  hideLikeCounts Boolean        @default(false)
-  audioName      String?
-  userTags       String?
-  paidPartner    String?
-  fbScheduledAt  DateTime?
-  createdAt      DateTime       @default(now())
-  targets        SocialTarget[]
+  id              String         @id @default(cuid())
+  caption         String
+  captionFb       String?
+  captionThreads  String?
+  hashtags        String
+  hashtagsFb      String?
+  hashtagsThreads String?
+  mediaType       String
+  mediaUrl        String
+  igLocationId    String?
+  igLocationName  String?
+  fbLocationId    String?
+  fbLocationName  String?
+  altText         String?
+  coverUrl        String?
+  shareToFeed     Boolean        @default(true)
+  collaborators   String?
+  fbTitle         String?
+  threadsReply    String?
+  threadsTopic    String?
+  hideLikeCounts  Boolean        @default(false)
+  audioName       String?
+  userTags        String?
+  paidPartner     String?
+  fbScheduledAt   DateTime?
+  createdAt       DateTime       @default(now())
+  targets         SocialTarget[]
 
   @@index([createdAt])
 }

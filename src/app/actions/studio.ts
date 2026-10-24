@@ -46,6 +46,8 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
   };
 
   const hashtags = normalizeHashtags(text(formData, "hashtags"));
+  const hashtagsFb = normalizeHashtags(text(formData, "hashtags_fb"));
+  const hashtagsThreads = normalizeHashtags(text(formData, "hashtags_threads"));
   const file = formData.get("media");
   const targets = formData
     .getAll("targets")
@@ -66,11 +68,11 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
     redirect("/admin/meta/studio?post=media");
   }
 
-  const tags = hashtags.join(" ");
-  const withTags = (value: string) => [value, tags].filter(Boolean).join("\n\n");
-  const fullIg = withTags(captions.ig);
-  const fullFb = withTags(captions.fb);
-  const fullThreads = withTags(captions.threads.slice(0, MAX_CAPTION.threads));
+  const withTags = (value: string, tags: string[]) =>
+    [value, tags.join(" ")].filter(Boolean).join("\n\n");
+  const fullIg = withTags(captions.ig, hashtags);
+  const fullFb = withTags(captions.fb, hashtagsFb);
+  const fullThreads = withTags(captions.threads.slice(0, MAX_CAPTION.threads), hashtagsThreads);
 
   let coverUrl: string | null = null;
   const coverFile = formData.get("cover");
@@ -133,7 +135,9 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
       caption: captions.ig,
       captionFb: captions.fb || null,
       captionThreads: captions.threads || null,
-      hashtags: tags,
+      hashtags: hashtags.join(" "),
+      hashtagsFb: hashtagsFb.join(" ") || null,
+      hashtagsThreads: hashtagsThreads.join(" ") || null,
       mediaType: media.type,
       mediaUrl: media.url,
       igLocationId: igLocationId || null,

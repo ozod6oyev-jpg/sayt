@@ -17,7 +17,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, items: [] }, { status: 401 });
   }
 
-  const raw = (new URL(request.url).searchParams.get("q") ?? "").replace(/^#+/, "").trim();
+  const params = new URL(request.url).searchParams;
+  const raw = (params.get("q") ?? "").replace(/^#+/, "").trim();
+  const platform = params.get("platform") === "fb" ? "fb" : params.get("platform") === "threads" ? "threads" : "ig";
   if (!raw) {
     return NextResponse.json({ ok: true, items: [] });
   }
@@ -26,13 +28,21 @@ export async function GET(request: Request) {
 
   // 1) O'z postlarimizdagi teglar
   const posts = await prisma.socialPost.findMany({
-    where: { hashtags: { contains: raw } },
-    select: { hashtags: true },
+    where:
+      platform === "fb"
+        ? { hashtagsFb: { contains: raw } }
+        : platform === "threads"
+          ? { hashtagsThreads: { contains: raw } }
+          : { hashtags: { contains: raw } },
+    select: { hashtags: true, hashtagsFb: true, hashtagsThreads: true },
     take: 100,
   });
 
   for (const post of posts) {
-    for (const tag of post.hashtags.split(/\s+/).filter(Boolean)) {
+    const source =
+      platform === "fb" ? post.hashtagsFb : platform === "threads" ? post.hashtagsThreads : post.hashtags;
+
+    for (const tag of (source ?? "").split(/\s+/).filter(Boolean)) {
       const name = tag.replace(/^#+/, "");
       if (!name.toLowerCase().includes(raw.toLowerCase())) continue;
 
