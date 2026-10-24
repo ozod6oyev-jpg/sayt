@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { contact } from "@/lib/contact";
 import { getDict, localePath, siteName, type Locale } from "@/lib/i18n";
-import { InstagramIcon, TelegramIcon } from "./icons";
+import { InstagramIcon, TelegramIcon, YoutubeIcon } from "./icons";
 
 export function MobileNav({ locale }: { locale: Locale }) {
   const t = getDict(locale);
@@ -123,6 +123,16 @@ export function MobileNav({ locale }: { locale: Locale }) {
                 {contact.telegramChannelHandle}
               </a>
             </div>
+
+            <a
+              href={contact.youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-card px-2 py-2 text-xs font-semibold text-foreground shadow-xs"
+            >
+              <YoutubeIcon className="h-3.5 w-3.5 text-[#FF0033]" />
+              YouTube · {contact.youtubeHandle}
+            </a>
           </div>
         </nav>
 

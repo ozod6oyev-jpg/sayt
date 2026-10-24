@@ -4,6 +4,7 @@ import { ArrowUpRight, Clock, Headphones, MapPin, Phone } from "lucide-react";
 import {
   InstagramIcon,
   TelegramIcon,
+  YoutubeIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -168,6 +169,17 @@ export default async function ContactPage({ params }: Props) {
                 </span>
                 <span className="text-xs font-medium text-muted-foreground">
                   {contact.telegramChannelHandle}
+                </span>
+              </a>
+            </Button>
+            <Button asChild variant="outline" className="justify-between">
+              <a href={contact.youtubeUrl} target="_blank" rel="noopener noreferrer">
+                <span className="inline-flex items-center gap-2">
+                  <YoutubeIcon className="h-4 w-4 text-[#FF0033]" />
+                  YouTube
+                </span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {contact.youtubeHandle}
                 </span>
               </a>
             </Button>

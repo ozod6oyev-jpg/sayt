@@ -3,7 +3,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { contact } from "@/lib/contact";
 import { getDict, localePath, siteName, type Locale } from "@/lib/i18n";
-import { HeadphonesIcon, InstagramIcon, MapPinIcon, PhoneIcon, TelegramIcon } from "./icons";
+import {
+  HeadphonesIcon,
+  InstagramIcon,
+  MapPinIcon,
+  PhoneIcon,
+  TelegramIcon,
+  YoutubeIcon,
+} from "./icons";
 
 export function SiteFooter({ locale }: { locale: Locale }) {
   const t = getDict(locale);
@@ -39,6 +46,12 @@ export function SiteFooter({ locale }: { locale: Locale }) {
               <a href={contact.telegramChannelUrl} target="_blank" rel="noopener noreferrer">
                 <TelegramIcon className="h-4 w-4" />
                 {contact.telegramChannelHandle}
+              </a>
+            </Button>
+            <Button asChild variant="subtle" size="sm" className="h-9 gap-2 rounded-xl px-3">
+              <a href={contact.youtubeUrl} target="_blank" rel="noopener noreferrer">
+                <YoutubeIcon className="h-4 w-4 text-[#FF0033]" />
+                {contact.youtubeHandle}
               </a>
             </Button>
           </div>

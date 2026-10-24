@@ -9,6 +9,8 @@ export const contact = {
   telegramChannelUrl: "https://t.me/realsotamiz",
   instagramHandle: "@realsotamiz",
   instagramUrl: "https://www.instagram.com/realsotamiz",
+  youtubeHandle: "@realsotamizuz",
+  youtubeUrl: "https://www.youtube.com/@realsotamizuz",
   address: {
     uz: "Toshkent, Mirobod tumani",
     ru: "Ташкент, Мирабадский район",
