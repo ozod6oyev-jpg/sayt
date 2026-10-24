@@ -25,3 +25,10 @@ uploads/*
 npm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
+
+# Lokal backup arxivlari
+backups/
+
+# SQLite WAL fayllari
+prisma/dev.db-wal
+prisma/dev.db-shm

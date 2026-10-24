@@ -22,6 +22,8 @@ export default async function AccessPage({ searchParams }: PageProps) {
   const query = await searchParams;
   const rawFilter = Array.isArray(query.filter) ? query.filter[0] : query.filter;
   const filter = rawFilter === "trusted" || rawFilter === "untrusted" ? rawFilter : "all";
+  const rawError = Array.isArray(query.error) ? query.error[0] : query.error;
+  const otpError = rawError === "otp";
 
   const devices = await prisma.verifiedDevice.findMany({
     where:
@@ -61,8 +63,12 @@ export default async function AccessPage({ searchParams }: PageProps) {
       </div>
 
       <p className="rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-xs leading-5 text-brand-800">
-        {c.hint}
+        {c.hint} {c.otpHint}
       </p>
+
+      {otpError && (
+        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{c.otpError}</p>
+      )}
 
       <div className="flex flex-wrap gap-1.5">
         {filters.map((item) => (
@@ -138,10 +144,27 @@ export default async function AccessPage({ searchParams }: PageProps) {
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center justify-end gap-2">
-                        <form action={toggleDeviceTrust.bind(null, device.id)}>
+                        <form
+                          action={toggleDeviceTrust.bind(null, device.id)}
+                          className="flex items-center gap-1.5"
+                        >
+                          {!device.isTrusted && (
+                            <input
+                              name="otp"
+                              type="text"
+                              inputMode="numeric"
+                              autoComplete="one-time-code"
+                              pattern="[0-9]{6}"
+                              maxLength={6}
+                              required
+                              aria-label={c.otpLabel}
+                              placeholder={c.otpPlaceholder}
+                              className="field h-7 w-[76px] px-2 py-0 text-center font-mono text-xs tracking-widest"
+                            />
+                          )}
                           <button
                             type="submit"
-                            className="text-xs font-medium text-brand-700 hover:underline"
+                            className="text-xs font-medium whitespace-nowrap text-brand-700 hover:underline"
                           >
                             {device.isTrusted ? c.untrust : c.trust}
                           </button>

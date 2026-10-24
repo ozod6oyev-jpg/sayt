@@ -65,7 +65,12 @@ export async function POST(request: Request) {
   const language = text(body.language, 40);
   const timezone = text(body.timezone, 60);
   const screen = text(body.screen, 40);
-  const ip = text(requestHeaders.get("x-forwarded-for")?.split(",")[0], 60);
+  // Eng oxirgi manzilni olamiz: nginx uni o'zi qo'shadi, shuning uchun soxtalashtirib bo'lmaydi
+  const forwarded = requestHeaders.get("x-forwarded-for")?.split(",") ?? [];
+  const ip = text(
+    requestHeaders.get("x-real-ip") ?? forwarded[forwarded.length - 1],
+    60,
+  );
 
   const fingerprint = createHash("sha256")
     .update([userAgent, platform, screen, timezone].join("|"))
