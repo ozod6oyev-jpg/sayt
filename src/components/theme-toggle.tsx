@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { THEME_EVENT, THEME_KEY } from "./theme-sync";
 
-const STORAGE_KEY = "uyjoy-theme";
+const STORAGE_KEY = THEME_KEY;
 
 type PageTransition = { finished: Promise<void> };
 type DocumentWithTransitions = Document & {
@@ -17,7 +18,16 @@ export function ThemeToggle({ label }: { label: string }) {
   const runId = useRef(0);
 
   useEffect(() => {
-    setDark(document.documentElement.classList.contains("dark"));
+    const sync = () => setDark(document.documentElement.classList.contains("dark"));
+
+    sync();
+    window.addEventListener(THEME_EVENT, sync);
+    window.addEventListener("storage", sync);
+
+    return () => {
+      window.removeEventListener(THEME_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
   }, []);
 
   function toggleTheme() {
@@ -30,7 +40,10 @@ export function ThemeToggle({ label }: { label: string }) {
       root.classList.toggle("dark", next);
 
       try {
-        localStorage.setItem(STORAGE_KEY, next ? "dark" : "light");
+        const value = next ? "dark" : "light";
+        localStorage.setItem(STORAGE_KEY, value);
+        // Cookie serverga ham yetib boradi: sahifa almashganda rejim saqlanadi
+        document.cookie = `${STORAGE_KEY}=${value};path=/;max-age=31536000;samesite=lax`;
       } catch {
         // localStorage mavjud bo'lmasa ham rejim shu sessiyada ishlaydi
       }
