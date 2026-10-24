@@ -1,0 +1,103 @@
+// Uy-joy sayti ma'lumotlar bazasi sxemasi
+// Hozircha SQLite (lokal). Postgres'ga o'tish uchun faqat
+// prisma/schema.prisma dagi provider va .env dagi DATABASE_URL o'zgaradi.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Listing {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  // sale | rent
+  type         String   @default("sale")
+  // apartment | house | land | commercial
+  propertyType String   @default("apartment")
+  titleUz      String
+  titleRu      String
+  descriptionUz String
+  descriptionRu String
+  price        BigInt
+  // UZS | USD
+  currency     String   @default("USD")
+  rooms        Int?
+  area         Int?
+  floor        Int?
+  totalFloors  Int?
+  yearBuilt    Int?
+  // yangi | tamirlangan | ortacha | ta'mirtalab
+  condition    String?
+  region       String
+  district     String
+  address      String
+  lat          Float?
+  lng          Float?
+  phone        String
+  // draft | active | sold
+  status       String   @default("draft")
+  views        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  photos Photo[]
+  leads  Lead[]
+
+  @@index([status, createdAt])
+  @@index([type, propertyType])
+  @@index([district])
+  @@index([price])
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String   @default("")
+  width     Int      @default(1200)
+  height    Int      @default(800)
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([listingId, sort])
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  titleUz     String
+  titleRu     String
+  excerptUz   String
+  excerptRu   String
+  bodyUz      String
+  bodyRu      String
+  coverImage  String
+  coverWidth  Int      @default(1200)
+  coverHeight Int      @default(800)
+  // bozor | qollanma | ipoteka | tahlil
+  category    String   @default("qollanma")
+  authorName  String
+  authorRole  String   @default("")
+  published   Boolean  @default(false)
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, publishedAt])
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  listingId String?
+  listing   Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  name      String
+  phone     String
+  message   String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

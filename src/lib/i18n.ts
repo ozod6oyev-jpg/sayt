@@ -1,0 +1,375 @@
+export const locales = ["uz", "ru"] as const;
+export type Locale = (typeof locales)[number];
+export const defaultLocale: Locale = "uz";
+
+export function isLocale(value: string): value is Locale {
+  return (locales as readonly string[]).includes(value);
+}
+
+export const localeNames: Record<Locale, string> = {
+  uz: "O'zbekcha",
+  ru: "Русский",
+};
+
+export const siteName = "UyJoy";
+
+const uz = {
+  meta: {
+    homeTitle: "Uy-joy sotib olish va sotish — O'zbekiston bo'ylab",
+    homeDescription:
+      "O'zbekiston bo'ylab sotiladigan kvartiralar, uylar va yer uchastkalari. Rasmlar, narxlar, tumanlar bo'yicha qidiruv. Uy-joy bozori tahlili va maslahatlar.",
+    listingsTitle: "E'lonlar",
+    listingsDescription:
+      "Toshkent va viloyatlar bo'ylab sotiladigan uy-joy e'lonlari: narx, maydon, xonalar soni bo'yicha filtr.",
+    blogTitle: "Maqolalar",
+    blogDescription:
+      "Uy-joy bozori tahlili, uy sotib olish qo'llanmalari, ipoteka va qurilish bo'yicha maslahatlar.",
+  },
+  nav: {
+    home: "Bosh sahifa",
+    listings: "E'lonlar",
+    blog: "Maqolalar",
+    contact: "Aloqa",
+    admin: "Boshqaruv",
+  },
+  hero: {
+    title: "O'zingizga mos uyni toping",
+    subtitle:
+      "O'zbekiston bo'ylab minglab e'lon. Narx, tuman va maydon bo'yicha qulay qidiruv.",
+    cta: "E'lonlarni ko'rish",
+  },
+  search: {
+    type: "Bitim turi",
+    propertyType: "Obyekt turi",
+    district: "Tuman",
+    rooms: "Xonalar",
+    priceFrom: "Narx (dan)",
+    priceTo: "Narx (gacha)",
+    apply: "Qidirish",
+    reset: "Tozalash",
+    all: "Barchasi",
+    results: (n: number) => `${n} ta e'lon topildi`,
+    empty: "Bu shartlarga mos e'lon topilmadi.",
+    anyRooms: "Xonalar soni",
+  },
+  listingType: {
+    sale: "Sotuv",
+    rent: "Ijara",
+  },
+  propertyType: {
+    apartment: "Kvartira",
+    house: "Uy",
+    land: "Yer uchastkasi",
+    commercial: "Tijorat",
+  },
+  condition: {
+    new: "Yangi",
+    renovated: "Ta'mirlangan",
+    average: "O'rtacha",
+    needsRepair: "Ta'mirtalab",
+  } as Record<string, string>,
+  listing: {
+    price: "Narx",
+    pricePerM2: "1 m² uchun",
+    rooms: "Xonalar",
+    area: "Maydon",
+    floor: "Qavat",
+    year: "Qurilgan yil",
+    condition: "Holati",
+    address: "Manzil",
+    description: "Tavsif",
+    photos: "Rasmlar",
+    map: "Xaritada",
+    contact: "Aloqa",
+    call: "Qo'ng'iroq qilish",
+    views: "ko'rish",
+    similar: "O'xshash e'lonlar",
+    backToList: "Barcha e'lonlar",
+    sold: "Sotilgan",
+    perM2: "so'm/m²",
+  },
+  lead: {
+    title: "Bu uy bo'yicha ma'lumot olish",
+    subtitle: "Telefon raqamingizni qoldiring, mutaxassis siz bilan bog'lanadi.",
+    name: "Ismingiz",
+    phone: "Telefon raqam",
+    message: "Xabar (ixtiyoriy)",
+    send: "Yuborish",
+    sent: "Rahmat! Tez orada siz bilan bog'lanamiz.",
+    error: "Iltimos, ism va telefon raqamni to'g'ri kiriting.",
+  },
+  blog: {
+    all: "Barcha maqolalar",
+    readMore: "O'qish",
+    published: "Nashr etilgan",
+    updated: "Yangilangan",
+    author: "Muallif",
+    category: "Kategoriya",
+    related: "Yana o'qing",
+    empty: "Hozircha maqola yo'q.",
+  },
+  category: {
+    bozor: "Bozor tahlili",
+    qollanma: "Qo'llanma",
+    ipoteka: "Ipoteka",
+    tahlil: "Tahlil",
+  } as Record<string, string>,
+  footer: {
+    about:
+      "UyJoy — O'zbekistonda uy-joy sotib olish va sotish uchun qulay platforma. Har bir e'lon tekshiriladi.",
+    navigation: "Bo'limlar",
+    contact: "Bog'lanish",
+    rights: "Barcha huquqlar himoyalangan.",
+    privacy: "Maxfiylik siyosati",
+  },
+  admin: {
+    title: "Boshqaruv paneli",
+    dashboard: "Umumiy",
+    listings: "E'lonlar",
+    articles: "Maqolalar",
+    leads: "So'rovlar",
+    newListing: "Yangi e'lon",
+    newArticle: "Yangi maqola",
+    logout: "Chiqish",
+    login: "Kirish",
+    password: "Parol",
+    save: "Saqlash",
+    delete: "O'chirish",
+    edit: "Tahrirlash",
+    status: "Holat",
+    published: "Nashr etilgan",
+    draft: "Qoralama",
+    active: "Faol",
+    sold: "Sotilgan",
+    upload: "Rasm yuklash",
+    photos: "Rasmlar",
+    noPhotos: "Rasm yuklanmagan",
+    stats: {
+      total: "Jami e'lonlar",
+      active: "Faol e'lonlar",
+      views: "Ko'rishlar",
+      leads: "So'rovlar",
+      articles: "Maqolalar",
+    },
+    fields: {
+      titleUz: "Sarlavha (o'zbekcha)",
+      titleRu: "Sarlavha (ruscha)",
+      descriptionUz: "Tavsif (o'zbekcha)",
+      descriptionRu: "Tavsif (ruscha)",
+      slug: "URL (slug)",
+      type: "Bitim turi",
+      propertyType: "Obyekt turi",
+      price: "Narx",
+      currency: "Valyuta",
+      rooms: "Xonalar",
+      area: "Maydon (m²)",
+      floor: "Qavat",
+      totalFloors: "Qavatlar soni",
+      yearBuilt: "Qurilgan yil",
+      condition: "Holati",
+      region: "Viloyat / shahar",
+      district: "Tuman",
+      address: "Manzil",
+      phone: "Telefon",
+      status: "Holat",
+      category: "Kategoriya",
+      authorName: "Muallif ismi",
+      authorRole: "Muallif lavozimi",
+      excerptUz: "Qisqa tavsif (o'zbekcha)",
+      excerptRu: "Qisqa tavsif (ruscha)",
+      bodyUz: "Matn (o'zbekcha, Markdown)",
+      bodyRu: "Matn (ruscha, Markdown)",
+      cover: "Muqova rasm",
+      publishedAt: "Nashr sanasi",
+    },
+  },
+};
+
+export type Dict = typeof uz;
+
+const ru: Dict = {
+  meta: {
+    homeTitle: "Купить и продать недвижимость — по всему Узбекистану",
+    homeDescription:
+      "Квартиры, дома и участки по всему Узбекистану. Фото, цены, поиск по районам. Аналитика рынка и советы по покупке жилья.",
+    listingsTitle: "Объявления",
+    listingsDescription:
+      "Объявления о продаже недвижимости в Ташкенте и регионах: фильтр по цене, площади и количеству комнат.",
+    blogTitle: "Статьи",
+    blogDescription:
+      "Аналитика рынка недвижимости, руководства по покупке жилья, ипотека и советы по строительству.",
+  },
+  nav: {
+    home: "Главная",
+    listings: "Объявления",
+    blog: "Статьи",
+    contact: "Контакты",
+    admin: "Панель",
+  },
+  hero: {
+    title: "Найдите подходящий дом",
+    subtitle:
+      "Тысячи объявлений по всему Узбекистану. Удобный поиск по цене, району и площади.",
+    cta: "Смотреть объявления",
+  },
+  search: {
+    type: "Тип сделки",
+    propertyType: "Тип объекта",
+    district: "Район",
+    rooms: "Комнаты",
+    priceFrom: "Цена (от)",
+    priceTo: "Цена (до)",
+    apply: "Найти",
+    reset: "Сбросить",
+    all: "Все",
+    results: (n: number) => `Найдено объявлений: ${n}`,
+    empty: "По этим условиям объявлений не найдено.",
+    anyRooms: "Количество комнат",
+  },
+  listingType: {
+    sale: "Продажа",
+    rent: "Аренда",
+  },
+  propertyType: {
+    apartment: "Квартира",
+    house: "Дом",
+    land: "Участок",
+    commercial: "Коммерческая",
+  },
+  condition: {
+    new: "Новое",
+    renovated: "С ремонтом",
+    average: "Среднее",
+    needsRepair: "Требует ремонта",
+  },
+  listing: {
+    price: "Цена",
+    pricePerM2: "За 1 м²",
+    rooms: "Комнаты",
+    area: "Площадь",
+    floor: "Этаж",
+    year: "Год постройки",
+    condition: "Состояние",
+    address: "Адрес",
+    description: "Описание",
+    photos: "Фотографии",
+    map: "На карте",
+    contact: "Контакты",
+    call: "Позвонить",
+    views: "просмотров",
+    similar: "Похожие объявления",
+    backToList: "Все объявления",
+    sold: "Продано",
+    perM2: "сум/м²",
+  },
+  lead: {
+    title: "Узнать подробнее об этом объекте",
+    subtitle: "Оставьте номер телефона, и специалист свяжется с вами.",
+    name: "Ваше имя",
+    phone: "Номер телефона",
+    message: "Сообщение (необязательно)",
+    send: "Отправить",
+    sent: "Спасибо! Мы свяжемся с вами в ближайшее время.",
+    error: "Пожалуйста, укажите корректное имя и номер телефона.",
+  },
+  blog: {
+    all: "Все статьи",
+    readMore: "Читать",
+    published: "Опубликовано",
+    updated: "Обновлено",
+    author: "Автор",
+    category: "Категория",
+    related: "Читайте также",
+    empty: "Пока нет статей.",
+  },
+  category: {
+    bozor: "Аналитика рынка",
+    qollanma: "Руководство",
+    ipoteka: "Ипотека",
+    tahlil: "Анализ",
+  },
+  footer: {
+    about:
+      "UyJoy — удобная платформа для покупки и продажи недвижимости в Узбекистане. Каждое объявление проверяется.",
+    navigation: "Разделы",
+    contact: "Связаться",
+    rights: "Все права защищены.",
+    privacy: "Политика конфиденциальности",
+  },
+  admin: {
+    title: "Панель управления",
+    dashboard: "Обзор",
+    listings: "Объявления",
+    articles: "Статьи",
+    leads: "Заявки",
+    newListing: "Новое объявление",
+    newArticle: "Новая статья",
+    logout: "Выйти",
+    login: "Войти",
+    password: "Пароль",
+    save: "Сохранить",
+    delete: "Удалить",
+    edit: "Редактировать",
+    status: "Статус",
+    published: "Опубликовано",
+    draft: "Черновик",
+    active: "Активно",
+    sold: "Продано",
+    upload: "Загрузить фото",
+    photos: "Фотографии",
+    noPhotos: "Фотографии не загружены",
+    stats: {
+      total: "Всего объявлений",
+      active: "Активные объявления",
+      views: "Просмотры",
+      leads: "Заявки",
+      articles: "Статьи",
+    },
+    fields: {
+      titleUz: "Заголовок (узбекский)",
+      titleRu: "Заголовок (русский)",
+      descriptionUz: "Описание (узбекский)",
+      descriptionRu: "Описание (русский)",
+      slug: "URL (slug)",
+      type: "Тип сделки",
+      propertyType: "Тип объекта",
+      price: "Цена",
+      currency: "Валюта",
+      rooms: "Комнаты",
+      area: "Площадь (м²)",
+      floor: "Этаж",
+      totalFloors: "Этажей в доме",
+      yearBuilt: "Год постройки",
+      condition: "Состояние",
+      region: "Регион",
+      district: "Район",
+      address: "Адрес",
+      phone: "Телефон",
+      status: "Статус",
+      category: "Категория",
+      authorName: "Имя автора",
+      authorRole: "Должность автора",
+      excerptUz: "Краткое описание (узбекский)",
+      excerptRu: "Краткое описание (русский)",
+      bodyUz: "Текст (узбекский, Markdown)",
+      bodyRu: "Текст (русский, Markdown)",
+      cover: "Обложка",
+      publishedAt: "Дата публикации",
+    },
+  },
+};
+
+export const dict: Record<Locale, Dict> = { uz, ru };
+
+export function getDict(locale: Locale): Dict {
+  return dict[locale];
+}
+
+export function otherLocale(locale: Locale): Locale {
+  return locale === "uz" ? "ru" : "uz";
+}
+
+/** Har bir sahifa uchun to'liq yo'l: pagePath bo'sh bo'lsa bosh sahifa */
+export function localePath(locale: Locale, pagePath = ""): string {
+  return `/${locale}${pagePath}`;
+}
