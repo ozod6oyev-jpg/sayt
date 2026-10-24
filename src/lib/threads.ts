@@ -81,6 +81,84 @@ export async function checkThreadsConnection(): Promise<ThreadsResult<{ username
   return { ok: true, result: { username } };
 }
 
+/** Threads video/rasm konteyneri tayyor bo'lishini kutadi */
+async function waitForContainer(
+  containerId: string,
+  token: string,
+): Promise<ThreadsResult<{ id: string }>> {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const status = await threadsCall<{ id: string; status?: string; error_message?: string }>(
+      containerId,
+      { token, params: { fields: "status,error_message" } },
+    );
+
+    if (!status.ok) return { ok: false, description: status.description, code: status.code };
+
+    const value = status.result.status;
+    if (value === "FINISHED" || value === "PUBLISHED") return { ok: true, result: { id: containerId } };
+    if (value === "ERROR" || value === "EXPIRED") {
+      return { ok: false, description: status.result.error_message ?? "Threads mediani qabul qilmadi" };
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 3_000));
+  }
+
+  return { ok: false, description: "Threads media tayyor bo'lmadi (vaqt tugadi)" };
+}
+
+/** Threads'ga video yoki rasmli post joylash (container → publish) */
+export async function publishThreadsMedia(options: {
+  text: string;
+  videoUrl?: string;
+  imageUrl?: string;
+}): Promise<ThreadsResult<{ id: string }>> {
+  const row = await prisma.metaIntegration.findUnique({ where: { id: "default" } });
+  const token = row?.threadsToken ? decryptSecret(row.threadsToken) : null;
+
+  if (!row?.threadsUserId || !token) {
+    return { ok: false, description: "Threads user ID yoki token o'rnatilmagan" };
+  }
+
+  // Threads matni 500 belgidan oshmaydi
+  const text = options.text.slice(0, 500);
+  const isVideo = Boolean(options.videoUrl);
+
+  if (!isVideo && !options.imageUrl) {
+    return { ok: false, description: "Threads uchun media kerak" };
+  }
+
+  const container = await threadsCall<{ id: string }>(`${row.threadsUserId}/threads`, {
+    method: "POST",
+    token,
+    body: {
+      media_type: isVideo ? "VIDEO" : "IMAGE",
+      ...(isVideo ? { video_url: options.videoUrl } : { image_url: options.imageUrl }),
+      text,
+    },
+  });
+
+  if (!container.ok) {
+    return { ok: false, description: container.description, code: container.code };
+  }
+
+  if (isVideo) {
+    const ready = await waitForContainer(container.result.id, token);
+    if (!ready.ok) return ready;
+  }
+
+  const published = await threadsCall<{ id: string }>(`${row.threadsUserId}/threads_publish`, {
+    method: "POST",
+    token,
+    body: { creation_id: container.result.id },
+  });
+
+  if (!published.ok) {
+    return { ok: false, description: published.description, code: published.code };
+  }
+
+  return { ok: true, result: published.result };
+}
+
 /** Threads'ga matnli post joylash (container → publish) */
 export async function publishThreadsPost(text: string): Promise<ThreadsResult<{ id: string }>> {
   const row = await prisma.metaIntegration.findUnique({ where: { id: "default" } });

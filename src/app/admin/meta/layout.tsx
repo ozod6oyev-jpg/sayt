@@ -18,6 +18,7 @@ export default async function MetaLayout({ children }: { children: React.ReactNo
   const tabs = [
     { href: "/admin/meta", label: c.tabOverview },
     { href: "/admin/meta/kanallar", label: c.tabChannels },
+    { href: "/admin/meta/studio", label: c.tabStudio },
     { href: "/admin/meta/xabarlar", label: c.tabInbox },
     { href: "/admin/meta/reja", label: c.tabPlan },
   ];

@@ -222,6 +222,33 @@ model MetaChat {
   @@index([lastMessageAt])
 }
 
+/// Ijtimoiy tarmoqlar uchun tayyorlangan post (reels, post yoki story)
+model SocialPost {
+  id        String         @id @default(cuid())
+  caption   String
+  hashtags  String
+  mediaType String
+  mediaUrl  String
+  createdAt DateTime       @default(now())
+  targets   SocialTarget[]
+
+  @@index([createdAt])
+}
+
+/// Bitta postning bitta platformadagi natijasi
+model SocialTarget {
+  id         String     @id @default(cuid())
+  postRefId  String
+  post       SocialPost @relation(fields: [postRefId], references: [id], onDelete: Cascade)
+  kind       String
+  status     String
+  externalId String?
+  error      String?
+  createdAt  DateTime   @default(now())
+
+  @@index([postRefId])
+}
+
 /// Meta orqali kelgan va yuborilgan xabarlar
 model MetaMessage {
   id         String   @id @default(cuid())

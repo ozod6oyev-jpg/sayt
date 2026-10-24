@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      // Rasmlar 15 MB gacha yuklanishi mumkin
-      bodySizeLimit: "15mb",
+      // Rasmlar 15 MB, Reels videolari 200 MB gacha yuklanishi mumkin
+      bodySizeLimit: "210mb",
     },
   },
 };
