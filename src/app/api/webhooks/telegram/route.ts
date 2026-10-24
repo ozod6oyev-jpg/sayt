@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { notifyAdmins } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { verifyTelegramSecret } from "@/lib/telegram";
 
@@ -110,7 +111,7 @@ export async function POST(request: Request) {
       },
     });
 
-    await prisma.telegramMessage.create({
+    const stored = await prisma.telegramMessage.create({
       data: {
         chatRefId: storedChat.id,
         tgMessageId: message.message_id,
@@ -119,6 +120,13 @@ export async function POST(request: Request) {
         fromName: senderName(message.from, chat),
         createdAt: new Date(message.date * 1000),
       },
+    });
+
+    await notifyAdmins({
+      kind: "telegram",
+      title: `Telegram · ${storedChat.title}`,
+      body: stored.text,
+      href: "/admin/meta/xabarlar",
     });
   } catch (error) {
     // Takroriy update (masalan qayta yuborilgan) — xato emas

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { replyToMetaChat } from "@/app/actions/meta";
+import { markInboxRead } from "@/app/actions/inbox";
 import { replyToTelegramChat } from "@/app/actions/telegram";
 import { metaCopy } from "@/lib/admin-copy/meta";
 import { getAdminCopy } from "@/lib/admin-i18n";
@@ -40,6 +41,7 @@ type InboxChat = {
   title: string;
   subtitle: string;
   time: Date;
+  unread: number;
   messages: InboxMessage[];
 };
 
@@ -62,7 +64,10 @@ export default async function MetaInboxPage({ searchParams }: PageProps) {
       ? prisma.telegramChat.findMany({
           orderBy: { lastMessageAt: "desc" },
           take: 20,
-          include: { messages: { orderBy: { createdAt: "desc" }, take: 6 } },
+          include: {
+            messages: { orderBy: { createdAt: "desc" }, take: 6 },
+            _count: { select: { messages: { where: { direction: "in", readAt: null } } } },
+          },
         })
       : Promise.resolve([]),
     filter === "facebook" || filter === "instagram"
@@ -70,13 +75,19 @@ export default async function MetaInboxPage({ searchParams }: PageProps) {
           where: { platform: filter },
           orderBy: { lastMessageAt: "desc" },
           take: 20,
-          include: { messages: { orderBy: { createdAt: "desc" }, take: 6 } },
+          include: {
+            messages: { orderBy: { createdAt: "desc" }, take: 6 },
+            _count: { select: { messages: { where: { direction: "in", readAt: null } } } },
+          },
         })
       : filter === "all"
         ? prisma.metaChat.findMany({
             orderBy: { lastMessageAt: "desc" },
             take: 20,
-            include: { messages: { orderBy: { createdAt: "desc" }, take: 6 } },
+            include: {
+              messages: { orderBy: { createdAt: "desc" }, take: 6 },
+              _count: { select: { messages: { where: { direction: "in", readAt: null } } } },
+            },
           })
         : Promise.resolve([]),
   ]);
@@ -88,6 +99,7 @@ export default async function MetaInboxPage({ searchParams }: PageProps) {
       title: chat.title,
       subtitle: chat.username ? `@${chat.username}` : chat.type,
       time: chat.lastMessageAt,
+      unread: chat._count.messages,
       messages: [...chat.messages].reverse().map((message) => ({
         id: message.id,
         direction: message.direction,
@@ -101,6 +113,7 @@ export default async function MetaInboxPage({ searchParams }: PageProps) {
       title: chat.name,
       subtitle: chat.platform === "instagram" ? c.metaInstagram : c.metaFacebook,
       time: chat.lastMessageAt,
+      unread: chat._count.messages,
       messages: [...chat.messages].reverse().map((message) => ({
         id: message.id,
         direction: message.direction,
@@ -129,6 +142,9 @@ export default async function MetaInboxPage({ searchParams }: PageProps) {
   if (metaReplyStatus === "invalid" || metaReplyStatus === "error") {
     banners.push({ tone: "error", text: c.metaReplyFail });
   }
+  if (first(params.read) === "done") banners.push({ tone: "ok", text: c.inboxReadDone });
+
+  const totalUnread = items.reduce((sum, chat) => sum + chat.unread, 0);
 
   return (
     <div className="space-y-4">
@@ -148,7 +164,22 @@ export default async function MetaInboxPage({ searchParams }: PageProps) {
             </Link>
           ))}
         </div>
-        <p className="text-xs text-slate-500">{c.inboxHint}</p>
+        <div className="flex items-center gap-2">
+          {totalUnread > 0 && (
+            <span className="rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-bold text-white">
+              {totalUnread} {c.inboxUnread}
+            </span>
+          )}
+          {totalUnread > 0 && (
+            <form action={markInboxRead}>
+              <input type="hidden" name="all" value="1" />
+              <button type="submit" className="btn-secondary text-xs">
+                {c.inboxMarkAll}
+              </button>
+            </form>
+          )}
+          <p className="text-xs text-slate-500">{c.inboxHint}</p>
+        </div>
       </div>
 
       {banners.map((banner) => (
@@ -180,9 +211,25 @@ export default async function MetaInboxPage({ searchParams }: PageProps) {
                     {chat.subtitle} · {formatDateTime(chat.time)}
                   </p>
                 </div>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">
-                  {platformBadge(chat.kind)}
-                </span>
+                <div className="flex items-center gap-2">
+                  {chat.unread > 0 && (
+                    <span className="rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-bold text-white">
+                      {chat.unread} {c.inboxUnread}
+                    </span>
+                  )}
+                  {chat.unread > 0 && (
+                    <form action={markInboxRead}>
+                      <input type="hidden" name="kind" value={chat.kind} />
+                      <input type="hidden" name="chatId" value={chat.id} />
+                      <button type="submit" className="text-[11px] font-semibold text-brand-700 hover:underline">
+                        {c.inboxMarkRead}
+                      </button>
+                    </form>
+                  )}
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+                    {platformBadge(chat.kind)}
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-1.5 px-4 py-3">

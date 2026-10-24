@@ -182,6 +182,7 @@ model TelegramMessage {
   direction   String
   text        String
   fromName    String?
+  readAt      DateTime?
   createdAt   DateTime     @default(now())
 
   @@unique([chatRefId, tgMessageId, direction])
@@ -272,14 +273,28 @@ model SocialTarget {
 
 /// Meta orqali kelgan va yuborilgan xabarlar
 model MetaMessage {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   chatRefId  String
-  chat       MetaChat @relation(fields: [chatRefId], references: [id], onDelete: Cascade)
+  chat       MetaChat  @relation(fields: [chatRefId], references: [id], onDelete: Cascade)
   externalId String?
   direction  String
   text       String
-  createdAt  DateTime @default(now())
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
 
   @@unique([chatRefId, externalId, direction])
   @@index([chatRefId, createdAt])
+}
+
+/// Admin panel bildirishnomalari (yangi mijoz xabari va h.k.)
+model AdminNotification {
+  id        String    @id @default(cuid())
+  kind      String
+  title     String
+  body      String?
+  href      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([readAt, createdAt])
 }

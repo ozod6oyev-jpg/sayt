@@ -38,7 +38,15 @@ function iconFor(href: string) {
   return LayoutGrid;
 }
 
-export function AdminNavMenu({ groups, label }: { groups: AdminNavGroup[]; label: string }) {
+export function AdminNavMenu({
+  groups,
+  label,
+  badges = {},
+}: {
+  groups: AdminNavGroup[];
+  label: string;
+  badges?: Record<string, number>;
+}) {
   const pathname = usePathname() || "/admin";
   const links = groups.flatMap((group) => group.links);
 
@@ -49,13 +57,14 @@ export function AdminNavMenu({ groups, label }: { groups: AdminNavGroup[]; label
       .find((link) => pathname === link.href || pathname.startsWith(`${link.href}/`)) ?? links[0];
 
   const CurrentIcon = current?.logo === "meta" ? null : iconFor(current?.href ?? "/admin");
+  const totalUnread = Object.values(badges).reduce((sum, value) => sum + value, 0);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-xl border border-border bg-background px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/40 sm:px-3 sm:py-2 sm:text-sm"
+          className="relative flex items-center gap-2 rounded-xl border border-border bg-background px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/40 sm:px-3 sm:py-2 sm:text-sm"
           aria-label={label}
         >
           {current?.logo === "meta" ? (
@@ -64,6 +73,11 @@ export function AdminNavMenu({ groups, label }: { groups: AdminNavGroup[]; label
             CurrentIcon && <CurrentIcon className="size-4 shrink-0 text-muted-foreground" />
           )}
           <span className="max-w-[7.5rem] truncate sm:max-w-[12rem]">{current?.label ?? label}</span>
+          {(badges[current?.href ?? ""] ?? 0) === 0 && totalUnread > 0 ? (
+            <span className="absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-4 text-white">
+              {totalUnread > 99 ? "99+" : totalUnread}
+            </span>
+          ) : null}
           <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>
@@ -105,6 +119,11 @@ export function AdminNavMenu({ groups, label }: { groups: AdminNavGroup[]; label
                       />
                     )}
                     <span className="truncate">{link.label}</span>
+                    {(badges[link.href] ?? 0) > 0 && (
+                      <span className="ml-auto flex min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-4 text-white">
+                        {(badges[link.href] ?? 0) > 99 ? "99+" : badges[link.href]}
+                      </span>
+                    )}
                     {active && (
                       <span className="ml-auto size-1.5 shrink-0 rounded-full bg-brand-700" />
                     )}

@@ -17,6 +17,68 @@ if (!TOKEN || !OWNER_CHAT_ID) {
 
 const API = `https://api.telegram.org/bot${TOKEN}`;
 
+// Kelgan xabarlarni panelga yozish uchun (owner chatidan tashqari)
+const prismaClient = new PrismaClient();
+
+function messageText(message) {
+  if (message.text) return message.text;
+  if (message.caption) return message.caption;
+  if (message.photo) return "[rasm]";
+  if (message.video) return "[video]";
+  if (message.voice) return "[ovozli xabar]";
+  if (message.document) return `[fayl: ${message.document.file_name ?? "hujjat"}]`;
+  if (message.sticker) return "[stiker]";
+  if (message.location) return "[joylashuv]";
+  return "[xabar]";
+}
+
+async function storeIncoming(message) {
+  const chat = message.chat;
+  if (!chat || chat.type === "channel") return;
+  if (String(chat.id) === String(OWNER_CHAT_ID)) return;
+
+  const title =
+    chat.title || [chat.first_name, chat.last_name].filter(Boolean).join(" ") || String(chat.id);
+
+  try {
+    const storedChat = await prismaClient.telegramChat.upsert({
+      where: { chatId: String(chat.id) },
+      create: {
+        chatId: String(chat.id),
+        title,
+        username: chat.username ?? message.from?.username ?? null,
+        type: chat.type,
+        lastMessageAt: new Date(message.date * 1000),
+      },
+      update: { title, lastMessageAt: new Date(message.date * 1000) },
+    });
+
+    const stored = await prismaClient.telegramMessage.create({
+      data: {
+        chatRefId: storedChat.id,
+        tgMessageId: message.message_id,
+        direction: "in",
+        text: messageText(message),
+        fromName: title,
+        createdAt: new Date(message.date * 1000),
+      },
+    });
+
+    await prismaClient.adminNotification.create({
+      data: {
+        kind: "telegram",
+        title: `Telegram \u00b7 ${title}`,
+        body: stored.text.slice(0, 500),
+        href: "/admin/meta/xabarlar",
+      },
+    });
+  } catch (error) {
+    if (error?.code !== "P2002") {
+      console.error("Xabarni saqlashda xato:", error?.message ?? error);
+    }
+  }
+}
+
 async function api(method, payload) {
   const response = await fetch(`${API}/${method}`, {
     method: "POST",
@@ -110,6 +172,8 @@ const HELP = [
 async function handleUpdate(update) {
   const message = update.message;
   if (!message) return;
+
+  await storeIncoming(message);
 
   const chatId = String(message.chat?.id ?? "");
   const fromId = String(message.from?.id ?? "");

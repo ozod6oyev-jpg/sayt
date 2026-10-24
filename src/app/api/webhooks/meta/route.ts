@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { metaVerifyToken, verifyMetaSignature } from "@/lib/meta";
+import { notifyAdmins } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
           update: { lastMessageAt: createdAt },
         });
 
-        await prisma.metaMessage.create({
+        const stored = await prisma.metaMessage.create({
           data: {
             chatRefId: chat.id,
             externalId: message.mid ?? null,
@@ -106,6 +107,13 @@ export async function POST(request: Request) {
             text: textOf(message),
             createdAt,
           },
+        });
+
+        await notifyAdmins({
+          kind: "meta",
+          title: `${platform === "instagram" ? "Instagram" : "Facebook"} · ${chat.name}`,
+          body: stored.text,
+          href: "/admin/meta/xabarlar",
         });
       } catch (error) {
         if ((error as { code?: string }).code !== "P2002") {

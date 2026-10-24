@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { notifyAdmins } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 
 function safeReturnTo(value: string): string {
@@ -39,13 +40,20 @@ export async function submitLead(formData: FormData): Promise<void> {
     listingId = listing?.id ?? null;
   }
 
-  await prisma.lead.create({
+  const lead = await prisma.lead.create({
     data: {
       name: name.slice(0, 100),
       phone: phone.slice(0, 30),
       message: message ? message.slice(0, 1000) : null,
       listingId,
     },
+  });
+
+  await notifyAdmins({
+    kind: "lead",
+    title: `Yangi so'rov: ${lead.name}`,
+    body: [lead.phone, lead.message].filter(Boolean).join(" · "),
+    href: "/admin/leads",
   });
 
   redirect(`${returnTo}?lead=sent#aloqa`);

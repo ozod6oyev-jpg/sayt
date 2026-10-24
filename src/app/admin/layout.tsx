@@ -4,12 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import "../globals.css";
 import { AdminNavMenu } from "@/components/admin/admin-nav-menu";
+import { AdminNotifications } from "@/components/admin/admin-notifications";
 import { AdminScriptSwitcher } from "@/components/admin/admin-script-switcher";
 import { AdminUserMenu } from "@/components/admin/admin-user-menu";
 import { ThemeSync } from "@/components/theme-sync";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { requireAdmin } from "@/lib/auth";
 import { getAdminCopy, getAdminScript } from "@/lib/admin-i18n";
+import { unreadCounts } from "@/lib/notifications";
 import { shellCopy } from "@/lib/admin-copy/shell";
 import { fontDisplay, fontSans } from "@/lib/fonts";
 import { siteName } from "@/lib/i18n";
@@ -24,6 +26,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const script = await getAdminScript();
   const c = await getAdminCopy(shellCopy);
   const isDark = (await cookies()).get("uyjoy-theme")?.value === "dark";
+  const counts = await unreadCounts();
+
+  const badges: Record<string, number> = {
+    "/admin/leads": counts.lead,
+    "/admin/meta": counts.meta + counts.telegram,
+  };
 
   const groups = [
     { links: [{ href: "/admin", label: c.dashboard }] },
@@ -83,10 +91,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 </span>
               </Link>
 
-              <AdminNavMenu groups={groups} label={c.sections} />
+              <AdminNavMenu groups={groups} label={c.sections} badges={badges} />
             </div>
 
             <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+              <AdminNotifications
+                initialUnread={counts.total}
+                title={c.notifications}
+                empty={c.notificationsEmpty}
+                markAll={c.notificationsMarkAll}
+              />
               <ThemeToggle label={c.theme} />
               <AdminScriptSwitcher script={script} hint={c.switchHint} />
               <AdminUserMenu
