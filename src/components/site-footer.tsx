@@ -66,7 +66,17 @@ export function SiteFooter({ locale }: { locale: Locale }) {
                 {contact.telegramHandle}
               </a>
             </li>
-            <li>{contact.address[locale]}</li>
+            <li>
+              <a
+                href={contact.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-brand-700"
+              >
+                <span aria-hidden="true">📍</span>
+                {contact.address[locale]}
+              </a>
+            </li>
           </ul>
 
           <a

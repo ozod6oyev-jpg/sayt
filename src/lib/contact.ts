@@ -13,6 +13,7 @@ export const contact = {
     uz: "Toshkent, Mirobod tumani",
     ru: "Ташкент, Мирабадский район",
   },
+  mapsUrl: "https://maps.app.goo.gl/16iFWwEG2nbRJYc7A",
   hours: {
     uz: "Har kuni, 7:00–00:00",
     ru: "Ежедневно, 7:00–00:00",

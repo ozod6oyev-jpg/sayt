@@ -101,7 +101,25 @@ export default async function ContactPage({ params }: Props) {
           <h2 className="text-sm font-semibold text-slate-900">
             {locale === "ru" ? "Адрес" : "Manzil"}
           </h2>
-          <p className="mt-2 text-sm text-slate-700">{contact.address[locale]}</p>
+          <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <a
+              href={contact.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-brand-700"
+            >
+              <span aria-hidden="true">📍</span>
+              {contact.address[locale]}
+            </a>
+            <a
+              href={contact.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary text-xs"
+            >
+              {locale === "ru" ? "Открыть на карте" : "Xaritada ochish"}
+            </a>
+          </div>
         </div>
       </div>
     </div>
