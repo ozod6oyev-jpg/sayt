@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { contact } from "@/lib/contact";
 import { getDict, isLocale } from "@/lib/i18n";
 import { alternatesFor, robotsMeta, socialMetadata } from "@/lib/seo";
 
@@ -35,18 +36,23 @@ export default async function ContactPage({ params }: Props) {
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <div className="card p-5">
           <h2 className="text-sm font-semibold text-slate-900">Telefon</h2>
-          <a href="tel:+998901234567" className="mt-2 block text-lg font-semibold text-brand-700">
-            +998 90 123 45 67
+          <p className="mt-2 text-sm font-medium text-slate-900">{contact.name}</p>
+          <a
+            href={contact.phoneHref}
+            className="mt-1 block text-lg font-semibold text-brand-700 hover:underline"
+          >
+            {contact.phoneDisplay}
           </a>
-          <p className="mt-1 text-xs text-slate-500">
-            {locale === "ru" ? "Ежедневно, 9:00–19:00" : "Har kuni, 9:00–19:00"}
-          </p>
+          <p className="mt-1 text-xs text-slate-500">{contact.hours[locale]}</p>
         </div>
 
         <div className="card p-5">
           <h2 className="text-sm font-semibold text-slate-900">Email</h2>
-          <a href="mailto:info@uyjoy.uz" className="mt-2 block text-lg font-semibold text-brand-700">
-            info@uyjoy.uz
+          <a
+            href={`mailto:${contact.email}`}
+            className="mt-2 block text-lg font-semibold text-brand-700 hover:underline"
+          >
+            {contact.email}
           </a>
           <p className="mt-1 text-xs text-slate-500">
             {locale === "ru" ? "Ответим в течение рабочего дня" : "Ish kuni ichida javob beramiz"}
@@ -57,7 +63,7 @@ export default async function ContactPage({ params }: Props) {
           <h2 className="text-sm font-semibold text-slate-900">
             {locale === "ru" ? "Адрес" : "Manzil"}
           </h2>
-          <p className="mt-2 text-sm text-slate-700">Toshkent sh., Amir Temur ko'chasi, 1</p>
+          <p className="mt-2 text-sm text-slate-700">{contact.address[locale]}</p>
         </div>
       </div>
     </div>

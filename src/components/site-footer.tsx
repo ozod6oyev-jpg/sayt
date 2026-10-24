@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { contact } from "@/lib/contact";
 import { getDict, localePath, type Locale } from "@/lib/i18n";
 
 export function SiteFooter({ locale }: { locale: Locale }) {
@@ -42,17 +43,18 @@ export function SiteFooter({ locale }: { locale: Locale }) {
         <div>
           <h2 className="text-sm font-semibold text-slate-900">{t.footer.contact}</h2>
           <ul className="mt-3 space-y-2 text-sm text-slate-600">
+            <li className="font-medium text-slate-900">{contact.name}</li>
             <li>
-              <a href="tel:+998901234567" className="hover:text-brand-700">
-                +998 90 123 45 67
+              <a href={contact.phoneHref} className="font-semibold text-brand-700 hover:underline">
+                {contact.phoneDisplay}
               </a>
             </li>
             <li>
-              <a href="mailto:info@uyjoy.uz" className="hover:text-brand-700">
-                info@uyjoy.uz
+              <a href={`mailto:${contact.email}`} className="hover:text-brand-700">
+                {contact.email}
               </a>
             </li>
-            <li>Toshkent, O'zbekiston</li>
+            <li>{contact.address[locale]}</li>
           </ul>
         </div>
       </div>
