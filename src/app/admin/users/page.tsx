@@ -24,8 +24,12 @@ export default async function UsersPage({ searchParams }: PageProps) {
   const c = await getAdminCopy(peopleCopy);
   const ERRORS: Record<string, string> = {
     fields: c.errFields,
+    name: c.errName,
+    emailformat: c.errEmailFormat,
+    weak: c.errWeak,
     match: c.errMatch,
     email: c.errEmail,
+    db: c.errDb,
     notfound: c.errNotFound,
   };
 
@@ -109,6 +113,9 @@ export default async function UsersPage({ searchParams }: PageProps) {
       <section className="card p-6">
         <h2 className="text-sm font-semibold text-slate-900">{c.usersAdd}</h2>
         <p className="mt-1 text-xs text-slate-500">{c.usersAddHint}</p>
+        <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
+          {c.usersAddTwoFactor}
+        </p>
 
         <form action={createAdmin} className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>

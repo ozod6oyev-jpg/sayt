@@ -256,6 +256,40 @@
   color: var(--muted-foreground);
 }
 
+.dark .btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.dark .btn-primary:hover {
+  background-color: #e4e4e7;
+}
+
+/* Brendning to'q ko'ki tungi rejimda oq bo'lib qoladi — oq matn ko'rinmaydi */
+.dark .bg-brand-800 {
+  background-color: #3f3f46;
+}
+
+.dark .card {
+  background-color: var(--card);
+  border-color: var(--border);
+}
+
+.dark .btn-secondary {
+  background-color: var(--card);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.dark .btn-ghost {
+  color: var(--muted-foreground);
+}
+
+.dark .btn-ghost:hover {
+  background-color: var(--secondary);
+  color: var(--foreground);
+}
+
 .dark .field {
   background-color: var(--background);
   border-color: var(--input);

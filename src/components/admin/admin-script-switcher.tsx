@@ -25,7 +25,7 @@ export function AdminScriptSwitcher({
   return (
     <div
       className={cn(
-        "flex items-center gap-0.5 rounded-full border border-slate-200 bg-white p-0.5",
+        "flex items-center gap-0.5 rounded-full border border-slate-200 bg-card p-0.5",
         pending && "opacity-60",
       )}
       role="group"

@@ -13,6 +13,8 @@ const lat = {
   viewSite: "Saytni ko'rish",
   logout: "Chiqish",
   switchHint: "Panel tili",
+  theme: "Tungi rejim",
+  sections: "Bo'limlar",
   owner: "Owner",
   adminRole: "Admin",
 };
@@ -30,6 +32,8 @@ const cyrl: typeof lat = {
   viewSite: "Сайтни кўриш",
   logout: "Чиқиш",
   switchHint: "Панел тили",
+  theme: "Тунги режим",
+  sections: "Бўлимлар",
   owner: "Эгаси",
   adminRole: "Админ",
 };

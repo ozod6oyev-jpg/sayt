@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import "../globals.css";
+import { AdminNavMenu } from "@/components/admin/admin-nav-menu";
 import { AdminScriptSwitcher } from "@/components/admin/admin-script-switcher";
 import { AdminUserMenu } from "@/components/admin/admin-user-menu";
+import { ThemeSync } from "@/components/theme-sync";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { requireAdmin } from "@/lib/auth";
 import { getAdminCopy, getAdminScript } from "@/lib/admin-i18n";
 import { shellCopy } from "@/lib/admin-copy/shell";
@@ -19,6 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const user = await requireAdmin();
   const script = await getAdminScript();
   const c = await getAdminCopy(shellCopy);
+  const isDark = (await cookies()).get("uyjoy-theme")?.value === "dark";
 
   const links = [
     { href: "/admin", label: c.dashboard },
@@ -36,25 +41,35 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   ];
 
   return (
-    <html lang={script === "cyrl" ? "uz-Cyrl" : "uz"}>
+    <html
+      lang={script === "cyrl" ? "uz-Cyrl" : "uz"}
+      className={isDark ? "dark" : undefined}
+      suppressHydrationWarning
+    >
       <body className={`${fontSans.variable} ${fontDisplay.variable} min-h-screen bg-slate-50`}>
-        <header className="border-b border-slate-200 bg-white">
-          <div className="container-page flex h-16 items-center justify-between gap-4">
-            <Link href="/admin" className="flex items-center gap-2">
-              <Image
-                src="/logo-mark.png"
-                alt={siteName}
-                width={32}
-                height={32}
-                className="h-8 w-8 rounded-lg object-cover"
-              />
-              <span className="text-sm font-bold text-slate-900">{siteName}</span>
-              <span className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500 sm:inline">
-                {c.panel}
-              </span>
-            </Link>
+        <ThemeSync />
+        <header className="border-b border-slate-200 bg-card">
+          <div className="container-page flex h-16 items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+              <Link href="/admin" className="flex shrink-0 items-center gap-2">
+                <Image
+                  src="/logo-mark.png"
+                  alt={siteName}
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 rounded-lg object-cover"
+                />
+                <span className="hidden text-sm font-bold text-slate-900 sm:block">{siteName}</span>
+                <span className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500 sm:inline">
+                  {c.panel}
+                </span>
+              </Link>
 
-            <div className="flex items-center gap-2 sm:gap-3">
+              <AdminNavMenu links={links} label={c.sections} />
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+              <ThemeToggle label={c.theme} />
               <AdminScriptSwitcher script={script} hint={c.switchHint} />
               <AdminUserMenu
                 name={user.name}
@@ -65,20 +80,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               />
             </div>
           </div>
-
-          <nav className="border-t border-slate-100">
-            <div className="container-page flex gap-1 overflow-x-auto py-2">
-              {links.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </nav>
         </header>
 
         <div className="container-page py-8">{children}</div>

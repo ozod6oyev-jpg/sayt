@@ -96,7 +96,7 @@ export function SearchForm({
               aria-label={t.search.priceFrom}
               className="h-10 w-full min-w-0 border-0 bg-transparent px-0.5 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
-            <span className="text-border">—</span>
+            <span className="text-muted-foreground/60">—</span>
             <input
               name="maxPrice"
               type="number"

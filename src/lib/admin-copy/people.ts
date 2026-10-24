@@ -17,6 +17,9 @@ const lat = {
   usersHint:
     "Yangi admin qo'shsangiz, unga kirish uchun email, parol va authenticator kaliti beriladi.",
   errFields: "Ism, to'g'ri email va kamida 8 belgili parol kiriting.",
+  errName: "Ism kamida 2 belgidan iborat bo'lsin.",
+  errEmailFormat: "Email manzili noto'g'ri. Masalan: ism@example.com",
+  errDb: "Admin yaratishda texnik xatolik yuz berdi. Qayta urinib ko'ring.",
   errMatch: "Parollar mos kelmadi.",
   errEmail: "Bu email allaqachon ro'yxatdan o'tgan.",
   errNotFound: "Admin topilmadi.",
@@ -36,6 +39,10 @@ const lat = {
   manage: "Boshqarish",
   usersAdd: "Yangi admin qo'shish",
   usersAddHint: "Authenticator kaliti avtomatik yaratiladi va keyingi sahifada ko'rsatiladi.",
+  usersAddTwoFactor:
+    "Muhim: yangi admin faqat authenticator kalitini o'z telefoniga qo'shgandan keyin tizimga kira oladi.",
+  copy: "Nusxalash",
+  copied: "Nusxalandi",
   labelName: "Ism familiya",
   labelEmail: "Email (login)",
   labelTempPassword: "Vaqtinchalik parol",
@@ -85,6 +92,9 @@ const cyrl: typeof lat = {
   usersHint:
     "Янги админ қўшсангиз, унга кириш учун email, парол ва аутентификатор калити берилади.",
   errFields: "Исм, тўғри email ва камида 8 белгили парол киритинг.",
+  errName: "Исм камида 2 белгидан иборат бўлсин.",
+  errEmailFormat: "Email манзили нотўғри. Масалан: ism@example.com",
+  errDb: "Админ яратишда техник хатолик юз берди. Қайта уриниб кўринг.",
   errMatch: "Пароллар мос келмади.",
   errEmail: "Бу email аллақачон рўйхатдан ўтган.",
   errNotFound: "Админ топилмади.",
@@ -105,6 +115,10 @@ const cyrl: typeof lat = {
   usersAdd: "Янги админ қўшиш",
   usersAddHint:
     "Аутентификатор калити автоматик яратилади ва кейинги саҳифада кўрсатилади.",
+  usersAddTwoFactor:
+    "Муҳим: янги админ фақат аутентификатор калитини ўз телефонига қўшгандан кейин тизимга кира олади.",
+  copy: "Нусхалаш",
+  copied: "Нусхаланди",
   labelName: "Исм фамилия",
   labelEmail: "Email (логин)",
   labelTempPassword: "Вақтинчалик парол",

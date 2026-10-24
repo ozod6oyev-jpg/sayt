@@ -21,15 +21,21 @@ export async function createAdmin(formData: FormData): Promise<void> {
   const confirm = String(formData.get("confirm") ?? "");
   const role = text(formData, "role") === "owner" ? "owner" : "admin";
 
-  if (name.length < 2 || !isValidEmail(email) || !isValidPassword(password)) {
-    redirect("/admin/users?error=fields");
+  if (name.length < 2) {
+    redirect("/admin/users?error=name");
+  }
+  if (!isValidEmail(email)) {
+    redirect("/admin/users?error=emailformat");
+  }
+  if (!isValidPassword(password)) {
+    redirect("/admin/users?error=weak");
   }
   if (password !== confirm) {
     redirect("/admin/users?error=match");
   }
 
-  const user = await prisma.adminUser
-    .create({
+  try {
+    const user = await prisma.adminUser.create({
       data: {
         name,
         email,
@@ -39,14 +45,21 @@ export async function createAdmin(formData: FormData): Promise<void> {
         totpEnabled: true,
         createdById: owner.id,
       },
-    })
-    .catch(() => null);
+    });
 
-  if (!user) {
-    redirect("/admin/users?error=email");
+    redirect(`/admin/users/${user.id}?created=1`);
+  } catch (error) {
+    // redirect() o'zi xato tashlaydi — uni DB xatosi bilan aralashtirmaymiz
+    if (typeof (error as { digest?: unknown }).digest === "string") {
+      throw error;
+    }
+    if ((error as { code?: string }).code === "P2002") {
+      redirect("/admin/users?error=email");
+    }
+
+    console.error("Admin yaratishda kutilmagan xato:", error);
+    redirect("/admin/users?error=db");
   }
-
-  redirect(`/admin/users/${user.id}?created=1`);
 }
 
 /** Owner admin parolini yangilaydi (2FA kodi o'zgarmaydi) */

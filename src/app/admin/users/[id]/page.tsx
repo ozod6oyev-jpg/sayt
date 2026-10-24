@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { regenerateAdminTotp, resetAdminPassword, toggleAdminActive } from "@/app/actions/users";
+import { CopyButton } from "@/components/copy-button";
 import { getAdminCopy } from "@/lib/admin-i18n";
 import { peopleCopy } from "@/lib/admin-copy/people";
 import { requireOwner } from "@/lib/auth";
@@ -95,18 +96,24 @@ export default async function AdminUserPage({ params, searchParams }: PageProps)
         <p className="mt-1 text-xs leading-5 text-slate-500">{c.totpHint}</p>
 
         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <p className="text-[11px] font-medium tracking-wide text-slate-500 uppercase">
-            {c.totpSecret}
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-[11px] font-medium tracking-wide text-slate-500 uppercase">
+              {c.totpSecret}
+            </p>
+            <CopyButton value={user.totpSecret} label={c.copy} copiedLabel={c.copied} />
+          </div>
           <code className="mt-1 block font-mono text-base break-all text-slate-900 select-all">
             {secret}
           </code>
         </div>
 
         <div className="mt-3 rounded-lg border border-slate-200 p-4">
-          <p className="text-[11px] font-medium tracking-wide text-slate-500 uppercase">
-            {c.totpUri}
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-[11px] font-medium tracking-wide text-slate-500 uppercase">
+              {c.totpUri}
+            </p>
+            <CopyButton value={uri} label={c.copy} copiedLabel={c.copied} />
+          </div>
           <a
             href={uri}
             className="mt-1 block font-mono text-xs break-all text-brand-700 hover:underline"

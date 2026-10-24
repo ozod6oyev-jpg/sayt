@@ -78,7 +78,7 @@ export default async function AccessPage({ searchParams }: PageProps) {
             className={
               filter === item.value
                 ? "rounded-full bg-brand-800 px-3 py-1 text-xs font-semibold text-white"
-                : "rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                : "rounded-full border border-slate-200 bg-card px-3 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
             }
           >
             {item.label}
