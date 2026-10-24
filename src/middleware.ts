@@ -25,6 +25,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Admin, API, statik fayllar va yuklangan rasmlardan tashqari hamma joyda
-    "/((?!admin|kirish|api|_next/static|_next/image|uploads|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
+    "/((?!admin|kirish|verifydev|api|_next/static|_next/image|uploads|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
   ],
 };

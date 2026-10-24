@@ -126,6 +126,26 @@ model Article {
   @@index([published, publishedAt])
 }
 
+model VerifiedDevice {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  label       String
+  fingerprint String
+  userAgent   String
+  platform    String?
+  language    String?
+  timezone    String?
+  screen      String?
+  ip          String?
+  isTrusted   Boolean  @default(false)
+  visits      Int      @default(1)
+  createdAt   DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  @@index([fingerprint])
+  @@index([isTrusted, lastSeenAt])
+}
+
 model Lead {
   id        String   @id @default(cuid())
   listingId String?
