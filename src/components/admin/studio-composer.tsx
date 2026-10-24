@@ -757,13 +757,39 @@ export function StudioComposer({
                   )}
 
                   {platform.id === "fb" && (
-                    <div>
-                      <label className="label" htmlFor="fb-title">
-                        {copy.fbTitleLabel}
-                      </label>
-                      <input id="fb-title" name="fbTitle" className="field" autoComplete="off" maxLength={200} />
-                      <p className="mt-1 text-[11px] text-muted-foreground">{copy.fbTitleHint}</p>
-                    </div>
+                    <>
+                      <div>
+                        <label className="label" htmlFor="fb-title">
+                          {copy.fbTitleLabel}
+                        </label>
+                        <input
+                          id="fb-title"
+                          name="fbTitle"
+                          className="field"
+                          autoComplete="off"
+                          maxLength={200}
+                        />
+                        <p className="mt-1 text-[11px] text-muted-foreground">{copy.fbTitleHint}</p>
+                      </div>
+
+                      <div>
+                        <label className="label" htmlFor="fb-schedule">
+                          {copy.scheduleLabel}
+                        </label>
+                        <input
+                          id="fb-schedule"
+                          name="fbScheduleAt"
+                          type="datetime-local"
+                          className="field"
+                        />
+                        <p className="mt-1 text-[11px] text-muted-foreground">{copy.scheduleHint}</p>
+                      </div>
+
+                      <div className="rounded-lg bg-muted/60 p-2 text-[11px] leading-4 text-muted-foreground">
+                        <p className="font-semibold text-foreground">{copy.fbAppOnlyTitle}</p>
+                        <p className="mt-0.5">{copy.fbAppOnlyText}</p>
+                      </div>
+                    </>
                   )}
 
                   {platform.id === "threads" && (

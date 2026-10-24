@@ -90,6 +90,11 @@ const lat = {
   appOnlyTitle: "Instagram ilovasidagina",
   appOnlyText:
     "AI belgisi, Audience, Poll/Prompt, audio kutubxonasi, rejalashtirish, yuklab olishga ruxsat va andoza sozlamalari Graph API'da mavjud emas — ular ilovada qo'lda qo'yiladi.",
+  scheduleLabel: "Rejalashtirish",
+  scheduleHint: "Bo'sh bo'lsa darhol chiqadi. Vaqti kelganda Facebook o'zi e'lon qiladi.",
+  fbAppOnlyTitle: "Facebook ilovasidagina",
+  fbAppOnlyText:
+    "Plevlist, guruhlarga ulashish, AI belgisi, odamlarni belgilash, hikoyaga ulashish, reklama (boost), A/B test, «kimlar ko'ra oladi», taglavhalar va monetizatsiya Graph API'da yo'q — ular ilovada qo'yiladi.",
   storyNote: "Story faqat yuklangan mediani oladi — stiker, poll va havolalar API'da yo'q.",
 
 };
@@ -184,6 +189,11 @@ const cyrl: typeof lat = {
   appOnlyTitle: "Instagram иловасидагина",
   appOnlyText:
     "AI белгиси, Audience, Poll/Prompt, аудио кутубхонаси, режалаштириш, юклаб олишга рухсат ва андооза созламалари Graph API'да мавжуд эмас — улар иловада қўлда қўйилади.",
+  scheduleLabel: "Режалаштириш",
+  scheduleHint: "Бўш бўлса дарҳол чиқади. Вақти келганда Facebook ўзи эълон қилади.",
+  fbAppOnlyTitle: "Facebook иловасидагина",
+  fbAppOnlyText:
+    "Плейлист, гуруҳларга улашиш, AI белгиси, одамларни белгилаш, ҳикояга улашиш, реклама (boost), A/B тест, «кимлар кўра олади», таглавҳалар ва монетизация Graph API'да йўқ — улар иловада қўйилади.",
   storyNote: "Story фақат юкланган медиани олади — стикер, poll ва ҳаволалар API'да йўқ.",
 
 };

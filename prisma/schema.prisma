@@ -246,6 +246,7 @@ model SocialPost {
   audioName      String?
   userTags       String?
   paidPartner    String?
+  fbScheduledAt  DateTime?
   createdAt      DateTime       @default(now())
   targets        SocialTarget[]
 

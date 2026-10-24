@@ -95,6 +95,13 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
     .filter(Boolean)
     .slice(0, 10);
 
+  const rawSchedule = text(formData, "fbScheduleAt");
+  const scheduleDate = rawSchedule ? new Date(rawSchedule) : null;
+  const fbScheduledAt =
+    scheduleDate && !Number.isNaN(scheduleDate.getTime()) && scheduleDate.getTime() > Date.now() + 60_000
+      ? scheduleDate
+      : null;
+
   const threadsTopic = text(formData, "threadsTopic")
     .replace(/^#+/, "")
     .replace(/[^\p{L}\p{N}_ ]/gu, "")
@@ -118,6 +125,7 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
     audioName: text(formData, "audioName") || undefined,
     userTags,
     paidPartner: text(formData, "paidPartner") || undefined,
+    fbScheduledAt: fbScheduledAt ? Math.floor(fbScheduledAt.getTime() / 1000) : undefined,
   };
 
   const post = await prisma.socialPost.create({
@@ -143,6 +151,7 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
       audioName: options.audioName ?? null,
       userTags: userTags.join(",") || null,
       paidPartner: options.paidPartner ?? null,
+      fbScheduledAt,
     },
   });
 

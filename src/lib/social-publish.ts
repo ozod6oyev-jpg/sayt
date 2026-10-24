@@ -56,6 +56,8 @@ export type PublishOptions = {
   userTags?: string[];
   /** Brend kontent hamkori (Page/IG ID) */
   paidPartner?: string;
+  /** Facebook uchun rejalashtirilgan vaqt (unix sekund) */
+  fbScheduledAt?: number;
 };
 
 const GRAPH_VERSION = process.env.META_GRAPH_VERSION?.trim() || "v21.0";
@@ -278,6 +280,9 @@ async function publishFacebookVideo(
       description: caption,
       ...(options.fbTitle ? { title: options.fbTitle } : {}),
       ...(options.fbPlaceId ? { place: options.fbPlaceId } : {}),
+      ...(options.fbScheduledAt
+        ? { published: "false", scheduled_publish_time: String(options.fbScheduledAt) }
+        : {}),
     });
     return result.ok ? { ok: true, id: result.data.id ?? null } : { ok: false, error: result.error };
   }
@@ -293,10 +298,13 @@ async function publishFacebookVideo(
   const uploaded = await uploadVideoToFacebook(videoId, token, media.localPath);
   if (!uploaded.ok) return uploaded;
 
+  const scheduled = kind !== "fb_story" ? options.fbScheduledAt : undefined;
+
   const finished = await graphPost(endpoint, token, {
     upload_phase: "finish",
     video_id: videoId,
-    video_state: "PUBLISHED",
+    video_state: scheduled ? "SCHEDULED" : "PUBLISHED",
+    ...(scheduled ? { scheduled_publish_time: String(scheduled) } : {}),
     description: caption,
   });
 
@@ -318,6 +326,9 @@ async function publishFacebookImage(
       url: publicMediaUrl(media.url),
       message: caption,
       ...(options.fbPlaceId ? { place: options.fbPlaceId } : {}),
+      ...(options.fbScheduledAt
+        ? { published: "false", scheduled_publish_time: String(options.fbScheduledAt) }
+        : {}),
     });
     return result.ok ? { ok: true, id: result.data.id ?? null } : { ok: false, error: result.error };
   }
