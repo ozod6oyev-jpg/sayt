@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, LayoutGrid } from "lucide-react";
+import { MetaLogo } from "@/components/meta-logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-type NavLink = { href: string; label: string };
+type NavLink = { href: string; label: string; logo?: "meta" };
 
 export function AdminNavMenu({ links, label }: { links: NavLink[]; label: string }) {
   const pathname = usePathname() || "/admin";
@@ -50,6 +51,7 @@ export function AdminNavMenu({ links, label }: { links: NavLink[]; label: string
                 aria-current={active ? "page" : undefined}
                 className={cn(active && "bg-accent font-semibold text-foreground")}
               >
+                {link.logo === "meta" && <MetaLogo className="size-4 shrink-0" />}
                 {link.label}
               </Link>
             </DropdownMenuItem>

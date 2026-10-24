@@ -34,6 +34,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     ...(user.role === "owner"
       ? [
           { href: "/admin/users", label: c.users },
+          { href: "/admin/meta", label: c.meta, logo: "meta" as const },
           { href: "/admin/kirish-huquqi", label: c.access },
         ]
       : []),
