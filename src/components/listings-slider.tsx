@@ -46,8 +46,8 @@ export function ListingsSlider({
   if (items.length === 0) return null;
 
   const active = items[index];
-  const total = String(items.length).padStart(2, "0");
   const current = String(index + 1).padStart(2, "0");
+  const total = String(items.length).padStart(2, "0");
 
   function goTo(next: number) {
     setIndex((next + items.length) % items.length);
@@ -56,7 +56,7 @@ export function ListingsSlider({
   return (
     <section className="container-page pt-4 sm:pt-5">
       <div
-        className="relative overflow-hidden rounded-2xl bg-brand-900 shadow-float sm:rounded-3xl"
+        className="relative overflow-hidden rounded-2xl bg-neutral-950 shadow-float sm:rounded-3xl"
         aria-roledescription="carousel"
         aria-label={locale === "ru" ? "Слайдер объявлений" : "E'lonlar slayderi"}
         onMouseEnter={() => setPaused(true)}
@@ -64,144 +64,126 @@ export function ListingsSlider({
         onFocus={() => setPaused(true)}
         onBlur={() => setPaused(false)}
       >
-        <div className="grid lg:h-[480px] lg:grid-cols-[0.92fr_1.08fr]">
-          {/* Rasm */}
-          <div className="relative order-1 h-[230px] overflow-hidden bg-brand-800 sm:h-[320px] lg:order-2 lg:h-full">
-            {items.map((item, slideIndex) => {
-              const isActive = slideIndex === index;
+        <div className="relative h-[540px] sm:h-[520px] lg:h-[560px]">
+          {/* Rasmlar */}
+          {items.map((item, slideIndex) => {
+            const isActive = slideIndex === index;
 
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  aria-hidden={!isActive}
-                  tabIndex={isActive ? 0 : -1}
-                  className={cn(
-                    "absolute inset-0 transition-opacity duration-[1200ms] ease-out motion-reduce:transition-none",
-                    isActive ? "opacity-100" : "pointer-events-none opacity-0",
-                  )}
-                >
-                  {item.image ? (
-                    <Image
-                      src={item.image.url}
-                      alt={item.image.alt || item.title}
-                      fill
-                      priority={slideIndex === 0}
-                      sizes="(max-width: 1024px) 100vw, 58vw"
-                      className={cn(
-                        "object-cover transition-transform duration-[7000ms] ease-out motion-reduce:transition-none",
-                        isActive ? "scale-105" : "scale-100",
-                      )}
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-brand-800" />
-                  )}
-                </Link>
-              );
-            })}
-
-            {/* Chetlarni yumshatish */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-brand-900/50 to-transparent backdrop-blur-xl [mask-image:linear-gradient(to_bottom,black,transparent)]"
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-brand-900/60 to-transparent backdrop-blur-xl [mask-image:linear-gradient(to_top,black,transparent)] lg:h-20"
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-brand-900 to-transparent lg:block"
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-brand-900 to-transparent lg:hidden"
-            />
-          </div>
-
-          {/* Ma'lumot paneli */}
-          <div className="relative z-10 order-2 flex flex-col justify-between gap-7 bg-brand-900 p-6 sm:p-8 lg:order-1 lg:p-10">
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-[11px] font-semibold tracking-[0.22em] text-brand-300 uppercase">
-                {t.slider.featured}
-              </span>
-              <span className="font-display text-xs font-bold tracking-widest text-brand-300">
-                <span className="text-white">{current}</span> / {total}
-              </span>
-            </div>
-
-            <div
-              key={active.id}
-              className="animate-in fade-in slide-in-from-bottom-1 duration-500 motion-reduce:animate-none"
-            >
-              <div className="flex flex-wrap gap-1.5">
-                <Badge className="bg-white/10 text-white backdrop-blur">{active.saleLabel}</Badge>
-                <Badge variant="glass">{active.propertyTypeLabel}</Badge>
-              </div>
-
-              <h2 className="mt-4 line-clamp-3 text-2xl leading-[1.18] font-extrabold tracking-tight text-white sm:text-3xl lg:text-[2rem]">
-                {active.title}
-              </h2>
-
-              <p className="mt-4 flex items-center gap-2 text-sm text-brand-200">
-                <MapPin className="size-4 shrink-0 text-brand-300" />
-                {active.location}
-              </p>
-
-              <p className="font-display mt-5 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-                {active.price}
-              </p>
-            </div>
-
-            <div>
-              <div className="flex gap-1.5" role="tablist" aria-label="Slaydlar">
-                {items.map((item, dotIndex) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="tab"
-                    onClick={() => goTo(dotIndex)}
-                    aria-selected={dotIndex === index}
-                    aria-label={`${dotIndex + 1} / ${items.length}`}
+            return (
+              <div
+                key={item.id}
+                aria-hidden={!isActive}
+                className={cn(
+                  "absolute inset-0 transition-opacity duration-[1200ms] ease-out motion-reduce:transition-none",
+                  isActive ? "opacity-100" : "pointer-events-none opacity-0",
+                )}
+              >
+                {item.image ? (
+                  <Image
+                    src={item.image.url}
+                    alt={item.image.alt || item.title}
+                    fill
+                    priority={slideIndex === 0}
+                    sizes="(max-width: 1152px) 100vw, 1152px"
                     className={cn(
-                      "h-1 flex-1 rounded-full transition-colors duration-300",
-                      dotIndex === index
-                        ? "bg-white"
-                        : "bg-white/20 hover:bg-white/40",
+                      "object-cover transition-transform duration-[7000ms] ease-out motion-reduce:transition-none",
+                      isActive ? "scale-105" : "scale-100",
                     )}
                   />
-                ))}
+                ) : (
+                  <div className="h-full w-full bg-neutral-900" />
+                )}
+              </div>
+            );
+          })}
+
+          {/* Chetlarni yumshatuvchi blur */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/35 via-black/10 to-transparent backdrop-blur-md [mask-image:linear-gradient(to_bottom,black,transparent)]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/45 via-black/10 to-transparent backdrop-blur-lg [mask-image:linear-gradient(to_top,black,transparent)]"
+          />
+
+          {/* Yuqori boshqaruv */}
+          <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 p-4 sm:p-5 lg:p-6">
+            <span className="rounded-full bg-black/25 px-3 py-1.5 text-[11px] font-semibold tracking-[0.18em] text-white ring-1 ring-white/20 backdrop-blur-md">
+              {current} <span className="text-white/50">/ {total}</span>
+            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => goTo(index - 1)}
+                aria-label={t.slider.prev}
+                className="flex size-9 items-center justify-center rounded-full bg-black/25 text-white ring-1 ring-white/20 backdrop-blur-md transition-colors hover:bg-black/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:size-10"
+              >
+                <ChevronLeft className="size-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => goTo(index + 1)}
+                aria-label={t.slider.next}
+                className="flex size-9 items-center justify-center rounded-full bg-black/25 text-white ring-1 ring-white/20 backdrop-blur-md transition-colors hover:bg-black/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:size-10"
+              >
+                <ChevronRight className="size-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Suzuvchi ma'lumot kartasi */}
+          <div className="absolute inset-x-4 bottom-4 z-20 sm:inset-x-6 sm:bottom-6 lg:left-8 lg:bottom-8 lg:max-w-[430px]">
+            <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xl sm:p-6">
+              <p className="text-[10px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                {t.slider.featured}
+              </p>
+
+              <div key={active.id} className="mt-3 animate-in fade-in duration-500">
+                <div className="flex flex-wrap gap-1.5">
+                  <Badge>{active.saleLabel}</Badge>
+                  <Badge variant="secondary">{active.propertyTypeLabel}</Badge>
+                </div>
+
+                <h2 className="mt-3 line-clamp-2 text-xl leading-snug font-extrabold tracking-tight text-foreground sm:text-2xl">
+                  {active.title}
+                </h2>
+
+                <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground sm:text-sm">
+                  <MapPin className="size-4 shrink-0 text-brand-500" />
+                  {active.location}
+                </p>
+
+                <p className="font-display mt-3 text-2xl font-extrabold tracking-tight text-foreground">
+                  {active.price}
+                </p>
               </div>
 
-              <div className="mt-6 flex items-center justify-between gap-4">
-                <Button
-                  asChild
-                  size="lg"
-                  className="rounded-xl bg-white text-brand-900 shadow-sm hover:bg-brand-50"
-                >
+              <div className="mt-5 flex items-center justify-between gap-4 border-t border-border pt-4">
+                <Button asChild size="sm" className="h-10 px-4">
                   <Link href={active.href}>
                     {t.slider.view}
                     <ArrowUpRight className="size-4" />
                   </Link>
                 </Button>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => goTo(index - 1)}
-                    aria-label={t.slider.prev}
-                    className="flex size-10 items-center justify-center rounded-full border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-                  >
-                    <ChevronLeft className="size-5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => goTo(index + 1)}
-                    aria-label={t.slider.next}
-                    className="flex size-10 items-center justify-center rounded-full border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-                  >
-                    <ChevronRight className="size-5" />
-                  </button>
+                <div className="flex items-center gap-1">
+                  {items.map((item, dotIndex) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => goTo(dotIndex)}
+                      aria-label={`${dotIndex + 1} / ${items.length}`}
+                      aria-current={dotIndex === index}
+                      className={cn(
+                        "h-1 rounded-full transition-all duration-300",
+                        dotIndex === index
+                          ? "w-5 bg-foreground"
+                          : "w-1.5 bg-foreground/20 hover:bg-foreground/40",
+                      )}
+                    />
+                  ))}
                 </div>
               </div>
             </div>

@@ -29,25 +29,37 @@
 .dark {
   color-scheme: dark;
 
-  --background: #071426;
-  --foreground: #eaf1fb;
-  --card: #0b1d33;
-  --card-foreground: #eaf1fb;
-  --popover: #0b1d33;
-  --popover-foreground: #eaf1fb;
-  --primary: #5b8cf7;
-  --primary-foreground: #04122a;
-  --secondary: #122a47;
-  --secondary-foreground: #dbe7ff;
-  --muted: #122a47;
-  --muted-foreground: #93a8c7;
-  --accent: #122a47;
-  --accent-foreground: #dbe7ff;
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: #121214;
+  --card-foreground: #fafafa;
+  --popover: #121214;
+  --popover-foreground: #fafafa;
+  --primary: #f4f4f5;
+  --primary-foreground: #09090b;
+  --secondary: #1c1c1f;
+  --secondary-foreground: #fafafa;
+  --muted: #1c1c1f;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
   --destructive: #f87171;
-  --destructive-foreground: #1a0505;
-  --border: #1e3552;
-  --input: #27425f;
-  --ring: #5b8cf7;
+  --destructive-foreground: #09090b;
+  --border: #27272a;
+  --input: #3f3f46;
+  --ring: #a1a1aa;
+
+  /* Tungi rejimda brend palitrasi neytral qora-kulrang bo'ladi */
+  --color-brand-50: #18181b;
+  --color-brand-100: #27272a;
+  --color-brand-200: #d4d4d8;
+  --color-brand-300: #a1a1aa;
+  --color-brand-400: #71717a;
+  --color-brand-500: #a1a1aa;
+  --color-brand-600: #d4d4d8;
+  --color-brand-700: #f4f4f5;
+  --color-brand-800: #fafafa;
+  --color-brand-900: #0b0b0d;
 }
 
 @theme inline {
@@ -254,7 +266,7 @@
 
 .dark .bg-slate-50,
 .dark .bg-slate-100 {
-  background-color: #0e2038;
+  background-color: #18181b;
 }
 
 .dark .bg-slate-200 {
@@ -263,43 +275,20 @@
 
 .dark .text-slate-900,
 .dark .text-slate-800 {
-  color: #eaf1fb;
+  color: #f4f4f5;
 }
 
 .dark .text-slate-700 {
-  color: #cfdcef;
+  color: #d4d4d8;
 }
 
 .dark .text-slate-600 {
-  color: #b3c6de;
+  color: #a1a1aa;
 }
 
 .dark .text-slate-500,
 .dark .text-slate-400 {
-  color: #8fa7c6;
-}
-
-.dark .bg-brand-50 {
-  background-color: rgba(91, 140, 247, 0.14);
-}
-
-.dark .bg-brand-100 {
-  background-color: rgba(91, 140, 247, 0.2);
-}
-
-.dark .text-brand-900,
-.dark .text-brand-800,
-.dark .text-brand-700 {
-  color: #9dbdff;
-}
-
-.dark .text-brand-600 {
-  color: #8fb3ff;
-}
-
-.dark .border-brand-100,
-.dark .border-brand-200 {
-  border-color: rgba(91, 140, 247, 0.35);
+  color: #71717a;
 }
 
 .dark .article-body {
@@ -316,16 +305,16 @@
 }
 
 .dark .site-header {
-  background-color: rgba(7, 20, 38, 0.88);
+  background-color: rgba(9, 9, 11, 0.9);
   border-color: var(--border);
 }
 
 .dark .hover\:bg-slate-100:hover {
-  background-color: #0e2038;
+  background-color: #27272a;
 }
 
 .dark .hover\:bg-slate-50:hover {
-  background-color: #0b1d33;
+  background-color: #18181b;
 }
 
 .dark .hover\:text-slate-900:hover {
@@ -333,5 +322,5 @@
 }
 
 .dark .hover\:text-brand-700:hover {
-  color: #9dbdff;
+  color: #ffffff;
 }
