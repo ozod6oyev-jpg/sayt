@@ -76,7 +76,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                 <BrandRotator locale={locale} />
               </span>
               <span className="hidden text-[11px] font-medium text-muted-foreground sm:block">
-                {locale === "ru" ? "Недвижимость в Узбекистане" : "O'zbekistonda ko'chmas mulk"}
+                {locale === "ru" ? "Недвижимость в Ташкенте" : "Toshkentda ko'chmas mulk"}
               </span>
             </span>
           </Link>

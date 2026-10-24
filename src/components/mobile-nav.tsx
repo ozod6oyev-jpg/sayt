@@ -53,7 +53,7 @@ export function MobileNav({ locale }: { locale: Locale }) {
             <span className="flex flex-col leading-tight">
               <span className="text-sm font-bold text-foreground">{siteName}</span>
               <span className="text-[11px] font-medium text-muted-foreground">
-                {locale === "ru" ? "Недвижимость в Узбекистане" : "O'zbekistonda ko'chmas mulk"}
+                {locale === "ru" ? "Недвижимость в Ташкенте" : "Toshkentda ko'chmas mulk"}
               </span>
             </span>
           </Link>

@@ -15,12 +15,12 @@ export const siteName = "Real sotamiz";
 
 const uz = {
   meta: {
-    homeTitle: "Uy-joy sotib olish va sotish — O'zbekiston bo'ylab",
+    homeTitle: "Uy-joy sotib olish va sotish — Toshkentda",
     homeDescription:
-      "O'zbekiston bo'ylab sotiladigan kvartiralar, uylar va yer uchastkalari. Rasmlar, narxlar, tumanlar bo'yicha qidiruv. Uy-joy bozori tahlili va maslahatlar.",
+      "Toshkentda sotiladigan kvartiralar, uylar va yer uchastkalari. Rasmlar, narxlar, tumanlar bo'yicha qidiruv. Uy-joy bozori tahlili va maslahatlar.",
     listingsTitle: "E'lonlar",
     listingsDescription:
-      "Toshkent va viloyatlar bo'ylab sotiladigan uy-joy e'lonlari: narx, maydon, xonalar soni bo'yicha filtr.",
+      "Toshkentda sotiladigan uy-joy e'lonlari: tuman, narx, maydon va xonalar soni bo'yicha filtr.",
     blogTitle: "Maqolalar",
     blogDescription:
       "Uy-joy bozori tahlili, uy sotib olish qo'llanmalari, ipoteka va qurilish bo'yicha maslahatlar.",
@@ -125,7 +125,7 @@ const uz = {
   } as Record<string, string>,
   footer: {
     about:
-      "Toshkent va viloyatlar bo'ylab uy-joy e'lonlari. Sotib olish va sotish — bitta joyda.",
+      "Toshkent bo'ylab uy-joy e'lonlari. Sotib olish va sotish — bitta joyda.",
     navigation: "Bo'limlar",
     contact: "Bog'lanish",
     rights: "Barcha huquqlar himoyalangan.",
@@ -207,12 +207,12 @@ export type Dict = typeof uz;
 
 const ru: Dict = {
   meta: {
-    homeTitle: "Купить и продать недвижимость — по всему Узбекистану",
+    homeTitle: "Купить и продать недвижимость — в Ташкенте",
     homeDescription:
-      "Квартиры, дома и участки по всему Узбекистану. Фото, цены, поиск по районам. Аналитика рынка и советы по покупке жилья.",
+      "Квартиры, дома и участки в Ташкенте. Фото, цены, поиск по районам. Аналитика рынка и советы по покупке жилья.",
     listingsTitle: "Объявления",
     listingsDescription:
-      "Объявления о продаже недвижимости в Ташкенте и регионах: фильтр по цене, площади и количеству комнат.",
+      "Объявления о продаже недвижимости в Ташкенте: фильтр по району, цене, площади и количеству комнат.",
     blogTitle: "Статьи",
     blogDescription:
       "Аналитика рынка недвижимости, руководства по покупке жилья, ипотека и советы по строительству.",
@@ -317,7 +317,7 @@ const ru: Dict = {
   },
   footer: {
     about:
-      "Объявления о недвижимости по Ташкенту и регионам. Покупка и продажа — в одном месте.",
+      "Объявления о недвижимости по Ташкенту. Покупка и продажа — в одном месте.",
     navigation: "Разделы",
     contact: "Связаться",
     rights: "Все права защищены.",
