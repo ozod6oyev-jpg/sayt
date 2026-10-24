@@ -34,8 +34,7 @@ const uz = {
   },
   hero: {
     title: "O'zingizga mos uyni toping",
-    subtitle:
-      "O'zbekiston bo'ylab minglab e'lon. Narx, tuman va maydon bo'yicha qulay qidiruv.",
+    subtitle: "Sotuv va ijara e'lonlari — narx, tuman va maydon bo'yicha qidiruv.",
     cta: "E'lonlarni ko'rish",
   },
   search: {
@@ -117,7 +116,7 @@ const uz = {
   } as Record<string, string>,
   footer: {
     about:
-      "Uy-joylar sotamiz — O'zbekistonda uy-joy sotib olish va sotish uchun qulay platforma. Har bir e'lon tekshiriladi.",
+      "Toshkent va viloyatlar bo'ylab uy-joy e'lonlari. Sotib olish, sotish va ijara — bitta joyda.",
     navigation: "Bo'limlar",
     contact: "Bog'lanish",
     rights: "Barcha huquqlar himoyalangan.",
@@ -209,8 +208,7 @@ const ru: Dict = {
   },
   hero: {
     title: "Найдите подходящий дом",
-    subtitle:
-      "Тысячи объявлений по всему Узбекистану. Удобный поиск по цене, району и площади.",
+    subtitle: "Продажа и аренда — поиск по цене, району и площади.",
     cta: "Смотреть объявления",
   },
   search: {
@@ -292,7 +290,7 @@ const ru: Dict = {
   },
   footer: {
     about:
-      "Uy-joylar sotamiz — удобная платформа для покупки и продажи недвижимости в Узбекистане. Каждое объявление проверяется.",
+      "Объявления о недвижимости по Ташкенту и регионам. Покупка, продажа и аренда — в одном месте.",
     navigation: "Разделы",
     contact: "Связаться",
     rights: "Все права защищены.",

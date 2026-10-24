@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import { ArticleBody } from "@/components/article-body";
 import { ArticleCard } from "@/components/article-card";
 import { JsonLd } from "@/components/json-ld";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { articleBody, articleExcerpt, articleTitle } from "@/lib/content";
 import { formatDate } from "@/lib/format";
 import { getDict, isLocale, localePath, siteName } from "@/lib/i18n";
@@ -139,7 +142,7 @@ export default async function ArticlePage({ params }: PageProps) {
     <article className="container-page py-10">
       <JsonLd data={jsonLd} />
 
-      <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+      <nav aria-label="Breadcrumb" className="text-xs text-slate-500">
         <Link href={localePath(locale)} className="hover:text-brand-700">
           {t.nav.home}
         </Link>
@@ -150,9 +153,9 @@ export default async function ArticlePage({ params }: PageProps) {
       </nav>
 
       <header className="mx-auto mt-6 max-w-3xl">
-        <span className="badge">{t.category[article.category] ?? article.category}</span>
+        <Badge variant="secondary">{t.category[article.category] ?? article.category}</Badge>
 
-        <h1 className="mt-4 text-3xl leading-tight font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="mt-4 text-3xl leading-tight font-extrabold tracking-tight text-slate-900 sm:text-4xl">
           {title}
         </h1>
 
@@ -160,9 +163,9 @@ export default async function ArticlePage({ params }: PageProps) {
 
         <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-y border-slate-200 py-4 text-sm text-slate-600">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">
-              {article.authorName.charAt(0).toUpperCase()}
-            </span>
+            <Avatar className="size-9">
+              <AvatarFallback>{article.authorName.charAt(0).toUpperCase()}</AvatarFallback>
+            </Avatar>
             <div>
               <p className="font-medium text-slate-900">{article.authorName}</p>
               {article.authorRole && <p className="text-xs text-slate-500">{article.authorRole}</p>}
@@ -187,7 +190,7 @@ export default async function ArticlePage({ params }: PageProps) {
         </div>
       </header>
 
-      <figure className="mx-auto mt-8 max-w-4xl">
+      <figure className="mx-auto mt-8 max-w-4xl overflow-hidden rounded-2xl bg-muted shadow-float">
         <Image
           src={article.coverImage}
           alt={title}
@@ -195,7 +198,7 @@ export default async function ArticlePage({ params }: PageProps) {
           height={article.coverHeight}
           priority
           sizes="(max-width: 1024px) 100vw, 896px"
-          className="w-full rounded-xl object-cover"
+          className="w-full object-cover"
         />
       </figure>
 
@@ -203,10 +206,10 @@ export default async function ArticlePage({ params }: PageProps) {
         <ArticleBody body={body} />
       </div>
 
-      <footer className="mx-auto mt-10 max-w-3xl border-t border-slate-200 pt-6">
-        <Link href={localePath(locale, "/blog")} className="text-sm font-medium text-brand-700">
-          ← {t.blog.all}
-        </Link>
+      <footer className="mx-auto mt-10 max-w-3xl border-t border-border pt-6">
+        <Button asChild variant="outline" size="sm">
+          <Link href={localePath(locale, "/blog")}>← {t.blog.all}</Link>
+        </Button>
       </footer>
 
       {related.length > 0 && (

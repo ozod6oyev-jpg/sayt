@@ -1,6 +1,10 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { login } from "@/app/actions/auth";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { getCurrentUser } from "@/lib/auth";
 import { getDict, siteName } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
@@ -25,7 +29,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
   const t = getDict("uz");
 
   return (
-    <div className="card w-full max-w-sm p-8">
+    <Card className="w-full max-w-sm animate-in fade-in zoom-in-95 gap-0 p-8 duration-300">
       <div className="mb-6 flex items-center gap-2">
         <Image
           src="/logo-mark.png"
@@ -53,43 +57,41 @@ export default async function LoginPage({ searchParams }: PageProps) {
 
       <form action={login} className="mt-6 space-y-4">
         <div>
-          <label className="label" htmlFor="email">
+          <Label htmlFor="email" className="mb-1.5">
             Email
-          </label>
-          <input
+          </Label>
+          <Input
             id="email"
             name="email"
             type="email"
             required
             autoFocus
             autoComplete="username"
-            className="field"
             placeholder="admin@tezsotamiz.uz"
           />
         </div>
 
         <div>
-          <label className="label" htmlFor="password">
+          <Label htmlFor="password" className="mb-1.5">
             {t.admin.password}
-          </label>
-          <input
+          </Label>
+          <Input
             id="password"
             name="password"
             type="password"
             required
             autoComplete="current-password"
-            className="field"
           />
         </div>
 
-        <button type="submit" className="btn-primary w-full">
+        <Button type="submit" className="w-full">
           {t.admin.login}
-        </button>
+        </Button>
       </form>
 
       <p className="mt-6 text-center text-xs text-slate-400">
         Bu sahifa qidiruv tizimlariga yopiq.
       </p>
-    </div>
+    </Card>
   );
 }

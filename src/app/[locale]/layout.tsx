@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import "../globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { fontDisplay, fontSans } from "@/lib/fonts";
 import { getDict, isLocale, siteName } from "@/lib/i18n";
 import { robotsMeta, siteUrl } from "@/lib/seo";
 
@@ -45,7 +46,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
 
   return (
     <html lang={locale}>
-      <body className="flex min-h-screen flex-col">
+      <body className={`${fontSans.variable} ${fontDisplay.variable} flex min-h-screen flex-col`}>
         <SiteHeader locale={locale} />
         <main className="flex-1">{children}</main>
         <SiteFooter locale={locale} />

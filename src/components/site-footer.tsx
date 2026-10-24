@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { contact } from "@/lib/contact";
 import { getDict, localePath, siteName, type Locale } from "@/lib/i18n";
 import { HeadphonesIcon, InstagramIcon, MapPinIcon, PhoneIcon, TelegramIcon } from "./icons";
@@ -29,24 +30,18 @@ export function SiteFooter({ locale }: { locale: Locale }) {
             {locale === "ru" ? "Наши соцсети" : "Ijtimoiy tarmoqlarimiz"}
           </p>
           <div className="mt-3 flex flex-wrap gap-3">
-            <a
-              href={contact.instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
-            >
-              <InstagramIcon className="h-4 w-4" />
-              {contact.instagramHandle}
-            </a>
-            <a
-              href={contact.telegramChannelUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
-            >
-              <TelegramIcon className="h-4 w-4" />
-              {contact.telegramChannelHandle}
-            </a>
+            <Button asChild variant="subtle" size="sm" className="h-9 gap-2 rounded-xl px-3">
+              <a href={contact.instagramUrl} target="_blank" rel="noopener noreferrer">
+                <InstagramIcon className="h-4 w-4" />
+                {contact.instagramHandle}
+              </a>
+            </Button>
+            <Button asChild variant="subtle" size="sm" className="h-9 gap-2 rounded-xl px-3">
+              <a href={contact.telegramChannelUrl} target="_blank" rel="noopener noreferrer">
+                <TelegramIcon className="h-4 w-4" />
+                {contact.telegramChannelHandle}
+              </a>
+            </Button>
           </div>
         </div>
 
@@ -107,15 +102,16 @@ export function SiteFooter({ locale }: { locale: Locale }) {
             <li className="text-brand-100/70">{contact.hours[locale]}</li>
           </ul>
 
-          <a
-            href={contact.telegramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-brand-900 transition-colors hover:bg-brand-50"
+          <Button
+            asChild
+            variant="secondary"
+            className="mt-5 bg-white text-brand-900 shadow-sm hover:bg-brand-50"
           >
-            <HeadphonesIcon className="h-4 w-4" />
-            {locale === "ru" ? "Связаться" : "Bog'lanish"}
-          </a>
+            <a href={contact.telegramUrl} target="_blank" rel="noopener noreferrer">
+              <HeadphonesIcon className="h-4 w-4" />
+              {locale === "ru" ? "Связаться" : "Bog'lanish"}
+            </a>
+          </Button>
         </div>
       </div>
 

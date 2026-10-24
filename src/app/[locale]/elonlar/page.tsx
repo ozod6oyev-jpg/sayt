@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import { ListingCard } from "@/components/listing-card";
 import { SearchForm, type SearchParams } from "@/components/search-form";
+import { Button } from "@/components/ui/button";
 import { getDict, isLocale, type Locale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { alternatesFor, robotsMeta, socialMetadata } from "@/lib/seo";
@@ -160,9 +161,11 @@ export default async function ListingsPage({ params, searchParams }: Props) {
       {totalPages > 1 && (
         <nav className="mt-10 flex items-center justify-center gap-1" aria-label="Sahifalar">
           {page > 1 && (
-            <Link href={buildPageHref(page - 1)} className="btn-secondary" rel="prev">
-              ←
-            </Link>
+            <Button asChild variant="outline" size="icon-sm">
+              <Link href={buildPageHref(page - 1)} rel="prev" aria-label="Oldingi">
+                ←
+              </Link>
+            </Button>
           )}
           {Array.from({ length: totalPages }, (_, index) => index + 1)
             .filter((num) => num === 1 || num === totalPages || Math.abs(num - page) <= 1)
@@ -171,23 +174,26 @@ export default async function ListingsPage({ params, searchParams }: Props) {
                 {index > 0 && arr[index - 1] !== num - 1 && (
                   <span className="px-1 text-slate-400">…</span>
                 )}
-                <Link
-                  href={buildPageHref(num)}
-                  aria-current={num === page ? "page" : undefined}
-                  className={
-                    num === page
-                      ? "btn-primary"
-                      : "btn-secondary"
-                  }
+                <Button
+                  asChild
+                  variant={num === page ? "default" : "outline"}
+                  size="icon-sm"
                 >
-                  {num}
-                </Link>
+                  <Link
+                    href={buildPageHref(num)}
+                    aria-current={num === page ? "page" : undefined}
+                  >
+                    {num}
+                  </Link>
+                </Button>
               </span>
             ))}
           {page < totalPages && (
-            <Link href={buildPageHref(page + 1)} className="btn-secondary" rel="next">
-              →
-            </Link>
+            <Button asChild variant="outline" size="icon-sm">
+              <Link href={buildPageHref(page + 1)} rel="next" aria-label="Keyingi">
+                →
+              </Link>
+            </Button>
           )}
         </nav>
       )}

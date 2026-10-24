@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { localeNames, otherLocale, type Locale } from "@/lib/i18n";
 
 export function LocaleSwitcher({ locale }: { locale: Locale }) {
@@ -11,14 +12,15 @@ export function LocaleSwitcher({ locale }: { locale: Locale }) {
   const href = `/${target}${rest}`;
 
   return (
-    <Link
-      href={href}
-      hrefLang={target}
-      className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-      title={localeNames[target]}
-      aria-label={localeNames[target]}
-    >
-      {target.toUpperCase()}
-    </Link>
+    <Button asChild variant="outline" size="sm" className="h-9 px-2.5">
+      <Link
+        href={href}
+        hrefLang={target}
+        title={localeNames[target]}
+        aria-label={localeNames[target]}
+      >
+        {target.toUpperCase()}
+      </Link>
+    </Button>
   );
 }

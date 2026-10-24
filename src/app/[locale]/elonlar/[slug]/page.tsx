@@ -4,11 +4,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { submitLead } from "@/app/actions/leads";
 import { JsonLd } from "@/components/json-ld";
-import { MapPinIcon, PhoneIcon } from "@/components/icons";
+import { MapPinIcon, PhoneIcon, TelegramIcon } from "@/components/icons";
 import { ListingCard } from "@/components/listing-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { contact } from "@/lib/contact";
 import { listingDescription, listingTitle } from "@/lib/content";
 import { formatArea, formatFloor, formatNumber, formatPrice } from "@/lib/format";
-import { getDict, isLocale, type Locale } from "@/lib/i18n";
+import { getDict, isLocale, siteName, type Locale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import {
   absoluteUrl,
@@ -216,25 +223,28 @@ export default async function ListingPage({ params, searchParams }: Props) {
                 </div>
               ))}
             </div>
-          )}
-
-          <div className="mt-8">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{title}</h1>
-                <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-600">
-                  <MapPinIcon className="h-4 w-4 shrink-0 text-brand-500" />
-                  {listing.address}, {listing.district}, {listing.region}
-                </p>
+          )}            <div className="mt-8">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="mb-2.5 flex flex-wrap gap-1.5">
+                    <Badge>
+                      {t.listingType[listing.type as keyof typeof t.listingType] ?? listing.type}
+                    </Badge>
+                    <Badge variant="secondary">
+                      {t.propertyType[listing.propertyType as keyof typeof t.propertyType] ??
+                        listing.propertyType}
+                    </Badge>
+                    {listing.status === "sold" && <Badge variant="dark">{t.listing.sold}</Badge>}
+                  </div>
+                  <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{title}</h1>
+                  <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-600">
+                    <MapPinIcon className="h-4 w-4 shrink-0 text-brand-500" />
+                    {listing.address}, {listing.district}, {listing.region}
+                  </p>
+                </div>
               </div>
-              {listing.status === "sold" && (
-                <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
-                  {t.listing.sold}
-                </span>
-              )}
-            </div>
 
-            <p className="mt-4 text-3xl font-extrabold tracking-tight text-brand-800">
+            <p className="mt-4 font-display text-3xl font-extrabold tracking-tight text-brand-800">
               {formatPrice(listing.price, listing.currency, locale)}
             </p>
             {listing.area ? (
@@ -270,15 +280,16 @@ export default async function ListingPage({ params, searchParams }: Props) {
             </section>
 
             {listing.lat != null && listing.lng != null && (
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${listing.lat},${listing.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
-              >
-                <MapPinIcon className="h-4 w-4" />
-                {t.listing.map}
-              </a>
+              <Button asChild variant="outline" size="sm" className="mt-6">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${listing.lat},${listing.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MapPinIcon className="h-4 w-4 text-brand-600" />
+                  {t.listing.map}
+                </a>
+              </Button>
             )}
 
             <p className="mt-6 text-xs text-slate-400">
@@ -288,20 +299,42 @@ export default async function ListingPage({ params, searchParams }: Props) {
         </div>
 
         <aside id="aloqa" className="lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-float">
-            <p className="text-2xl font-extrabold text-slate-900">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-float">
+            <div className="flex items-center gap-3">
+              <Avatar className="size-11 ring-2 ring-brand-50">
+                <AvatarImage src="/logo-mark.png" alt={siteName} />
+                <AvatarFallback>UJ</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{siteName}</p>
+                <p className="text-xs text-muted-foreground">{contact.hours[locale]}</p>
+              </div>
+            </div>
+
+            <div className="my-4 border-t border-border" />
+
+            <p className="font-display text-2xl font-extrabold text-slate-900">
               {formatPrice(listing.price, listing.currency, locale)}
             </p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               {listing.district}, {listing.region}
             </p>
 
-            <a href={phoneHref} className="btn-primary mt-4 w-full">
-              <PhoneIcon className="h-4 w-4" />
-              {listing.phone}
-            </a>
+            <Button asChild size="lg" className="mt-4 w-full">
+              <a href={phoneHref}>
+                <PhoneIcon className="h-4 w-4" />
+                {listing.phone}
+              </a>
+            </Button>
 
-            <hr className="my-5 border-slate-200" />
+            <Button asChild variant="outline" className="mt-2 w-full">
+              <a href={contact.telegramUrl} target="_blank" rel="noopener noreferrer">
+                <TelegramIcon className="h-4 w-4 text-brand-600" />
+                {contact.telegramHandle}
+              </a>
+            </Button>
+
+            <div className="my-5 border-t border-border" />
 
             {leadStatus === "sent" && (
               <p className="mb-4 rounded-lg bg-brand-50 p-3 text-sm text-brand-800">
@@ -331,33 +364,32 @@ export default async function ListingPage({ params, searchParams }: Props) {
                 aria-hidden="true"
               />
               <div>
-                <label className="label" htmlFor="name">
+                <Label htmlFor="name" className="mb-1.5">
                   {t.lead.name}
-                </label>
-                <input id="name" name="name" required minLength={2} className="field" />
+                </Label>
+                <Input id="name" name="name" required minLength={2} />
               </div>
               <div>
-                <label className="label" htmlFor="phone">
+                <Label htmlFor="phone" className="mb-1.5">
                   {t.lead.phone}
-                </label>
-                <input
+                </Label>
+                <Input
                   id="phone"
                   name="phone"
                   type="tel"
                   required
                   placeholder="+998 90 123 45 67"
-                  className="field"
                 />
               </div>
               <div>
-                <label className="label" htmlFor="message">
+                <Label htmlFor="message" className="mb-1.5">
                   {t.lead.message}
-                </label>
-                <textarea id="message" name="message" rows={3} className="field" />
+                </Label>
+                <Textarea id="message" name="message" rows={3} />
               </div>
-              <button type="submit" className="btn-primary w-full">
+              <Button type="submit" className="w-full">
                 {t.lead.send}
-              </button>
+              </Button>
             </form>
           </div>
         </aside>

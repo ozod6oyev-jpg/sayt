@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import "../globals.css";
-import { logout } from "@/app/actions/auth";
+import { AdminUserMenu } from "@/components/admin/admin-user-menu";
 import { requireAdmin } from "@/lib/auth";
+import { fontDisplay, fontSans } from "@/lib/fonts";
 import { getDict, siteName } from "@/lib/i18n";
 
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <html lang="uz">
-      <body className="min-h-screen bg-slate-50">
+      <body className={`${fontSans.variable} ${fontDisplay.variable} min-h-screen bg-slate-50`}>
         <header className="border-b border-slate-200 bg-white">
           <div className="container-page flex h-16 items-center justify-between gap-4">
             <Link href="/admin" className="flex items-center gap-2">
@@ -44,23 +45,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </Link>
 
             <div className="flex items-center gap-3">
-              <div className="hidden text-right sm:block">
-                <p className="text-xs font-semibold text-slate-900">{user.name}</p>
-                <p className="text-[11px] text-slate-500">
-                  {user.role === "owner" ? "Owner" : "Admin"}
-                </p>
-              </div>
-              <Link
-                href="/uz"
-                className="hidden text-xs font-medium text-slate-500 hover:text-slate-800 sm:inline"
-              >
-                Saytni ko'rish →
-              </Link>
-              <form action={logout}>
-                <button type="submit" className="btn-secondary px-3 py-1.5 text-xs">
-                  {t.admin.logout}
-                </button>
-              </form>
+              <AdminUserMenu
+                name={user.name}
+                role={user.role}
+                logoutLabel={t.admin.logout}
+              />
             </div>
           </div>
 

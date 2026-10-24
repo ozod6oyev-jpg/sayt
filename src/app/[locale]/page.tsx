@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MapPin } from "lucide-react";
 import { ArticleCard } from "@/components/article-card";
 import { CameraIcon, HeadphonesIcon, ShieldCheckIcon } from "@/components/icons";
 import { JsonLd } from "@/components/json-ld";
 import { ListingCard } from "@/components/listing-card";
 import { SearchForm } from "@/components/search-form";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { contact } from "@/lib/contact";
 import { getDict, isLocale, localePath, siteName, type Locale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
@@ -91,17 +94,20 @@ export default async function HomePage({ params }: Props) {
       </section>
 
       <section className="container-page pt-8 sm:pt-10">
-        <div className="max-w-3xl">
-          <p className="text-xs font-bold tracking-[0.18em] text-brand-600 uppercase">
-            {siteName}
-          </p>
-          <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
+        <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <Badge variant="secondary" className="gap-1.5 border-brand-100 bg-brand-50 text-brand-700">
+            <MapPin className="size-3" />
+            {locale === "ru" ? "Ташкент · Узбекистан" : "Toshkent · O'zbekiston"}
+          </Badge>
+          <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-[2.75rem] lg:leading-[1.1]">
             {t.hero.title}
           </h1>
-          <p className="mt-3 text-base leading-7 text-slate-600">{t.hero.subtitle}</p>
+          <p className="mt-3 text-base leading-7 text-muted-foreground sm:text-lg">
+            {t.hero.subtitle}
+          </p>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 animate-in fade-in slide-in-from-bottom-3 duration-700">
           <SearchForm locale={locale} districts={districts} />
         </div>
       </section>
@@ -133,10 +139,7 @@ export default async function HomePage({ params }: Props) {
       <section className="mt-16 bg-slate-50 py-14">
         <div className="container-page">
           <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 className="section-heading">{t.nav.blog}</h2>
-              <p className="mt-1 text-sm text-slate-500">{t.meta.blogDescription}</p>
-            </div>
+            <h2 className="section-heading">{t.nav.blog}</h2>
             <Link href={localePath(locale, "/blog")} className="link-more">
               {t.blog.all} →
             </Link>
@@ -184,13 +187,18 @@ export default async function HomePage({ params }: Props) {
           ].map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.title} className="rounded-2xl border border-slate-200 bg-white p-6">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <h3 className="mt-4 text-base font-bold text-slate-900">{item.title}</h3>
-                <p className="mt-1.5 text-sm leading-6 text-slate-600">{item.text}</p>
-              </div>
+              <Card
+                key={item.title}
+                className="gap-0 p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-float"
+              >
+                <CardContent className="p-0">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <h3 className="mt-4 text-base font-bold text-slate-900">{item.title}</h3>
+                  <p className="mt-1.5 text-sm leading-6 text-slate-600">{item.text}</p>
+                </CardContent>
+              </Card>
             );
           })}
         </div>

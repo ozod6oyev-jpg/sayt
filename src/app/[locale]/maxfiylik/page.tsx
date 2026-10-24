@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Card } from "@/components/ui/card";
 import { contact } from "@/lib/contact";
 import { getDict, isLocale } from "@/lib/i18n";
 import { alternatesFor, robotsMeta } from "@/lib/seo";
@@ -25,10 +26,10 @@ export default async function PrivacyPage({ params }: Props) {
 
   return (
     <div className="container-page max-w-3xl py-12">
-      <h1 className="text-3xl font-bold">{t.footer.privacy}</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight">{t.footer.privacy}</h1>
 
       {locale === "ru" ? (
-        <div className="article-body mt-6">
+        <Card className="article-body mt-6 gap-0 p-6 sm:p-8">
           <p>
             Мы собираем только те данные, которые нужны для связи с вами: имя, номер телефона и
             текст сообщения. Эти данные не передаются третьим лицам, кроме случаев,
@@ -38,13 +39,13 @@ export default async function PrivacyPage({ params }: Props) {
             Файлы cookie используются для сохранения сессии администратора и анализа статистики
             посещений. Вы можете отключить cookie в настройках браузера.
           </p>
-          <p>
+          <p className="mb-0">
             По вопросам удаления данных напишите в Telegram: {contact.telegramHandle} — мы
             удалим ваши данные в течение 30 дней.
           </p>
-        </div>
+        </Card>
       ) : (
-        <div className="article-body mt-6">
+        <Card className="article-body mt-6 gap-0 p-6 sm:p-8">
           <p>
             Biz faqat siz bilan bog'lanish uchun kerakli ma'lumotlarni yig'amiz: ism, telefon
             raqami va xabar matni. Bu ma'lumotlar qonunda nazarda tutilgan holatlar bundan
@@ -54,11 +55,11 @@ export default async function PrivacyPage({ params }: Props) {
             Cookie fayllari administrator sessiyasini saqlash va tashriflar statistikasini tahlil
             qilish uchun ishlatiladi. Brauzer sozlamalarida cookie'ni o'chirib qo'yishingiz mumkin.
           </p>
-          <p>
+          <p className="mb-0">
             Ma'lumotlarni o'chirish bo'yicha Telegram orqali bog'laning: {contact.telegramHandle} —
             30 kun ichida ma'lumotlaringizni o'chiramiz.
           </p>
-        </div>
+        </Card>
       )}
     </div>
   );
