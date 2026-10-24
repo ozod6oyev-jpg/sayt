@@ -27,6 +27,10 @@ export default async function EditListingPage({ params, searchParams }: PageProp
   }
 
   const t = getDict("uz");
+  const saleOptions = await prisma.saleOption.findMany({
+    orderBy: [{ sort: "asc" }, { nameUz: "asc" }],
+    select: { id: true, nameUz: true, nameRu: true },
+  });
 
   return (
     <div className="space-y-6">
@@ -52,6 +56,7 @@ export default async function EditListingPage({ params, searchParams }: PageProp
       <ListingForm
         action={updateListing.bind(null, listing.id)}
         listing={listing}
+        saleOptions={saleOptions}
         error={error}
         saved={saved}
       />

@@ -27,3 +27,11 @@ export function articleBody(article: Pick<Article, "bodyUz" | "bodyRu">, locale:
 export function propertyTypeLabel(value: string, propertyTypes: Record<string, string>): string {
   return propertyTypes[value] ?? value;
 }
+
+export function saleOptionLabel(
+  option: { nameUz: string; nameRu: string } | null | undefined,
+  locale: Locale,
+): string | null {
+  if (!option) return null;
+  return locale === "ru" ? option.nameRu : option.nameUz;
+}

@@ -5,7 +5,6 @@ import { getDict, type Locale } from "@/lib/i18n";
 import { SearchIcon } from "./icons";
 
 export type SearchParams = {
-  type?: string;
   propertyType?: string;
   district?: string;
   rooms?: string;
@@ -24,40 +23,13 @@ export function SearchForm({
 }) {
   const t = getDict(locale);
 
-  const typeOptions = [
-    { value: "", label: t.search.all },
-    { value: "sale", label: t.listingType.sale },
-    { value: "rent", label: t.listingType.rent },
-  ];
-
   return (
     <form
       action={`/${locale}/elonlar`}
       method="get"
       className="rounded-2xl border border-border bg-card p-4 shadow-float sm:p-5"
     >
-      <div
-        className="inline-flex flex-wrap gap-1 rounded-xl bg-muted p-1"
-        role="radiogroup"
-        aria-label={t.search.type}
-      >
-        {typeOptions.map((option) => (
-          <label key={option.value || "all"} className="cursor-pointer">
-            <input
-              type="radio"
-              name="type"
-              value={option.value}
-              defaultChecked={(values.type ?? "") === option.value}
-              className="peer sr-only"
-            />
-            <span className="block rounded-lg px-3.5 py-2 text-sm font-semibold text-muted-foreground transition-all peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-xs">
-              {option.label}
-            </span>
-          </label>
-        ))}
-      </div>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <Label htmlFor="propertyType" className="mb-1.5">
             {t.search.propertyType}

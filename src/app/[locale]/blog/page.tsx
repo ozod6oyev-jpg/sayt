@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArticleCard } from "@/components/article-card";
+import { LoadMoreArticles } from "@/components/load-more-articles";
+import { toArticleCardData } from "@/lib/article-view";
 import { getDict, isLocale } from "@/lib/i18n";
+import { ARTICLES_PER_PAGE } from "@/lib/listing-query";
 import { prisma } from "@/lib/prisma";
 import { alternatesFor, robotsMeta, socialMetadata } from "@/lib/seo";
 
@@ -37,10 +39,16 @@ export default async function BlogPage({ params }: PageProps) {
 
   const t = getDict(locale);
 
-  const articles = await prisma.article.findMany({
-    where: { published: true },
-    orderBy: { publishedAt: "desc" },
-  });
+  const [articles, total] = await Promise.all([
+    prisma.article.findMany({
+      where: { published: true },
+      orderBy: { publishedAt: "desc" },
+      take: ARTICLES_PER_PAGE,
+    }),
+    prisma.article.count({ where: { published: true } }),
+  ]);
+
+  const cards = articles.map((article) => toArticleCardData(article, locale));
 
   return (
     <div className="container-page py-10">
@@ -51,15 +59,17 @@ export default async function BlogPage({ params }: PageProps) {
         <p className="mt-3 text-slate-600">{t.meta.blogDescription}</p>
       </header>
 
-      {articles.length === 0 ? (
+      {cards.length === 0 ? (
         <p className="mt-10 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
           {t.blog.empty}
         </p>
       ) : (
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} locale={locale} />
-          ))}
+        <div className="mt-8">
+          <LoadMoreArticles
+            initial={cards}
+            hasMore={cards.length < total}
+            locale={locale}
+          />
         </div>
       )}
     </div>

@@ -121,17 +121,17 @@ const listings = [
     views: 203,
   },
   {
-    slug: "sergeli-ijara-1-xonali",
-    type: "rent",
+    slug: "sergeli-1-xonali-kvartira",
+    type: "sale",
     propertyType: "apartment",
-    titleUz: "Sergelida 1 xonali kvartira, ijara",
-    titleRu: "1-комнатная квартира в Сергели, аренда",
+    titleUz: "Sergelida 1 xonali kvartira, yangi bino",
+    titleRu: "1-комнатная квартира в новом доме в Сергели",
     descriptionUz:
-      "Sergeli tumanida, yangi binoda 1 xonali kvartira ijaraga beriladi. Mebel va texnika to'liq.\n\nKommunal to'lovlar alohida. 6 oydan boshlab uzoq muddatli ijara.\n\nMetro va bozor yaqin.",
+      "Sergeli tumanida, yangi binoda 1 xonali kvartira sotiladi. Mebel va texnika qoladi.\n\nHujjatlar tayyor, naqd yoki ipoteka orqali xarid qilish mumkin.\n\nMetro va bozor yaqin.",
     descriptionRu:
-      "Сдаётся 1-комнатная квартира в новом доме в Сергели. Полностью с мебелью и техникой.\n\nКоммунальные платежи отдельно. Долгосрочная аренда от 6 месяцев.\n\nРядом метро и рынок.",
-    price: 3500000n,
-    currency: "UZS",
+      "Продаётся 1-комнатная квартира в новом доме в Сергели. Мебель и техника остаются.\n\nДокументы готовы, возможна покупка за наличные или в ипотеку.\n\nРядом метро и рынок.",
+    price: 45000n,
+    currency: "USD",
     rooms: 1,
     area: 34,
     floor: 3,
@@ -181,9 +181,9 @@ const listings = [
     titleUz: "Samarqand markazida 3 xonali kvartira",
     titleRu: "3-комнатная квартира в центре Самарканда",
     descriptionUz:
-      "Samarqand shahri markazida, Registon yodgorligidan 10 daqiqa masofada 3 xonali kvartira.\n\nKvartira ta'mirlangan, hujjatlar tayyor. Turistik ijara uchun ham mos.\n\nYopiq hovli, videokuzatuv mavjud.",
+      "Samarqand shahri markazida, Registon yodgorligidan 10 daqiqa masofada 3 xonali kvartira.\n\nKvartira ta'mirlangan, hujjatlar tayyor. Ipoteka orqali xarid qilish mumkin.\n\nYopiq hovli, videokuzatuv mavjud.",
     descriptionRu:
-      "3-комнатная квартира в центре Самарканда, 10 минут от Регистана.\n\nС ремонтом, документы готовы. Подходит и для туристической аренды.\n\nЗакрытый двор, видеонаблюдение.",
+      "3-комнатная квартира в центре Самарканда, 10 минут от Регистана.\n\nС ремонтом, документы готовы. Возможна покупка в ипотеку.\n\nЗакрытый двор, видеонаблюдение.",
     price: 64000n,
     currency: "USD",
     rooms: 3,
@@ -218,7 +218,7 @@ const articles = [
 
 Yunusobod va Mirzo Ulug'bek tumanlarida kvadrat metr narxi eng yuqori darajada saqlanib qolmoqda. Bu yerda yangi binolar, maktablar va savdo markazlari zich joylashgan.
 
-Chilonzor va Sergeli esa narx bo'yicha qulayroq variant bo'lib qolmoqda. Metro yaqinligi bu tumanlarda ijara bozorini ham faol qiladi.
+Chilonzor va Sergeli esa narx bo'yicha qulayroq variant bo'lib qolmoqda. Metro yaqinligi bu tumanlarda talabni yuqori ushlab turadi.
 
 ## Xaridor nimalarga e'tibor berishi kerak
 
@@ -236,7 +236,7 @@ Agar maqsad — o'z yashash joyi, markazga yaqinlik muhim bo'lsa, Yunusobod va M
 
 Самая высокая цена за квадратный метр сохраняется в Юнусабадском и Мирзо-Улугбекском районах. Здесь сосредоточены новостройки, школы и торговые центры.
 
-Чиланзар и Сергели остаются более доступными. Близость метро поддерживает и рынок аренды в этих районах.
+Чиланзар и Сергели остаются более доступными. Близость метро поддерживает спрос в этих районах.
 
 ## На что обратить внимание покупателю
 
@@ -327,7 +327,27 @@ Notarius, davlat boji va ro'yxatdan o'tkazish xarajatlari umumiy byudjetning bir
 async function main() {
   await mkdir(uploadsDir, { recursive: true });
 
+  const saleOptionSeeds = [
+    { slug: "naqd", nameUz: "Naqd", nameRu: "Наличные", sort: 0 },
+    { slug: "ipoteka", nameUz: "Ipoteka", nameRu: "Ипотека", sort: 1 },
+  ];
+
+  const saleOptions: Record<string, string> = {};
+
+  for (const option of saleOptionSeeds) {
+    const saved = await prisma.saleOption.upsert({
+      where: { slug: option.slug },
+      update: { nameUz: option.nameUz, nameRu: option.nameRu, sort: option.sort },
+      create: option,
+    });
+    saleOptions[option.slug] = saved.id;
+  }
+
   for (const item of listings) {
+    const saleOptionSlug =
+      item.slug === "chilonzor-3-xonali-kvartira" || item.slug === "samarqand-markaz-3-xonali"
+        ? "ipoteka"
+        : "naqd";
     const images = [
       await makeImage(`${item.slug}-1`, "Tashqi ko'rinish", "#0e634b", "#43b88c"),
       await makeImage(`${item.slug}-2`, "Ichki ko'rinish", "#1e3a5f", "#5b8db8"),
@@ -342,10 +362,12 @@ async function main() {
         descriptionRu: item.descriptionRu,
         price: item.price,
         status: item.status,
+        saleOptionId: saleOptions[saleOptionSlug],
       },
       create: {
         slug: item.slug,
         type: item.type,
+        saleOptionId: saleOptions[saleOptionSlug],
         propertyType: item.propertyType,
         titleUz: item.titleUz,
         titleRu: item.titleRu,

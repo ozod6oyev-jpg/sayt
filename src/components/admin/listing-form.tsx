@@ -12,11 +12,13 @@ const ERROR_MESSAGES: Record<string, string> = {
 export function ListingForm({
   action,
   listing,
+  saleOptions,
   error,
   saved,
 }: {
   action: (formData: FormData) => Promise<void>;
   listing?: Listing;
+  saleOptions: { id: string; nameUz: string; nameRu: string }[];
   error?: string;
   saved?: string;
 }) {
@@ -65,12 +67,21 @@ export function ListingForm({
           </div>
 
           <div>
-            <label className="label" htmlFor="type">
-              {t.admin.fields.type}
+            <label className="label" htmlFor="saleOptionId">
+              {t.admin.fields.saleOption}
             </label>
-            <select id="type" name="type" defaultValue={listing?.type ?? "sale"} className="field">
-              <option value="sale">{t.listingType.sale}</option>
-              <option value="rent">{t.listingType.rent}</option>
+            <select
+              id="saleOptionId"
+              name="saleOptionId"
+              defaultValue={listing?.saleOptionId ?? ""}
+              className="field"
+            >
+              <option value="">—</option>
+              {saleOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.nameUz}
+                </option>
+              ))}
             </select>
           </div>
 

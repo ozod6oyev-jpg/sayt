@@ -29,11 +29,28 @@ model AdminUser {
   createdUsers AdminUser[] @relation("AdminCreator")
 }
 
+model SaleOption {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  nameUz    String
+  nameRu    String
+  isActive  Boolean  @default(true)
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings Listing[]
+
+  @@index([isActive, sort])
+}
+
 model Listing {
   id           String   @id @default(cuid())
   slug         String   @unique
-  // sale | rent
+  // Eski maydon, endi ishlatilmaydi (barcha e'lonlar sotuv)
   type         String   @default("sale")
+  saleOptionId String?
+  saleOption   SaleOption? @relation(fields: [saleOptionId], references: [id], onDelete: SetNull)
   // apartment | house | land | commercial
   propertyType String   @default("apartment")
   titleUz      String
@@ -67,6 +84,7 @@ model Listing {
 
   @@index([status, createdAt])
   @@index([type, propertyType])
+  @@index([saleOptionId])
   @@index([district])
   @@index([price])
 }

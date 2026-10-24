@@ -108,7 +108,7 @@ export function MobileNav({ locale }: { locale: Locale }) {
                 href={contact.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white px-2 py-2 text-xs font-semibold text-foreground shadow-xs"
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-card px-2 py-2 text-xs font-semibold text-foreground shadow-xs"
               >
                 <InstagramIcon className="h-3.5 w-3.5" />
                 {contact.instagramHandle}
@@ -117,7 +117,7 @@ export function MobileNav({ locale }: { locale: Locale }) {
                 href={contact.telegramChannelUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white px-2 py-2 text-xs font-semibold text-foreground shadow-xs"
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-card px-2 py-2 text-xs font-semibold text-foreground shadow-xs"
               >
                 <TelegramIcon className="h-3.5 w-3.5" />
                 {contact.telegramChannelHandle}

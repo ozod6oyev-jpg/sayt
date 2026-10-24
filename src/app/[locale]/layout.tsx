@@ -45,7 +45,14 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   }
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem("uyjoy-theme")==="dark"){document.documentElement.classList.add("dark")}}catch(e){}`,
+          }}
+        />
+      </head>
       <body className={`${fontSans.variable} ${fontDisplay.variable} flex min-h-screen flex-col`}>
         <SiteHeader locale={locale} />
         <main className="flex-1">{children}</main>

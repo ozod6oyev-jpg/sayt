@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArticleBody } from "@/components/article-body";
 import { ArticleCard } from "@/components/article-card";
 import { JsonLd } from "@/components/json-ld";
+import { toArticleCardData } from "@/lib/article-view";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -217,7 +218,11 @@ export default async function ArticlePage({ params }: PageProps) {
           <h2 className="text-xl font-bold text-slate-900">{t.blog.related}</h2>
           <div className="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((item) => (
-              <ArticleCard key={item.id} article={item} locale={locale} />
+              <ArticleCard
+                key={item.id}
+                article={toArticleCardData(item, locale)}
+                locale={locale}
+              />
             ))}
           </div>
         </section>

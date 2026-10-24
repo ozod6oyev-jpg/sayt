@@ -4,6 +4,7 @@ import { MapPinIcon, PhoneIcon, TelegramIcon } from "./icons";
 import { LocaleSwitcher } from "./locale-switcher";
 import { MobileNav } from "./mobile-nav";
 import { NavLinks } from "./nav-links";
+import { ThemeToggle } from "./theme-toggle";
 import { Button } from "@/components/ui/button";
 import { contact } from "@/lib/contact";
 import { getDict, localePath, siteName, type Locale } from "@/lib/i18n";
@@ -57,7 +58,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
         </div>
       </div>
 
-      <header className="sticky top-0 z-40 border-b border-border/70 bg-white/85 backdrop-blur-xl">
+      <header className="site-header sticky top-0 z-40 border-b border-border/70 bg-white/85 backdrop-blur-xl">
         <div className="container-page flex h-16 items-center justify-between gap-4 sm:h-[4.5rem]">
           <Link href={localePath(locale)} className="flex items-center gap-2.5">
             <Image
@@ -81,12 +82,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
           <NavLinks links={links} homeHref={localePath(locale)} />
 
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="icon" className="sm:hidden">
-              <a href={contact.phoneHref} aria-label={contact.phoneDisplay}>
-                <PhoneIcon className="h-4 w-4" />
-              </a>
-            </Button>
-
+            <ThemeToggle label={locale === "ru" ? "Тёмная тема" : "Tungi rejim"} />
             <LocaleSwitcher locale={locale} />
 
             <Button asChild className="hidden sm:inline-flex">

@@ -7,7 +7,6 @@ import { prisma } from "@/lib/prisma";
 import { saveImage } from "@/lib/uploads";
 
 const LISTING_STATUSES = ["draft", "active", "sold"] as const;
-const LISTING_TYPES = ["sale", "rent"] as const;
 const PROPERTY_TYPES = ["apartment", "house", "land", "commercial"] as const;
 const ARTICLE_CATEGORIES = ["bozor", "qollanma", "ipoteka", "tahlil"] as const;
 
@@ -42,7 +41,9 @@ function bigIntOrNull(formData: FormData, key: string): bigint | null {
   const digits = text(formData, key).replace(/[^\d]/g, "");
   if (!digits) return null;
   try {
-    return BigInt(digits);
+    const value = BigInt(digits);
+    // SQLite Int64 chegarasidan oshmasligi kerak
+    return value > 9_000_000_000_000_000n ? null : value;
   } catch {
     return null;
   }
@@ -192,7 +193,7 @@ type ListingData = {
   titleRu: string;
   descriptionUz: string;
   descriptionRu: string;
-  type: string;
+  saleOptionId: string | null;
   propertyType: string;
   price: bigint;
   currency: string;
@@ -234,7 +235,7 @@ function parseListing(formData: FormData): { error: string } | { data: ListingDa
       titleRu,
       descriptionUz: text(formData, "descriptionUz"),
       descriptionRu: text(formData, "descriptionRu"),
-      type: oneOf(text(formData, "type"), LISTING_TYPES, "sale"),
+      saleOptionId: text(formData, "saleOptionId") || null,
       propertyType: oneOf(text(formData, "propertyType"), PROPERTY_TYPES, "apartment"),
       price,
       currency: oneOf(text(formData, "currency"), ["USD", "UZS"] as const, "USD"),
@@ -527,4 +528,103 @@ export async function toggleArticlePublished(id: string): Promise<void> {
 
   revalidatePublic(["/uz/blog", "/ru/blog"]);
   redirect("/admin/articles");
+}
+
+/* ------------------------------------------------------------------ */
+/* Sotuv variantlari (naqd, ipoteka va h.k.)                           */
+/* ------------------------------------------------------------------ */
+
+async function uniqueSaleOptionSlug(base: string, excludeId?: string): Promise<string> {
+  const root = slugify(base);
+  let candidate = root;
+  let counter = 1;
+
+  while (
+    await prisma.saleOption.findFirst({
+      where: { slug: candidate, ...(excludeId ? { id: { not: excludeId } } : {}) },
+      select: { id: true },
+    })
+  ) {
+    counter += 1;
+    candidate = `${root}-${counter}`;
+  }
+
+  return candidate;
+}
+
+export async function createSaleOption(formData: FormData): Promise<void> {
+  await requireAdmin();
+
+  const nameUz = text(formData, "nameUz");
+  const nameRu = text(formData, "nameRu");
+
+  if (!nameUz || !nameRu) {
+    redirect("/admin/sotuv-variantlari?error=required");
+  }
+
+  const slug = await uniqueSaleOptionSlug(text(formData, "slug") || nameUz);
+
+  await prisma.saleOption.create({
+    data: {
+      nameUz,
+      nameRu,
+      slug,
+      sort: intOrNull(formData, "sort") ?? 0,
+      isActive: formData.get("isActive") !== null,
+    },
+  });
+
+  revalidatePublic();
+  revalidatePath("/admin/sotuv-variantlari");
+  redirect("/admin/sotuv-variantlari?saved=1");
+}
+
+export async function updateSaleOption(id: string, formData: FormData): Promise<void> {
+  await requireAdmin();
+
+  const existing = await prisma.saleOption.findUnique({
+    where: { id },
+    select: { id: true, slug: true },
+  });
+
+  if (!existing) {
+    redirect("/admin/sotuv-variantlari");
+  }
+
+  const nameUz = text(formData, "nameUz");
+  const nameRu = text(formData, "nameRu");
+
+  if (!nameUz || !nameRu) {
+    redirect("/admin/sotuv-variantlari?error=required");
+  }
+
+  const requestedSlug = text(formData, "slug");
+  const slug = requestedSlug
+    ? await uniqueSaleOptionSlug(requestedSlug, id)
+    : existing.slug;
+
+  await prisma.saleOption.update({
+    where: { id },
+    data: {
+      nameUz,
+      nameRu,
+      slug,
+      sort: intOrNull(formData, "sort") ?? 0,
+      isActive: formData.get("isActive") !== null,
+    },
+  });
+
+  revalidatePublic();
+  revalidatePath("/admin/sotuv-variantlari");
+  redirect("/admin/sotuv-variantlari?saved=1");
+}
+
+export async function deleteSaleOption(id: string): Promise<void> {
+  await requireAdmin();
+
+  await prisma.saleOption.delete({ where: { id } }).catch(() => null);
+
+  revalidatePublic();
+  revalidatePath("/admin/sotuv-variantlari");
+  redirect("/admin/sotuv-variantlari");
 }

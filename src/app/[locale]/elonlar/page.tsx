@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { Prisma } from "@prisma/client";
-import { ListingCard } from "@/components/listing-card";
+import { LoadMoreListings } from "@/components/load-more-listings";
 import { SearchForm, type SearchParams } from "@/components/search-form";
-import { Button } from "@/components/ui/button";
 import { getDict, isLocale, type Locale } from "@/lib/i18n";
+import { LISTINGS_PER_PAGE, listingWhere } from "@/lib/listing-query";
+import { toListingCardData } from "@/lib/listing-view";
 import { prisma } from "@/lib/prisma";
 import { alternatesFor, robotsMeta, socialMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
-
-const PER_PAGE = 12;
-const PROPERTY_TYPES = ["apartment", "house", "land", "commercial"] as const;
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -50,7 +47,6 @@ export default async function ListingsPage({ params, searchParams }: Props) {
   const query = await searchParams;
 
   const values: SearchParams = {
-    type: first(query.type),
     propertyType: first(query.propertyType),
     district: first(query.district),
     rooms: first(query.rooms),
@@ -58,51 +54,18 @@ export default async function ListingsPage({ params, searchParams }: Props) {
     maxPrice: first(query.maxPrice),
   };
 
-  const page = Math.max(1, Number(first(query.page) ?? "1") || 1);
-
-  const where: Prisma.ListingWhereInput = { status: "active" };
-
-  if (values.type === "sale" || values.type === "rent") {
-    where.type = values.type;
-  }
-
-  if (values.propertyType && PROPERTY_TYPES.includes(values.propertyType as never)) {
-    where.propertyType = values.propertyType;
-  }
-
-  if (values.district) {
-    where.district = values.district;
-  }
-
-  if (values.rooms) {
-    if (values.rooms === "5+") {
-      where.rooms = { gte: 5 };
-    } else if (Number.isFinite(Number(values.rooms))) {
-      where.rooms = Number(values.rooms);
-    }
-  }
-
-  const priceFilter: { gte?: bigint; lte?: bigint } = {};
-  if (values.minPrice) {
-    const min = Number(values.minPrice);
-    if (Number.isFinite(min) && min >= 0) priceFilter.gte = BigInt(Math.trunc(min));
-  }
-  if (values.maxPrice) {
-    const max = Number(values.maxPrice);
-    if (Number.isFinite(max) && max >= 0) priceFilter.lte = BigInt(Math.trunc(max));
-  }
-  if (priceFilter.gte !== undefined || priceFilter.lte !== undefined) {
-    where.price = priceFilter;
-  }
+  const where = listingWhere(values);
 
   const [total, listings, districtRows] = await Promise.all([
     prisma.listing.count({ where }),
     prisma.listing.findMany({
       where,
       orderBy: { createdAt: "desc" },
-      skip: (page - 1) * PER_PAGE,
-      take: PER_PAGE,
-      include: { photos: { orderBy: { sort: "asc" }, take: 1 } },
+      take: LISTINGS_PER_PAGE,
+      include: {
+        photos: { orderBy: { sort: "asc" }, take: 1 },
+        saleOption: true,
+      },
     }),
     prisma.listing.findMany({
       where: { status: "active" },
@@ -113,17 +76,7 @@ export default async function ListingsPage({ params, searchParams }: Props) {
   ]);
 
   const districts = districtRows.map((row) => row.district);
-  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-
-  const buildPageHref = (targetPage: number) => {
-    const sp = new URLSearchParams();
-    Object.entries(values).forEach(([key, value]) => {
-      if (value) sp.set(key, value);
-    });
-    if (targetPage > 1) sp.set("page", String(targetPage));
-    const qs = sp.toString();
-    return `/${locale}/elonlar${qs ? `?${qs}` : ""}`;
-  };
+  const cards = listings.map((listing) => toListingCardData(listing, locale));
 
   return (
     <div className="container-page py-8">
@@ -146,56 +99,20 @@ export default async function ListingsPage({ params, searchParams }: Props) {
 
       <p className="mt-6 text-sm font-medium text-slate-600">{t.search.results(total)}</p>
 
-      {listings.length > 0 ? (
-        <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {listings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} locale={locale} />
-          ))}
+      {cards.length > 0 ? (
+        <div className="mt-4">
+          <LoadMoreListings
+            key={JSON.stringify(values)}
+            initial={cards}
+            hasMore={cards.length < total}
+            locale={locale}
+            filters={values}
+          />
         </div>
       ) : (
         <p className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-sm text-slate-500">
           {t.search.empty}
         </p>
-      )}
-
-      {totalPages > 1 && (
-        <nav className="mt-10 flex items-center justify-center gap-1" aria-label="Sahifalar">
-          {page > 1 && (
-            <Button asChild variant="outline" size="icon-sm">
-              <Link href={buildPageHref(page - 1)} rel="prev" aria-label="Oldingi">
-                ←
-              </Link>
-            </Button>
-          )}
-          {Array.from({ length: totalPages }, (_, index) => index + 1)
-            .filter((num) => num === 1 || num === totalPages || Math.abs(num - page) <= 1)
-            .map((num, index, arr) => (
-              <span key={num} className="flex items-center gap-1">
-                {index > 0 && arr[index - 1] !== num - 1 && (
-                  <span className="px-1 text-slate-400">…</span>
-                )}
-                <Button
-                  asChild
-                  variant={num === page ? "default" : "outline"}
-                  size="icon-sm"
-                >
-                  <Link
-                    href={buildPageHref(num)}
-                    aria-current={num === page ? "page" : undefined}
-                  >
-                    {num}
-                  </Link>
-                </Button>
-              </span>
-            ))}
-          {page < totalPages && (
-            <Button asChild variant="outline" size="icon-sm">
-              <Link href={buildPageHref(page + 1)} rel="next" aria-label="Keyingi">
-                →
-              </Link>
-            </Button>
-          )}
-        </nav>
       )}
     </div>
   );

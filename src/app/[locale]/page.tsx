@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin } from "lucide-react";
-import { ArticleCard } from "@/components/article-card";
 import { CameraIcon, HeadphonesIcon, ShieldCheckIcon } from "@/components/icons";
 import { JsonLd } from "@/components/json-ld";
-import { ListingCard } from "@/components/listing-card";
+import { ListingsSlider, type SliderSlide } from "@/components/listings-slider";
+import { LoadMoreArticles } from "@/components/load-more-articles";
+import { LoadMoreListings } from "@/components/load-more-listings";
 import { SearchForm } from "@/components/search-form";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { contact } from "@/lib/contact";
+import { toArticleCardData } from "@/lib/article-view";
+import { listingTitle, saleOptionLabel } from "@/lib/content";
+import { formatPrice } from "@/lib/format";
+import { ARTICLES_PER_PAGE, LISTINGS_PER_PAGE } from "@/lib/listing-query";
+import { toListingCardData } from "@/lib/listing-view";
 import { getDict, isLocale, localePath, siteName, type Locale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { alternatesFor, robotsMeta, siteUrl, socialMetadata } from "@/lib/seo";
@@ -44,17 +48,17 @@ export default async function HomePage({ params }: Props) {
   const locale: Locale = rawLocale;
   const t = getDict(locale);
 
-  const [listings, articles, districtRows, totalActive] = await Promise.all([
+  const [listings, articles, districtRows, totalActive, totalArticles] = await Promise.all([
     prisma.listing.findMany({
       where: { status: "active" },
       orderBy: { createdAt: "desc" },
-      take: 6,
-      include: { photos: { orderBy: { sort: "asc" }, take: 1 } },
+      take: LISTINGS_PER_PAGE,
+      include: { photos: { orderBy: { sort: "asc" }, take: 1 }, saleOption: true },
     }),
     prisma.article.findMany({
       where: { published: true },
       orderBy: { publishedAt: "desc" },
-      take: 3,
+      take: ARTICLES_PER_PAGE,
     }),
     prisma.listing.findMany({
       where: { status: "active" },
@@ -63,9 +67,40 @@ export default async function HomePage({ params }: Props) {
       orderBy: { district: "asc" },
     }),
     prisma.listing.count({ where: { status: "active" } }),
+    prisma.article.count({ where: { published: true } }),
   ]);
 
   const districts = districtRows.map((row) => row.district);
+
+  const listingCards = listings.map((listing) => toListingCardData(listing, locale));
+  const articleCards = articles.map((article) => toArticleCardData(article, locale));
+
+  const slides: SliderSlide[] = listings
+    .filter((listing) => listing.photos[0])
+    .slice(0, 5)
+    .map((listing) => {
+      const photo = listing.photos[0];
+
+      return {
+        id: listing.id,
+        href: localePath(locale, `/elonlar/${listing.slug}`),
+        title: listingTitle(listing, locale),
+        price: formatPrice(listing.price, listing.currency, locale),
+        location: `${listing.district}, ${listing.region}`,
+        saleLabel: saleOptionLabel(listing.saleOption, locale) ?? t.listing.forSale,
+        propertyTypeLabel:
+          t.propertyType[listing.propertyType as keyof typeof t.propertyType] ??
+          listing.propertyType,
+        image: photo
+          ? {
+              url: photo.url,
+              width: photo.width,
+              height: photo.height,
+              alt: photo.alt,
+            }
+          : null,
+      };
+    });
 
   return (
     <>
@@ -79,19 +114,7 @@ export default async function HomePage({ params }: Props) {
         }}
       />
 
-      <section className="bg-brand-900">
-        <div className="container-page py-4 sm:py-6">
-          <Image
-            src="/banner.webp"
-            alt={`${siteName} — ${contact.address[locale]}, ${contact.phoneDisplay}`}
-            width={1500}
-            height={600}
-            priority
-            sizes="(max-width: 1152px) 100vw, 1152px"
-            className="h-[220px] w-full rounded-2xl object-cover object-center shadow-float sm:h-[300px] lg:h-[360px]"
-          />
-        </div>
-      </section>
+      <ListingsSlider items={slides} locale={locale} />
 
       <section className="container-page pt-8 sm:pt-10">
         <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -123,11 +146,13 @@ export default async function HomePage({ params }: Props) {
           </Link>
         </div>
 
-        {listings.length > 0 ? (
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {listings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} locale={locale} />
-            ))}
+        {listingCards.length > 0 ? (
+          <div className="mt-6">
+            <LoadMoreListings
+              initial={listingCards}
+              hasMore={listingCards.length < totalActive}
+              locale={locale}
+            />
           </div>
         ) : (
           <p className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
@@ -145,11 +170,13 @@ export default async function HomePage({ params }: Props) {
             </Link>
           </div>
 
-          {articles.length > 0 ? (
-            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {articles.map((article) => (
-                <ArticleCard key={article.id} article={article} locale={locale} />
-              ))}
+          {articleCards.length > 0 ? (
+            <div className="mt-6">
+              <LoadMoreArticles
+                initial={articleCards}
+                hasMore={articleCards.length < totalArticles}
+                locale={locale}
+              />
             </div>
           ) : (
             <p className="mt-6 text-sm text-slate-500">{t.blog.empty}</p>

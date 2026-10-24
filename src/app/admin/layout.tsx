@@ -19,6 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const links = [
     { href: "/admin", label: t.admin.dashboard },
     { href: "/admin/listings", label: t.admin.listings },
+    { href: "/admin/sotuv-variantlari", label: t.admin.saleOptions },
     { href: "/admin/articles", label: t.admin.articles },
     { href: "/admin/leads", label: t.admin.leads },
     ...(user.role === "owner" ? [{ href: "/admin/users", label: "Adminlar" }] : []),

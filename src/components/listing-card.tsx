@@ -1,24 +1,21 @@
-import type { Listing, Photo } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import { BedDouble, Layers3, MapPin, Maximize2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { listingTitle } from "@/lib/content";
-import { formatArea, formatNumber, formatPrice } from "@/lib/format";
+import { formatArea, formatNumber } from "@/lib/format";
 import { getDict, localePath, type Locale } from "@/lib/i18n";
-
-export type ListingWithPhotos = Listing & { photos: Photo[] };
+import type { ListingCardData } from "@/lib/listing-view";
 
 export function ListingCard({
   listing,
   locale,
 }: {
-  listing: ListingWithPhotos;
+  listing: ListingCardData;
   locale: Locale;
 }) {
   const t = getDict(locale);
-  const cover = listing.photos[0];
+  const cover = listing.cover;
 
   return (
     <Card className="group gap-0 overflow-hidden p-0 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-float">
@@ -27,7 +24,7 @@ export function ListingCard({
           {cover ? (
             <Image
               src={cover.url}
-              alt={cover.alt || listingTitle(listing, locale)}
+              alt={cover.alt || listing.title}
               width={cover.width}
               height={cover.height}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -40,16 +37,13 @@ export function ListingCard({
           )}
 
           <div className="absolute top-3 left-3 flex gap-1.5">
-            <Badge className="shadow-sm">
-              {t.listingType[listing.type as keyof typeof t.listingType] ?? listing.type}
-            </Badge>
+            <Badge className="shadow-sm">{listing.saleLabel}</Badge>
             <Badge variant="glass" className="shadow-sm">
-              {t.propertyType[listing.propertyType as keyof typeof t.propertyType] ??
-                listing.propertyType}
+              {listing.propertyLabel}
             </Badge>
           </div>
 
-          {listing.status === "sold" && (
+          {listing.sold && (
             <Badge variant="dark" className="absolute top-3 right-3">
               {t.listing.sold}
             </Badge>
@@ -58,11 +52,11 @@ export function ListingCard({
 
         <div className="p-4 sm:p-5">
           <p className="font-display text-xl font-extrabold tracking-tight text-brand-800">
-            {formatPrice(listing.price, listing.currency, locale)}
+            {listing.price}
           </p>
 
           <h3 className="mt-1.5 line-clamp-2 min-h-[2.75rem] text-[15px] leading-6 font-semibold text-slate-800 transition-colors group-hover:text-brand-700">
-            {listingTitle(listing, locale)}
+            {listing.title}
           </h3>
 
           <p className="mt-2.5 flex items-center gap-1.5 text-xs text-muted-foreground">

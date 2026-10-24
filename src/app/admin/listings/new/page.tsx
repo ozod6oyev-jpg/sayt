@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createListing } from "@/app/actions/admin";
 import { ListingForm } from "@/components/admin/listing-form";
 import { getDict } from "@/lib/i18n";
+import { prisma } from "@/lib/prisma";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -11,6 +12,10 @@ export default async function NewListingPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const error = Array.isArray(params.error) ? params.error[0] : params.error;
   const t = getDict("uz");
+  const saleOptions = await prisma.saleOption.findMany({
+    orderBy: [{ sort: "asc" }, { nameUz: "asc" }],
+    select: { id: true, nameUz: true, nameRu: true },
+  });
 
   return (
     <div className="space-y-6">
@@ -24,7 +29,7 @@ export default async function NewListingPage({ searchParams }: PageProps) {
         </p>
       </div>
 
-      <ListingForm action={createListing} error={error} />
+      <ListingForm action={createListing} saleOptions={saleOptions} error={error} />
     </div>
   );
 }

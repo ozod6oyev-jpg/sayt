@@ -105,7 +105,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
           <Button
             asChild
             variant="secondary"
-            className="mt-5 bg-white text-brand-900 shadow-sm hover:bg-brand-50"
+            className="mt-5 bg-brand-50 text-brand-900 shadow-sm hover:bg-brand-100"
           >
             <a href={contact.telegramUrl} target="_blank" rel="noopener noreferrer">
               <HeadphonesIcon className="h-4 w-4" />

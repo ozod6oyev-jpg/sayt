@@ -34,11 +34,17 @@ const uz = {
   },
   hero: {
     title: "O'zingizga mos uyni toping",
-    subtitle: "Sotuv va ijara e'lonlari — narx, tuman va maydon bo'yicha qidiruv.",
+    subtitle: "Sotiladigan uy-joy e'lonlari — narx, tuman va maydon bo'yicha qidiruv.",
     cta: "E'lonlarni ko'rish",
   },
+  slider: {
+    view: "Ko'rish",
+  },
+  common: {
+    loadMore: "Yana 5 ta ko'rsatish",
+    loading: "Yuklanmoqda...",
+  },
   search: {
-    type: "Bitim turi",
     propertyType: "Obyekt turi",
     district: "Tuman",
     rooms: "Xonalar",
@@ -51,10 +57,6 @@ const uz = {
     results: (n: number) => `${n} ta e'lon topildi`,
     empty: "Bu shartlarga mos e'lon topilmadi.",
     anyRooms: "Xonalar soni",
-  },
-  listingType: {
-    sale: "Sotuv",
-    rent: "Ijara",
   },
   propertyType: {
     apartment: "Kvartira",
@@ -87,6 +89,7 @@ const uz = {
     backToList: "Barcha e'lonlar",
     sold: "Sotilgan",
     perM2: "so'm/m²",
+    forSale: "Sotuv",
   },
   lead: {
     title: "Bu uy bo'yicha ma'lumot olish",
@@ -116,7 +119,7 @@ const uz = {
   } as Record<string, string>,
   footer: {
     about:
-      "Toshkent va viloyatlar bo'ylab uy-joy e'lonlari. Sotib olish, sotish va ijara — bitta joyda.",
+      "Toshkent va viloyatlar bo'ylab uy-joy e'lonlari. Sotib olish va sotish — bitta joyda.",
     navigation: "Bo'limlar",
     contact: "Bog'lanish",
     rights: "Barcha huquqlar himoyalangan.",
@@ -130,6 +133,10 @@ const uz = {
     leads: "So'rovlar",
     newListing: "Yangi e'lon",
     newArticle: "Yangi maqola",
+    saleOptions: "Sotuv variantlari",
+    newSaleOption: "Yangi variant",
+    saleOptionsHint:
+      "E'lon formasida tanlanadigan sotuv shartlari. Masalan: Naqd, Ipoteka. Har bir variant alohida e'lon uchun tanlanadi.",
     logout: "Chiqish",
     login: "Kirish",
     password: "Parol",
@@ -154,10 +161,13 @@ const uz = {
     fields: {
       titleUz: "Sarlavha (o'zbekcha)",
       titleRu: "Sarlavha (ruscha)",
+      saleOption: "Sotuv varianti",
+      saleOptionUz: "Nomi (o'zbekcha)",
+      saleOptionRu: "Nomi (ruscha)",
+      sort: "Tartib raqami",
       descriptionUz: "Tavsif (o'zbekcha)",
       descriptionRu: "Tavsif (ruscha)",
       slug: "URL (slug)",
-      type: "Bitim turi",
       propertyType: "Obyekt turi",
       price: "Narx",
       currency: "Valyuta",
@@ -208,11 +218,17 @@ const ru: Dict = {
   },
   hero: {
     title: "Найдите подходящий дом",
-    subtitle: "Продажа и аренда — поиск по цене, району и площади.",
+    subtitle: "Объявления о продаже жилья — поиск по цене, району и площади.",
     cta: "Смотреть объявления",
   },
+  slider: {
+    view: "Смотреть",
+  },
+  common: {
+    loadMore: "Показать ещё 5",
+    loading: "Загрузка...",
+  },
   search: {
-    type: "Тип сделки",
     propertyType: "Тип объекта",
     district: "Район",
     rooms: "Комнаты",
@@ -225,10 +241,6 @@ const ru: Dict = {
     results: (n: number) => `Найдено объявлений: ${n}`,
     empty: "По этим условиям объявлений не найдено.",
     anyRooms: "Количество комнат",
-  },
-  listingType: {
-    sale: "Продажа",
-    rent: "Аренда",
   },
   propertyType: {
     apartment: "Квартира",
@@ -261,6 +273,7 @@ const ru: Dict = {
     backToList: "Все объявления",
     sold: "Продано",
     perM2: "сум/м²",
+    forSale: "Продажа",
   },
   lead: {
     title: "Узнать подробнее об этом объекте",
@@ -290,7 +303,7 @@ const ru: Dict = {
   },
   footer: {
     about:
-      "Объявления о недвижимости по Ташкенту и регионам. Покупка, продажа и аренда — в одном месте.",
+      "Объявления о недвижимости по Ташкенту и регионам. Покупка и продажа — в одном месте.",
     navigation: "Разделы",
     contact: "Связаться",
     rights: "Все права защищены.",
@@ -304,6 +317,10 @@ const ru: Dict = {
     leads: "Заявки",
     newListing: "Новое объявление",
     newArticle: "Новая статья",
+    saleOptions: "Варианты продажи",
+    newSaleOption: "Новый вариант",
+    saleOptionsHint:
+      "Условия продажи, которые выбираются в форме объявления. Например: наличные, ипотека. Для каждого объявления выбирается отдельно.",
     logout: "Выйти",
     login: "Войти",
     password: "Пароль",
@@ -328,10 +345,13 @@ const ru: Dict = {
     fields: {
       titleUz: "Заголовок (узбекский)",
       titleRu: "Заголовок (русский)",
+      saleOption: "Вариант продажи",
+      saleOptionUz: "Название (узбекский)",
+      saleOptionRu: "Название (русский)",
+      sort: "Порядок",
       descriptionUz: "Описание (узбекский)",
       descriptionRu: "Описание (русский)",
       slug: "URL (slug)",
-      type: "Тип сделки",
       propertyType: "Тип объекта",
       price: "Цена",
       currency: "Валюта",

@@ -6,6 +6,7 @@ import { submitLead } from "@/app/actions/leads";
 import { JsonLd } from "@/components/json-ld";
 import { MapPinIcon, PhoneIcon, TelegramIcon } from "@/components/icons";
 import { ListingCard } from "@/components/listing-card";
+import { toListingCardData } from "@/lib/listing-view";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { contact } from "@/lib/contact";
-import { listingDescription, listingTitle } from "@/lib/content";
+import { listingDescription, listingTitle, saleOptionLabel } from "@/lib/content";
 import { formatArea, formatFloor, formatNumber, formatPrice } from "@/lib/format";
 import { getDict, isLocale, siteName, type Locale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
@@ -35,7 +36,7 @@ type Props = {
 async function getListing(slug: string) {
   return prisma.listing.findFirst({
     where: { slug, status: { in: ["active", "sold"] } },
-    include: { photos: { orderBy: { sort: "asc" } } },
+    include: { photos: { orderBy: { sort: "asc" } }, saleOption: true },
   });
 }
 
@@ -95,7 +96,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
     },
     orderBy: { createdAt: "desc" },
     take: 3,
-    include: { photos: { orderBy: { sort: "asc" }, take: 1 } },
+    include: { photos: { orderBy: { sort: "asc" }, take: 1 }, saleOption: true },
   });
 
   const specs = [
@@ -227,9 +228,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="mb-2.5 flex flex-wrap gap-1.5">
-                    <Badge>
-                      {t.listingType[listing.type as keyof typeof t.listingType] ?? listing.type}
-                    </Badge>
+                    <Badge>{saleOptionLabel(listing.saleOption, locale) ?? t.listing.forSale}</Badge>
                     <Badge variant="secondary">
                       {t.propertyType[listing.propertyType as keyof typeof t.propertyType] ??
                         listing.propertyType}
@@ -258,9 +257,9 @@ export default async function ListingPage({ params, searchParams }: Props) {
               </p>
             ) : null}
 
-            <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 sm:grid-cols-3">
+            <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
               {specs.map((spec) => (
-                <div key={spec.label} className="bg-white p-4">
+                <div key={spec.label} className="bg-card p-4">
                   <dt className="text-xs text-slate-500">{spec.label}</dt>
                   <dd className="mt-1 text-sm font-semibold text-slate-900">{spec.value}</dd>
                 </div>
@@ -400,7 +399,11 @@ export default async function ListingPage({ params, searchParams }: Props) {
           <h2 className="text-xl font-bold">{t.listing.similar}</h2>
           <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {similar.map((item) => (
-              <ListingCard key={item.id} listing={item} locale={locale} />
+              <ListingCard
+                key={item.id}
+                listing={toListingCardData(item, locale)}
+                locale={locale}
+              />
             ))}
           </div>
         </section>

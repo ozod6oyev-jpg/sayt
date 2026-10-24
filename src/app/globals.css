@@ -26,6 +26,30 @@
   --ring: #3366e8;
 }
 
+.dark {
+  color-scheme: dark;
+
+  --background: #071426;
+  --foreground: #eaf1fb;
+  --card: #0b1d33;
+  --card-foreground: #eaf1fb;
+  --popover: #0b1d33;
+  --popover-foreground: #eaf1fb;
+  --primary: #5b8cf7;
+  --primary-foreground: #04122a;
+  --secondary: #122a47;
+  --secondary-foreground: #dbe7ff;
+  --muted: #122a47;
+  --muted-foreground: #93a8c7;
+  --accent: #122a47;
+  --accent-foreground: #dbe7ff;
+  --destructive: #f87171;
+  --destructive-foreground: #1a0505;
+  --border: #1e3552;
+  --input: #27425f;
+  --ring: #5b8cf7;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -84,13 +108,13 @@
   }
 
   body {
-    @apply bg-white text-slate-800 antialiased;
+    @apply bg-background text-foreground antialiased;
   }
 
   h1,
   h2,
   h3 {
-    @apply font-display text-slate-900;
+    @apply font-display text-foreground;
     letter-spacing: -0.015em;
     text-wrap: balance;
   }
@@ -194,4 +218,120 @@
 
 .article-body strong {
   @apply font-semibold text-slate-900;
+}
+
+/* Dark rejim: mavjud slate/brand ranglarini tungi palitraga moslash */
+.dark .section-heading,
+.dark .article-body h2,
+.dark .article-body h3,
+.dark .article-body strong {
+  color: var(--foreground);
+}
+
+.dark .label {
+  color: var(--muted-foreground);
+}
+
+.dark .field {
+  background-color: var(--background);
+  border-color: var(--input);
+  color: var(--foreground);
+}
+
+.dark .field::placeholder {
+  color: var(--muted-foreground);
+}
+
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: var(--border);
+}
+
+.dark .divide-slate-100 > :not(:last-child) {
+  border-color: var(--border);
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-100 {
+  background-color: #0e2038;
+}
+
+.dark .bg-slate-200 {
+  background-color: var(--border);
+}
+
+.dark .text-slate-900,
+.dark .text-slate-800 {
+  color: #eaf1fb;
+}
+
+.dark .text-slate-700 {
+  color: #cfdcef;
+}
+
+.dark .text-slate-600 {
+  color: #b3c6de;
+}
+
+.dark .text-slate-500,
+.dark .text-slate-400 {
+  color: #8fa7c6;
+}
+
+.dark .bg-brand-50 {
+  background-color: rgba(91, 140, 247, 0.14);
+}
+
+.dark .bg-brand-100 {
+  background-color: rgba(91, 140, 247, 0.2);
+}
+
+.dark .text-brand-900,
+.dark .text-brand-800,
+.dark .text-brand-700 {
+  color: #9dbdff;
+}
+
+.dark .text-brand-600 {
+  color: #8fb3ff;
+}
+
+.dark .border-brand-100,
+.dark .border-brand-200 {
+  border-color: rgba(91, 140, 247, 0.35);
+}
+
+.dark .article-body {
+  color: #cfdcef;
+}
+
+.dark .article-body a {
+  color: #9dbdff;
+}
+
+.dark .article-body blockquote {
+  background-color: rgba(91, 140, 247, 0.12);
+  color: #cfdcef;
+}
+
+.dark .site-header {
+  background-color: rgba(7, 20, 38, 0.88);
+  border-color: var(--border);
+}
+
+.dark .hover\:bg-slate-100:hover {
+  background-color: #0e2038;
+}
+
+.dark .hover\:bg-slate-50:hover {
+  background-color: #0b1d33;
+}
+
+.dark .hover\:text-slate-900:hover {
+  color: #ffffff;
+}
+
+.dark .hover\:text-brand-700:hover {
+  color: #9dbdff;
 }
