@@ -366,3 +366,41 @@ html[data-theme-transition="light"]::view-transition-old(root) {
     animation: none !important;
   }
 }
+
+/* Bildirishnoma qo'ng'irog'i jiringlashi */
+@keyframes bell-ring {
+  0%,
+  62%,
+  100% {
+    transform: rotate(0deg);
+  }
+  66% {
+    transform: rotate(13deg);
+  }
+  70% {
+    transform: rotate(-11deg);
+  }
+  74% {
+    transform: rotate(9deg);
+  }
+  78% {
+    transform: rotate(-7deg);
+  }
+  82% {
+    transform: rotate(4deg);
+  }
+  86% {
+    transform: rotate(0deg);
+  }
+}
+
+.bell-ring {
+  transform-origin: 50% 12%;
+  animation: bell-ring 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bell-ring {
+    animation: none;
+  }
+}

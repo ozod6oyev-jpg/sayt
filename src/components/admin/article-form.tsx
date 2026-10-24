@@ -1,16 +1,10 @@
 import type { Article } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
-import { getDict } from "@/lib/i18n";
+import { articlesCopy } from "@/lib/admin-copy/articles";
+import { getAdminCopy } from "@/lib/admin-i18n";
 
-const t = getDict("uz");
-
-const ERROR_MESSAGES: Record<string, string> = {
-  required: "Sarlavha (ikki tilda) va muallif ismini to'ldiring.",
-  cover: "Muqova rasmni yuklang.",
-};
-
-export function ArticleForm({
+export async function ArticleForm({
   action,
   article,
   error,
@@ -21,23 +15,29 @@ export function ArticleForm({
   error?: string;
   saved?: string;
 }) {
+  const c = await getAdminCopy(articlesCopy);
   const today = new Date().toISOString().slice(0, 10);
+
+  const errorMessages: Record<string, string> = {
+    required: c.errRequired,
+    cover: c.errCover,
+  };
 
   return (
     <form action={action} className="card space-y-6 p-6">
       {error && (
         <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-          {ERROR_MESSAGES[error] ?? "Xatolik yuz berdi. Qayta urinib ko'ring."}
+          {errorMessages[error] ?? c.errorGeneric}
         </p>
       )}
       {saved && (
-        <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700">Saqlandi.</p>
+        <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700">{c.saved}</p>
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label className="label" htmlFor="titleUz">
-            {t.admin.fields.titleUz} *
+            {c.fieldTitleUz} *
           </label>
           <input
             id="titleUz"
@@ -45,13 +45,13 @@ export function ArticleForm({
             required
             defaultValue={article?.titleUz}
             className="field"
-            placeholder="Toshkentda kvartira narxlari: 2026 tahlili"
+            placeholder={c.placeholderTitle}
           />
         </div>
 
         <div className="sm:col-span-2">
           <label className="label" htmlFor="titleRu">
-            {t.admin.fields.titleRu} *
+            {c.fieldTitleRu} *
           </label>
           <input
             id="titleRu"
@@ -64,7 +64,7 @@ export function ArticleForm({
 
         <div>
           <label className="label" htmlFor="category">
-            {t.admin.fields.category}
+            {c.fieldCategory}
           </label>
           <select
             id="category"
@@ -72,29 +72,29 @@ export function ArticleForm({
             defaultValue={article?.category ?? "qollanma"}
             className="field"
           >
-            <option value="bozor">{t.category.bozor}</option>
-            <option value="qollanma">{t.category.qollanma}</option>
-            <option value="ipoteka">{t.category.ipoteka}</option>
-            <option value="tahlil">{t.category.tahlil}</option>
+            <option value="bozor">{c.catBozor}</option>
+            <option value="qollanma">{c.catQollanma}</option>
+            <option value="ipoteka">{c.catIpoteka}</option>
+            <option value="tahlil">{c.catTahlil}</option>
           </select>
         </div>
 
         <div>
           <label className="label" htmlFor="slug">
-            {t.admin.fields.slug}
+            {c.fieldSlug}
           </label>
           <input
             id="slug"
             name="slug"
             defaultValue={article?.slug}
             className="field"
-            placeholder="avtomatik"
+            placeholder={c.placeholderSlug}
           />
         </div>
 
         <div>
           <label className="label" htmlFor="authorName">
-            {t.admin.fields.authorName} *
+            {c.fieldAuthorName} *
           </label>
           <input
             id="authorName"
@@ -102,26 +102,26 @@ export function ArticleForm({
             required
             defaultValue={article?.authorName}
             className="field"
-            placeholder="Ism Familiya"
+            placeholder={c.placeholderAuthor}
           />
         </div>
 
         <div>
           <label className="label" htmlFor="authorRole">
-            {t.admin.fields.authorRole}
+            {c.fieldAuthorRole}
           </label>
           <input
             id="authorRole"
             name="authorRole"
             defaultValue={article?.authorRole}
             className="field"
-            placeholder="Ko'chmas mulk bo'yicha mutaxassis"
+            placeholder={c.placeholderAuthorRole}
           />
         </div>
 
         <div>
           <label className="label" htmlFor="publishedAt">
-            {t.admin.fields.publishedAt}
+            {c.fieldPublishedAt}
           </label>
           <input
             id="publishedAt"
@@ -140,19 +140,19 @@ export function ArticleForm({
               defaultChecked={article?.published ?? true}
               className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
             />
-            {t.admin.published}
+            {c.fieldPublished}
           </label>
         </div>
       </div>
 
       <section>
         <h2 className="mb-4 text-sm font-semibold tracking-wide text-slate-500 uppercase">
-          Qisqa tavsif
+          {c.sectionExcerpt}
         </h2>
         <div className="grid gap-4">
           <div>
             <label className="label" htmlFor="excerptUz">
-              {t.admin.fields.excerptUz}
+              {c.fieldExcerptUz}
             </label>
             <textarea
               id="excerptUz"
@@ -160,12 +160,12 @@ export function ArticleForm({
               rows={3}
               defaultValue={article?.excerptUz}
               className="field"
-              placeholder="Google Discover uchun 1-2 jumlalik qisqa tavsif."
+              placeholder={c.placeholderExcerpt}
             />
           </div>
           <div>
             <label className="label" htmlFor="excerptRu">
-              {t.admin.fields.excerptRu}
+              {c.fieldExcerptRu}
             </label>
             <textarea
               id="excerptRu"
@@ -180,12 +180,12 @@ export function ArticleForm({
 
       <section>
         <h2 className="mb-4 text-sm font-semibold tracking-wide text-slate-500 uppercase">
-          Matn
+          {c.sectionBody}
         </h2>
         <div className="grid gap-4">
           <div>
             <label className="label" htmlFor="bodyUz">
-              {t.admin.fields.bodyUz}
+              {c.fieldBodyUz}
             </label>
             <textarea
               id="bodyUz"
@@ -197,7 +197,7 @@ export function ArticleForm({
           </div>
           <div>
             <label className="label" htmlFor="bodyRu">
-              {t.admin.fields.bodyRu}
+              {c.fieldBodyRu}
             </label>
             <textarea
               id="bodyRu"
@@ -209,16 +209,19 @@ export function ArticleForm({
           </div>
         </div>
         <p className="mt-2 text-xs text-slate-500">
-          Matn bo'sh qator bilan ajratilgan paragraflarga bo'linadi. Sarlavhalar uchun
-          <code className="mx-1 rounded bg-slate-100 px-1">##</code> va
-          <code className="mx-1 rounded bg-slate-100 px-1">###</code>, ro'yxat uchun
-          <code className="mx-1 rounded bg-slate-100 px-1">-</code> ishlatiladi.
+          {c.bodyHintStart}
+          <code className="mx-1 rounded bg-slate-100 px-1">##</code>
+          {c.bodyHintAnd}
+          <code className="mx-1 rounded bg-slate-100 px-1">###</code>
+          {c.bodyHintList}
+          <code className="mx-1 rounded bg-slate-100 px-1">-</code>
+          {c.bodyHintEnd}
         </p>
       </section>
 
       <section>
         <h2 className="mb-4 text-sm font-semibold tracking-wide text-slate-500 uppercase">
-          {t.admin.fields.cover}
+          {c.sectionCover}
         </h2>
 
         {article && (
@@ -230,9 +233,7 @@ export function ArticleForm({
               height={article.coverHeight}
               className="h-32 w-48 rounded-lg object-cover"
             />
-            <p className="text-xs text-slate-500">
-              Joriy muqova. Yangi rasm yuklamasangiz, shu rasm qoladi.
-            </p>
+            <p className="text-xs text-slate-500">{c.currentCover}</p>
           </div>
         )}
 
@@ -243,17 +244,15 @@ export function ArticleForm({
           required={!article}
           className="field file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-700"
         />
-        <p className="mt-2 text-xs text-slate-500">
-          Kamida 1200px kenglikdagi rasm tavsiya etiladi (Discover uchun).
-        </p>
+        <p className="mt-2 text-xs text-slate-500">{c.coverHint}</p>
       </section>
 
       <div className="flex items-center gap-3 border-t border-slate-200 pt-5">
         <button type="submit" className="btn-primary">
-          {t.admin.save}
+          {c.save}
         </button>
         <Link href="/admin/articles" className="btn-secondary">
-          Bekor qilish
+          {c.cancel}
         </Link>
       </div>
     </form>

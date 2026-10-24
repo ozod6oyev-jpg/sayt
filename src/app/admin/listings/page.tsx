@@ -2,12 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { deleteListing } from "@/app/actions/admin";
 import { StatusBadge } from "@/components/admin/status-badge";
+import { getAdminCopy, getAdminScript } from "@/lib/admin-i18n";
+import { listingsCopy } from "@/lib/admin-copy/listings";
 import { formatNumber, formatPrice } from "@/lib/format";
-import { getDict } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminListingsPage() {
-  const t = getDict("uz");
+  const c = await getAdminCopy(listingsCopy);
+  const script = await getAdminScript();
 
   const listings = await prisma.listing.findMany({
     orderBy: { createdAt: "desc" },
@@ -22,20 +24,22 @@ export default async function AdminListingsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">{t.admin.listings}</h1>
-          <p className="mt-0.5 text-sm text-slate-500">Jami: {listings.length} ta</p>
+          <h1 className="text-xl font-bold text-slate-900">{c.title}</h1>
+          <p className="mt-0.5 text-sm text-slate-500">
+            {c.total.replace("{n}", String(listings.length))}
+          </p>
         </div>
         <Link href="/admin/listings/new" className="btn-primary text-xs">
-          + {t.admin.newListing}
+          + {c.newListing}
         </Link>
       </div>
 
       <div className="card overflow-hidden">
         {listings.length === 0 ? (
           <div className="px-4 py-16 text-center">
-            <p className="text-sm text-slate-500">Hozircha e'lon qo'shilmagan.</p>
+            <p className="text-sm text-slate-500">{c.empty}</p>
             <Link href="/admin/listings/new" className="btn-primary mt-4 text-xs">
-              Birinchi e'lonni qo'shish
+              {c.addFirst}
             </Link>
           </div>
         ) : (
@@ -43,14 +47,14 @@ export default async function AdminListingsPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs text-slate-500">
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">Rasm</th>
-                  <th className="px-4 py-2.5 font-medium">Sarlavha</th>
-                  <th className="px-4 py-2.5 font-medium">Narx</th>
-                  <th className="px-4 py-2.5 font-medium">Holat</th>
-                  <th className="px-4 py-2.5 font-medium">Tuman</th>
-                  <th className="px-4 py-2.5 font-medium">Ko'rish</th>
-                  <th className="px-4 py-2.5 font-medium">So'rov</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Amallar</th>
+                  <th className="px-4 py-2.5 font-medium">{c.thPhoto}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.thTitle}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.thPrice}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.thStatus}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.thDistrict}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.thViews}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.thLeads}</th>
+                  <th className="px-4 py-2.5 text-right font-medium">{c.thActions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -70,7 +74,7 @@ export default async function AdminListingsPage() {
                           />
                         ) : (
                           <div className="flex h-12 w-16 items-center justify-center rounded-md bg-slate-100 text-[10px] text-slate-400">
-                            Yo'q
+                            {c.none}
                           </div>
                         )}
                       </td>
@@ -87,7 +91,7 @@ export default async function AdminListingsPage() {
                         {formatPrice(listing.price, listing.currency, "uz")}
                       </td>
                       <td className="px-4 py-2">
-                        <StatusBadge status={listing.status} />
+                        <StatusBadge status={listing.status} script={script} />
                       </td>
                       <td className="px-4 py-2 whitespace-nowrap text-slate-600">
                         {listing.district}
@@ -102,15 +106,15 @@ export default async function AdminListingsPage() {
                             href={`/admin/listings/${listing.id}`}
                             className="text-xs font-medium text-brand-700 hover:underline"
                           >
-                            {t.admin.edit}
+                            {c.edit}
                           </Link>
                           <form action={deleteListing.bind(null, listing.id)}>
                             <button
                               type="submit"
-                              title="E'lon butunlay o'chiriladi"
+                              title={c.deleteTitle}
                               className="text-xs font-medium text-red-600 hover:underline"
                             >
-                              {t.admin.delete}
+                              {c.delete}
                             </button>
                           </form>
                         </div>
@@ -125,7 +129,7 @@ export default async function AdminListingsPage() {
       </div>
 
       <p className="text-xs text-slate-500">
-        E'lonlarni saytda ko'rish uchun:{" "}
+        {c.viewOnSite}{" "}
         <Link href="/uz/elonlar" className="text-brand-700 hover:underline">
           /uz/elonlar
         </Link>

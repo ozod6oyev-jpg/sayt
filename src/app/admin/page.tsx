@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/admin/status-badge";
+import { dashboardCopy } from "@/lib/admin-copy/dashboard";
+import { getAdminCopy, getAdminScript } from "@/lib/admin-i18n";
 import { formatNumber, formatPrice } from "@/lib/format";
-import { getDict } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 
 function formatDateTime(date: Date): string {
@@ -12,7 +13,8 @@ function formatDateTime(date: Date): string {
 }
 
 export default async function AdminDashboardPage() {
-  const t = getDict("uz");
+  const c = await getAdminCopy(dashboardCopy);
+  const script = await getAdminScript();
 
   const [totalListings, activeListings, viewsAgg, leadsCount, articlesCount, listings, leads] =
     await Promise.all([
@@ -30,23 +32,23 @@ export default async function AdminDashboardPage() {
     ]);
 
   const stats = [
-    { label: t.admin.stats.total, value: formatNumber(totalListings, "uz") },
-    { label: t.admin.stats.active, value: formatNumber(activeListings, "uz") },
-    { label: t.admin.stats.views, value: formatNumber(viewsAgg._sum.views ?? 0, "uz") },
-    { label: t.admin.stats.leads, value: formatNumber(leadsCount, "uz") },
-    { label: t.admin.stats.articles, value: formatNumber(articlesCount, "uz") },
+    { label: c.statTotal, value: formatNumber(totalListings, "uz") },
+    { label: c.statActive, value: formatNumber(activeListings, "uz") },
+    { label: c.statViews, value: formatNumber(viewsAgg._sum.views ?? 0, "uz") },
+    { label: c.statLeads, value: formatNumber(leadsCount, "uz") },
+    { label: c.statArticles, value: formatNumber(articlesCount, "uz") },
   ];
 
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-bold text-slate-900">{t.admin.dashboard}</h1>
+        <h1 className="text-xl font-bold text-slate-900">{c.title}</h1>
         <div className="flex gap-2">
           <Link href="/admin/listings/new" className="btn-primary text-xs">
-            + {t.admin.newListing}
+            + {c.newListing}
           </Link>
           <Link href="/admin/articles/new" className="btn-secondary text-xs">
-            + {t.admin.newArticle}
+            + {c.newArticle}
           </Link>
         </div>
       </div>
@@ -62,23 +64,23 @@ export default async function AdminDashboardPage() {
 
       <section className="card overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-          <h2 className="text-sm font-semibold text-slate-900">{t.admin.listings}</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{c.listingsHeading}</h2>
           <Link href="/admin/listings" className="text-xs font-medium text-brand-700">
-            Barchasi →
+            {c.all}
           </Link>
         </div>
 
         {listings.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-slate-500">Hozircha e'lon yo'q.</p>
+          <p className="px-4 py-8 text-center text-sm text-slate-500">{c.listingsEmpty}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs text-slate-500">
                 <tr>
-                  <th className="px-4 py-2 font-medium">Sarlavha</th>
-                  <th className="px-4 py-2 font-medium">Narx</th>
-                  <th className="px-4 py-2 font-medium">Holat</th>
-                  <th className="px-4 py-2 font-medium">Sana</th>
+                  <th className="px-4 py-2 font-medium">{c.colTitle}</th>
+                  <th className="px-4 py-2 font-medium">{c.colPrice}</th>
+                  <th className="px-4 py-2 font-medium">{c.colStatus}</th>
+                  <th className="px-4 py-2 font-medium">{c.colDate}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -96,7 +98,7 @@ export default async function AdminDashboardPage() {
                       {formatPrice(listing.price, listing.currency, "uz")}
                     </td>
                     <td className="px-4 py-2">
-                      <StatusBadge status={listing.status} />
+                      <StatusBadge status={listing.status} script={script} />
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-xs text-slate-500">
                       {formatDateTime(listing.createdAt)}
@@ -111,23 +113,23 @@ export default async function AdminDashboardPage() {
 
       <section className="card overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-          <h2 className="text-sm font-semibold text-slate-900">{t.admin.leads}</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{c.leadsHeading}</h2>
           <Link href="/admin/leads" className="text-xs font-medium text-brand-700">
-            Barchasi →
+            {c.all}
           </Link>
         </div>
 
         {leads.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-slate-500">Hozircha so'rov yo'q.</p>
+          <p className="px-4 py-8 text-center text-sm text-slate-500">{c.leadsEmpty}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs text-slate-500">
                 <tr>
-                  <th className="px-4 py-2 font-medium">Ism</th>
-                  <th className="px-4 py-2 font-medium">Telefon</th>
-                  <th className="px-4 py-2 font-medium">E'lon</th>
-                  <th className="px-4 py-2 font-medium">Sana</th>
+                  <th className="px-4 py-2 font-medium">{c.colName}</th>
+                  <th className="px-4 py-2 font-medium">{c.colPhone}</th>
+                  <th className="px-4 py-2 font-medium">{c.colListing}</th>
+                  <th className="px-4 py-2 font-medium">{c.colDate}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

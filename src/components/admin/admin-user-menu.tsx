@@ -24,12 +24,16 @@ function initials(name: string) {
 
 export function AdminUserMenu({
   name,
-  role,
+  roleLabel,
   logoutLabel,
+  viewSiteLabel,
+  profileLabel,
 }: {
   name: string;
-  role: string;
+  roleLabel: string;
   logoutLabel: string;
+  viewSiteLabel: string;
+  profileLabel: string;
 }) {
   return (
     <DropdownMenu>
@@ -46,9 +50,7 @@ export function AdminUserMenu({
             <span className="block max-w-[140px] truncate text-xs font-semibold text-foreground">
               {name}
             </span>
-            <span className="block text-[10px] text-muted-foreground">
-              {role === "owner" ? "Owner" : "Admin"}
-            </span>
+            <span className="block text-[10px] text-muted-foreground">{roleLabel}</span>
           </span>
           <ChevronDown className="hidden size-3.5 text-muted-foreground sm:block" />
         </button>
@@ -61,13 +63,13 @@ export function AdminUserMenu({
         <DropdownMenuItem asChild>
           <Link href="/uz">
             <ExternalLink className="size-4 text-muted-foreground" />
-            Saytni ko&apos;rish
+            {viewSiteLabel}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/admin/profil">
             <UserRound className="size-4 text-muted-foreground" />
-            Profil
+            {profileLabel}
           </Link>
         </DropdownMenuItem>
 

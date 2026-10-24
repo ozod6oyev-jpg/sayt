@@ -2,12 +2,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { deleteArticle, toggleArticlePublished } from "@/app/actions/admin";
 import { PublishedBadge } from "@/components/admin/status-badge";
+import { getAdminCopy, getAdminScript } from "@/lib/admin-i18n";
+import { articlesCopy } from "@/lib/admin-copy/articles";
 import { formatDate } from "@/lib/format";
-import { getDict } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminArticlesPage() {
-  const t = getDict("uz");
+  const c = await getAdminCopy(articlesCopy);
+  const script = await getAdminScript();
+
+  const categoryLabels: Record<string, string> = {
+    bozor: c.catBozor,
+    qollanma: c.catQollanma,
+    ipoteka: c.catIpoteka,
+    tahlil: c.catTahlil,
+  };
 
   const articles = await prisma.article.findMany({
     orderBy: { publishedAt: "desc" },
@@ -18,20 +27,22 @@ export default async function AdminArticlesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">{t.admin.articles}</h1>
-          <p className="mt-0.5 text-sm text-slate-500">Jami: {articles.length} ta</p>
+          <h1 className="text-xl font-bold text-slate-900">{c.title}</h1>
+          <p className="mt-0.5 text-sm text-slate-500">
+            {c.total.replace("{n}", String(articles.length))}
+          </p>
         </div>
         <Link href="/admin/articles/new" className="btn-primary text-xs">
-          + {t.admin.newArticle}
+          + {c.newArticle}
         </Link>
       </div>
 
       <div className="card overflow-hidden">
         {articles.length === 0 ? (
           <div className="px-4 py-16 text-center">
-            <p className="text-sm text-slate-500">Hozircha maqola yo'q.</p>
+            <p className="text-sm text-slate-500">{c.empty}</p>
             <Link href="/admin/articles/new" className="btn-primary mt-4 text-xs">
-              Birinchi maqolani yozish
+              {c.writeFirst}
             </Link>
           </div>
         ) : (
@@ -39,12 +50,12 @@ export default async function AdminArticlesPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs text-slate-500">
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">Muqova</th>
-                  <th className="px-4 py-2.5 font-medium">Sarlavha</th>
-                  <th className="px-4 py-2.5 font-medium">Kategoriya</th>
-                  <th className="px-4 py-2.5 font-medium">Holat</th>
-                  <th className="px-4 py-2.5 font-medium">Sana</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Amallar</th>
+                  <th className="px-4 py-2.5 font-medium">{c.colCover}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.colTitle}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.colCategory}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.colStatus}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.colDate}</th>
+                  <th className="px-4 py-2.5 text-right font-medium">{c.colActions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -69,10 +80,10 @@ export default async function AdminArticlesPage() {
                       <p className="mt-0.5 text-xs text-slate-400">{article.authorName}</p>
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-slate-600">
-                      {t.category[article.category] ?? article.category}
+                      {categoryLabels[article.category] ?? article.category}
                     </td>
                     <td className="px-4 py-2">
-                      <PublishedBadge published={article.published} />
+                      <PublishedBadge published={article.published} script={script} />
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-xs text-slate-500">
                       {formatDate(article.publishedAt, "uz")}
@@ -84,22 +95,22 @@ export default async function AdminArticlesPage() {
                             type="submit"
                             className="text-xs font-medium text-slate-600 hover:underline"
                           >
-                            {article.published ? "Yashirish" : "Nashr"}
+                            {article.published ? c.hide : c.publish}
                           </button>
                         </form>
                         <Link
                           href={`/admin/articles/${article.id}`}
                           className="text-xs font-medium text-brand-700 hover:underline"
                         >
-                          {t.admin.edit}
+                          {c.edit}
                         </Link>
                         <form action={deleteArticle.bind(null, article.id)}>
                           <button
                             type="submit"
-                            title="Maqola butunlay o'chiriladi"
+                            title={c.deleteTitle}
                             className="text-xs font-medium text-red-600 hover:underline"
                           >
-                            {t.admin.delete}
+                            {c.delete}
                           </button>
                         </form>
                       </div>
@@ -112,10 +123,7 @@ export default async function AdminArticlesPage() {
         )}
       </div>
 
-      <p className="text-xs text-slate-500">
-        Maqolalar Discover uchun asosiy manba. Kamida 1200px kenglikdagi muqova rasm
-        ishlating.
-      </p>
+      <p className="text-xs text-slate-500">{c.note}</p>
     </div>
   );
 }

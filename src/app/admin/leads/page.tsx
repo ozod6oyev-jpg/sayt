@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getDict } from "@/lib/i18n";
+import { getAdminCopy } from "@/lib/admin-i18n";
+import { peopleCopy } from "@/lib/admin-copy/people";
 import { prisma } from "@/lib/prisma";
 
 function formatDateTime(date: Date): string {
@@ -10,7 +11,7 @@ function formatDateTime(date: Date): string {
 }
 
 export default async function AdminLeadsPage() {
-  const t = getDict("uz");
+  const c = await getAdminCopy(peopleCopy);
 
   const leads = await prisma.lead.findMany({
     orderBy: { createdAt: "desc" },
@@ -21,16 +22,16 @@ export default async function AdminLeadsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-slate-900">{t.admin.leads}</h1>
-        <p className="mt-0.5 text-sm text-slate-500">Jami: {leads.length} ta so'rov</p>
+        <h1 className="text-xl font-bold text-slate-900">{c.leadsTitle}</h1>
+        <p className="mt-0.5 text-sm text-slate-500">
+          {c.leadsTotal.replace("{n}", String(leads.length))}
+        </p>
       </div>
 
       {leads.length === 0 ? (
         <div className="card px-4 py-16 text-center">
-          <p className="text-sm text-slate-500">Hozircha so'rov kelmagan.</p>
-          <p className="mt-1 text-xs text-slate-400">
-            Saytdagi e'lon sahifasidagi forma orqali so'rovlar shu yerga tushadi.
-          </p>
+          <p className="text-sm text-slate-500">{c.leadsEmpty}</p>
+          <p className="mt-1 text-xs text-slate-400">{c.leadsEmptyHint}</p>
         </div>
       ) : (
         <div className="card overflow-hidden">
@@ -38,11 +39,11 @@ export default async function AdminLeadsPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs text-slate-500">
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">Sana</th>
-                  <th className="px-4 py-2.5 font-medium">Ism</th>
-                  <th className="px-4 py-2.5 font-medium">Telefon</th>
-                  <th className="px-4 py-2.5 font-medium">E'lon</th>
-                  <th className="px-4 py-2.5 font-medium">Xabar</th>
+                  <th className="px-4 py-2.5 font-medium">{c.colDate}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.colName}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.colPhone}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.colListing}</th>
+                  <th className="px-4 py-2.5 font-medium">{c.colMessage}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

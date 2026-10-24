@@ -1,20 +1,11 @@
 import { changeOwnPassword, regenerateOwnTotp } from "@/app/actions/auth";
 import { requireAdmin } from "@/lib/auth";
+import { getAdminCopy } from "@/lib/admin-i18n";
+import { accountCopy } from "@/lib/admin-copy/account";
 import { formatSecret, otpauthUrl } from "@/lib/totp";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-const SAVED: Record<string, string> = {
-  password: "Parol yangilandi.",
-  totp: "Yangi authenticator kaliti yaratildi. Eskisi endi ishlamaydi — yangisini ilovaga qo'shing.",
-};
-
-const ERRORS: Record<string, string> = {
-  current: "Joriy parol noto'g'ri.",
-  weak: "Yangi parol kamida 8 belgidan iborat bo'lsin.",
-  match: "Yangi parollar mos kelmadi.",
 };
 
 function first(value: string | string[] | undefined): string | undefined {
@@ -23,11 +14,23 @@ function first(value: string | string[] | undefined): string | undefined {
 
 export default async function ProfilePage({ searchParams }: PageProps) {
   const user = await requireAdmin();
+  const c = await getAdminCopy(accountCopy);
   const query = await searchParams;
 
   const saved = first(query.saved);
   const error = first(query.error);
   const isSetup = first(query.setup) === "1";
+
+  const savedMessages: Record<string, string> = {
+    password: c.savedPassword,
+    totp: c.savedTotp,
+  };
+
+  const errorMessages: Record<string, string> = {
+    current: c.errCurrent,
+    weak: c.errWeak,
+    match: c.errMatch,
+  };
 
   const secret = formatSecret(user.totpSecret);
   const uri = otpauthUrl(user.totpSecret, user.email);
@@ -35,48 +38,45 @@ export default async function ProfilePage({ searchParams }: PageProps) {
   return (
     <div className="max-w-3xl space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-slate-900">Profil</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Hisob ma'lumotlari, parol va Google Authenticator kaliti.
-        </p>
+        <h1 className="text-xl font-bold text-slate-900">{c.profileTitle}</h1>
+        <p className="mt-1 text-sm text-slate-500">{c.profileSubtitle}</p>
       </div>
 
       {isSetup && (
         <div className="rounded-lg border border-brand-200 bg-brand-50 p-4 text-sm text-brand-800">
-          <p className="font-semibold">Owner hisobi yaratildi 🎉</p>
-          <p className="mt-1 leading-6">
-            Endi quyidagi kalitni Google Authenticator'ga qo'shing. Keyingi safar kirishda
-            shu ilovadagi 6 xonali kod so'raladi. Kalitni xavfsiz joyda saqlang.
-          </p>
+          <p className="font-semibold">{c.setupTitle}</p>
+          <p className="mt-1 leading-6">{c.setupText}</p>
         </div>
       )}
 
-      {saved && SAVED[saved] && (
-        <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">{SAVED[saved]}</p>
+      {saved && savedMessages[saved] && (
+        <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">
+          {savedMessages[saved]}
+        </p>
       )}
-      {error && ERRORS[error] && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{ERRORS[error]}</p>
+      {error && errorMessages[error] && (
+        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{errorMessages[error]}</p>
       )}
 
       <section className="card p-6">
-        <h2 className="text-sm font-semibold text-slate-900">Hisob</h2>
+        <h2 className="text-sm font-semibold text-slate-900">{c.accountSection}</h2>
         <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-xs text-slate-500">Ism</dt>
+            <dt className="text-xs text-slate-500">{c.nameLabel}</dt>
             <dd className="mt-0.5 font-medium text-slate-900">{user.name}</dd>
           </div>
           <div>
-            <dt className="text-xs text-slate-500">Email</dt>
+            <dt className="text-xs text-slate-500">{c.emailLabel}</dt>
             <dd className="mt-0.5 font-medium text-slate-900">{user.email}</dd>
           </div>
           <div>
-            <dt className="text-xs text-slate-500">Rol</dt>
+            <dt className="text-xs text-slate-500">{c.roleLabel}</dt>
             <dd className="mt-0.5 font-medium text-slate-900">
-              {user.role === "owner" ? "Owner" : "Admin"}
+              {user.role === "owner" ? c.roleOwner : c.roleAdmin}
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-slate-500">Oxirgi kirish</dt>
+            <dt className="text-xs text-slate-500">{c.lastLoginLabel}</dt>
             <dd className="mt-0.5 font-medium text-slate-900">
               {user.lastLoginAt
                 ? new Intl.DateTimeFormat("ru-RU", {
@@ -90,15 +90,12 @@ export default async function ProfilePage({ searchParams }: PageProps) {
       </section>
 
       <section className="card p-6">
-        <h2 className="text-sm font-semibold text-slate-900">Google Authenticator</h2>
-        <p className="mt-1 text-xs leading-5 text-slate-500">
-          Ilovada «+» → «Kirish kodi» → «Kalitni qo'lda kiritish» ni tanlab, quyidagi kalitni
-          kiriting (bo'shliqlarsiz).
-        </p>
+        <h2 className="text-sm font-semibold text-slate-900">{c.authenticatorTitle}</h2>
+        <p className="mt-1 text-xs leading-5 text-slate-500">{c.authenticatorHint}</p>
 
         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
           <p className="text-[11px] font-medium tracking-wide text-slate-500 uppercase">
-            Maxfiy kalit
+            {c.secretLabel}
           </p>
           <code className="mt-1 block font-mono text-base break-all text-slate-900 select-all">
             {secret}
@@ -107,7 +104,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
 
         <div className="mt-3 rounded-lg border border-slate-200 p-4">
           <p className="text-[11px] font-medium tracking-wide text-slate-500 uppercase">
-            otpauth havolasi
+            {c.otpauthLabel}
           </p>
           <a
             href={uri}
@@ -115,28 +112,24 @@ export default async function ProfilePage({ searchParams }: PageProps) {
           >
             {uri}
           </a>
-          <p className="mt-2 text-xs text-slate-500">
-            Telefonda bu havolani bosish authenticator ilovasini ochadi.
-          </p>
+          <p className="mt-2 text-xs text-slate-500">{c.otpauthHint}</p>
         </div>
 
         <form action={regenerateOwnTotp} className="mt-4">
           <button type="submit" className="btn-secondary text-xs">
-            Yangi kalit yaratish
+            {c.newKey}
           </button>
-          <span className="ml-3 text-xs text-slate-500">
-            Diqqat: eski kalit ishlamay qoladi.
-          </span>
+          <span className="ml-3 text-xs text-slate-500">{c.newKeyWarning}</span>
         </form>
       </section>
 
       <section className="card p-6">
-        <h2 className="text-sm font-semibold text-slate-900">Parolni almashtirish</h2>
+        <h2 className="text-sm font-semibold text-slate-900">{c.changePassword}</h2>
 
         <form action={changeOwnPassword} className="mt-4 grid gap-4 sm:grid-cols-3">
           <div>
             <label className="label" htmlFor="current">
-              Joriy parol
+              {c.currentPassword}
             </label>
             <input
               id="current"
@@ -149,7 +142,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
           </div>
           <div>
             <label className="label" htmlFor="next">
-              Yangi parol
+              {c.newPassword}
             </label>
             <input
               id="next"
@@ -163,7 +156,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
           </div>
           <div>
             <label className="label" htmlFor="confirm">
-              Takrorlang
+              {c.repeatPassword}
             </label>
             <input
               id="confirm"
@@ -178,7 +171,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
 
           <div className="sm:col-span-3">
             <button type="submit" className="btn-primary">
-              Saqlash
+              {c.save}
             </button>
           </div>
         </form>

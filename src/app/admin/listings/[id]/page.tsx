@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { addListingPhotos, deletePhoto, updateListing } from "@/app/actions/admin";
 import { ListingForm } from "@/components/admin/listing-form";
-import { getDict } from "@/lib/i18n";
+import { getAdminCopy } from "@/lib/admin-i18n";
+import { listingsCopy } from "@/lib/admin-copy/listings";
 import { prisma } from "@/lib/prisma";
 
 type PageProps = {
@@ -26,7 +27,7 @@ export default async function EditListingPage({ params, searchParams }: PageProp
     notFound();
   }
 
-  const t = getDict("uz");
+  const c = await getAdminCopy(listingsCopy);
   const saleOptions = await prisma.saleOption.findMany({
     orderBy: [{ sort: "asc" }, { nameUz: "asc" }],
     select: { id: true, nameUz: true, nameRu: true },
@@ -37,11 +38,11 @@ export default async function EditListingPage({ params, searchParams }: PageProp
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link href="/admin/listings" className="text-xs font-medium text-brand-700">
-            ← {t.admin.listings}
+            ← {c.title}
           </Link>
           <h1 className="mt-2 text-xl font-bold text-slate-900">{listing.titleUz}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            {t.admin.edit} · {listing.slug}
+            {c.edit} · {listing.slug}
           </p>
         </div>
         <Link
@@ -49,7 +50,7 @@ export default async function EditListingPage({ params, searchParams }: PageProp
           className="btn-secondary text-xs"
           target="_blank"
         >
-          Saytda ko'rish ↗
+          {c.viewSite}
         </Link>
       </div>
 
@@ -59,15 +60,16 @@ export default async function EditListingPage({ params, searchParams }: PageProp
         saleOptions={saleOptions}
         error={error}
         saved={saved}
+        copy={c}
       />
 
       <section className="card p-6">
         <h2 className="text-sm font-semibold text-slate-900">
-          {t.admin.photos} ({listing.photos.length})
+          {c.photosCount.replace("{n}", String(listing.photos.length))}
         </h2>
 
         {listing.photos.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500">{t.admin.noPhotos}</p>
+          <p className="mt-3 text-sm text-slate-500">{c.noPhotos}</p>
         ) : (
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {listing.photos.map((photo) => (
@@ -83,7 +85,7 @@ export default async function EditListingPage({ params, searchParams }: PageProp
                   <span className="text-[11px] text-slate-400">#{photo.sort}</span>
                   <form action={deletePhoto.bind(null, photo.id, listing.id)}>
                     <button type="submit" className="text-xs font-medium text-red-600 hover:underline">
-                      {t.admin.delete}
+                      {c.delete}
                     </button>
                   </form>
                 </div>
@@ -104,7 +106,7 @@ export default async function EditListingPage({ params, searchParams }: PageProp
             className="field file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-700"
           />
           <button type="submit" className="btn-secondary shrink-0">
-            {t.admin.upload}
+            {c.upload}
           </button>
         </form>
       </section>

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BrandRotator } from "./brand-rotator";
 import { MapPinIcon, PhoneIcon, TelegramIcon } from "./icons";
+import { NotificationBell } from "./notification-bell";
 import { LocaleSwitcher } from "./locale-switcher";
 import { MobileNav } from "./mobile-nav";
 import { NavLinks } from "./nav-links";
@@ -87,6 +88,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
           </div>
 
           <div className="flex items-center gap-2">
+            <NotificationBell locale={locale} />
             <ThemeToggle label={locale === "ru" ? "Тёмная тема" : "Tungi rejim"} />
             <LocaleSwitcher locale={locale} />
 

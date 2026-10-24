@@ -1,13 +1,6 @@
 import type { Listing } from "@prisma/client";
 import Link from "next/link";
-import { getDict } from "@/lib/i18n";
-
-const t = getDict("uz");
-
-const ERROR_MESSAGES: Record<string, string> = {
-  required: "Majburiy maydonlarni to'ldiring (sarlavha, tuman, manzil, telefon).",
-  price: "Narxni to'g'ri kiriting.",
-};
+import type { ListingsCopy } from "@/lib/admin-copy/listings";
 
 export function ListingForm({
   action,
@@ -15,32 +8,39 @@ export function ListingForm({
   saleOptions,
   error,
   saved,
+  copy,
 }: {
   action: (formData: FormData) => Promise<void>;
   listing?: Listing;
   saleOptions: { id: string; nameUz: string; nameRu: string }[];
   error?: string;
   saved?: string;
+  copy: ListingsCopy;
 }) {
+  const errorMessages: Record<string, string> = {
+    required: copy.errorRequired,
+    price: copy.errorPrice,
+  };
+
   return (
     <form action={action} className="card space-y-6 p-6">
       {error && (
         <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-          {ERROR_MESSAGES[error] ?? "Xatolik yuz berdi. Qayta urinib ko'ring."}
+          {errorMessages[error] ?? copy.errorGeneric}
         </p>
       )}
       {saved && (
-        <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700">Saqlandi.</p>
+        <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700">{copy.saved}</p>
       )}
 
       <section>
         <h2 className="mb-4 text-sm font-semibold tracking-wide text-slate-500 uppercase">
-          Asosiy ma'lumot
+          {copy.sectionMain}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label className="label" htmlFor="titleUz">
-              {t.admin.fields.titleUz} *
+              {copy.titleUz} *
             </label>
             <input
               id="titleUz"
@@ -48,13 +48,13 @@ export function ListingForm({
               required
               defaultValue={listing?.titleUz}
               className="field"
-              placeholder="Chilonzorda 3 xonali kvartira"
+              placeholder={copy.titleUzPlaceholder}
             />
           </div>
 
           <div className="sm:col-span-2">
             <label className="label" htmlFor="titleRu">
-              {t.admin.fields.titleRu} *
+              {copy.titleRu} *
             </label>
             <input
               id="titleRu"
@@ -62,13 +62,13 @@ export function ListingForm({
               required
               defaultValue={listing?.titleRu}
               className="field"
-              placeholder="3-комнатная квартира в Чиланзаре"
+              placeholder={copy.titleRuPlaceholder}
             />
           </div>
 
           <div>
             <label className="label" htmlFor="saleOptionId">
-              {t.admin.fields.saleOption}
+              {copy.saleOption}
             </label>
             <select
               id="saleOptionId"
@@ -87,7 +87,7 @@ export function ListingForm({
 
           <div>
             <label className="label" htmlFor="propertyType">
-              {t.admin.fields.propertyType}
+              {copy.propertyType}
             </label>
             <select
               id="propertyType"
@@ -95,16 +95,16 @@ export function ListingForm({
               defaultValue={listing?.propertyType ?? "apartment"}
               className="field"
             >
-              <option value="apartment">{t.propertyType.apartment}</option>
-              <option value="house">{t.propertyType.house}</option>
-              <option value="land">{t.propertyType.land}</option>
-              <option value="commercial">{t.propertyType.commercial}</option>
+              <option value="apartment">{copy.apartment}</option>
+              <option value="house">{copy.house}</option>
+              <option value="land">{copy.land}</option>
+              <option value="commercial">{copy.commercial}</option>
             </select>
           </div>
 
           <div>
             <label className="label" htmlFor="price">
-              {t.admin.fields.price} *
+              {copy.price} *
             </label>
             <input
               id="price"
@@ -121,7 +121,7 @@ export function ListingForm({
 
           <div>
             <label className="label" htmlFor="currency">
-              {t.admin.fields.currency}
+              {copy.currency}
             </label>
             <select
               id="currency"
@@ -136,7 +136,7 @@ export function ListingForm({
 
           <div>
             <label className="label" htmlFor="status">
-              {t.admin.fields.status}
+              {copy.status}
             </label>
             <select
               id="status"
@@ -144,22 +144,22 @@ export function ListingForm({
               defaultValue={listing?.status ?? "draft"}
               className="field"
             >
-              <option value="draft">{t.admin.draft}</option>
-              <option value="active">{t.admin.active}</option>
-              <option value="sold">{t.admin.sold}</option>
+              <option value="draft">{copy.draft}</option>
+              <option value="active">{copy.active}</option>
+              <option value="sold">{copy.sold}</option>
             </select>
           </div>
 
           <div>
             <label className="label" htmlFor="slug">
-              {t.admin.fields.slug}
+              {copy.slug}
             </label>
             <input
               id="slug"
               name="slug"
               defaultValue={listing?.slug}
               className="field"
-              placeholder="avtomatik"
+              placeholder={copy.slugPlaceholder}
             />
           </div>
         </div>
@@ -167,12 +167,12 @@ export function ListingForm({
 
       <section>
         <h2 className="mb-4 text-sm font-semibold tracking-wide text-slate-500 uppercase">
-          Xususiyatlar
+          {copy.sectionFeatures}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <label className="label" htmlFor="rooms">
-              {t.admin.fields.rooms}
+              {copy.rooms}
             </label>
             <input
               id="rooms"
@@ -187,7 +187,7 @@ export function ListingForm({
 
           <div>
             <label className="label" htmlFor="area">
-              {t.admin.fields.area}
+              {copy.area}
             </label>
             <input
               id="area"
@@ -201,7 +201,7 @@ export function ListingForm({
 
           <div>
             <label className="label" htmlFor="floor">
-              {t.admin.fields.floor}
+              {copy.floor}
             </label>
             <input
               id="floor"
@@ -215,7 +215,7 @@ export function ListingForm({
 
           <div>
             <label className="label" htmlFor="totalFloors">
-              {t.admin.fields.totalFloors}
+              {copy.totalFloors}
             </label>
             <input
               id="totalFloors"
@@ -229,7 +229,7 @@ export function ListingForm({
 
           <div>
             <label className="label" htmlFor="yearBuilt">
-              {t.admin.fields.yearBuilt}
+              {copy.yearBuilt}
             </label>
             <input
               id="yearBuilt"
@@ -244,7 +244,7 @@ export function ListingForm({
 
           <div>
             <label className="label" htmlFor="condition">
-              {t.admin.fields.condition}
+              {copy.condition}
             </label>
             <select
               id="condition"
@@ -253,10 +253,10 @@ export function ListingForm({
               className="field"
             >
               <option value="">—</option>
-              <option value="new">{t.condition.new}</option>
-              <option value="renovated">{t.condition.renovated}</option>
-              <option value="average">{t.condition.average}</option>
-              <option value="needsRepair">{t.condition.needsRepair}</option>
+              <option value="new">{copy.conditionNew}</option>
+              <option value="renovated">{copy.conditionRenovated}</option>
+              <option value="average">{copy.conditionAverage}</option>
+              <option value="needsRepair">{copy.conditionNeedsRepair}</option>
             </select>
           </div>
         </div>
@@ -264,12 +264,12 @@ export function ListingForm({
 
       <section>
         <h2 className="mb-4 text-sm font-semibold tracking-wide text-slate-500 uppercase">
-          Joylashuv va aloqa
+          {copy.sectionLocation}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="label" htmlFor="region">
-              {t.admin.fields.region} *
+              {copy.region} *
             </label>
             <input
               id="region"
@@ -277,13 +277,13 @@ export function ListingForm({
               required
               defaultValue={listing?.region}
               className="field"
-              placeholder="Toshkent shahri"
+              placeholder={copy.regionPlaceholder}
             />
           </div>
 
           <div>
             <label className="label" htmlFor="district">
-              {t.admin.fields.district} *
+              {copy.district} *
             </label>
             <input
               id="district"
@@ -291,13 +291,13 @@ export function ListingForm({
               required
               defaultValue={listing?.district}
               className="field"
-              placeholder="Chilonzor"
+              placeholder={copy.districtPlaceholder}
             />
           </div>
 
           <div className="sm:col-span-2">
             <label className="label" htmlFor="address">
-              {t.admin.fields.address} *
+              {copy.address} *
             </label>
             <input
               id="address"
@@ -305,13 +305,13 @@ export function ListingForm({
               required
               defaultValue={listing?.address}
               className="field"
-              placeholder="Bunyodkor ko'chasi, 12-uy"
+              placeholder={copy.addressPlaceholder}
             />
           </div>
 
           <div>
             <label className="label" htmlFor="phone">
-              {t.admin.fields.phone} *
+              {copy.phone} *
             </label>
             <input
               id="phone"
@@ -320,14 +320,14 @@ export function ListingForm({
               required
               defaultValue={listing?.phone}
               className="field"
-              placeholder="+998 90 123 45 67"
+              placeholder={copy.phonePlaceholder}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="label" htmlFor="lat">
-                Lat
+                {copy.lat}
               </label>
               <input
                 id="lat"
@@ -340,7 +340,7 @@ export function ListingForm({
             </div>
             <div>
               <label className="label" htmlFor="lng">
-                Lng
+                {copy.lng}
               </label>
               <input
                 id="lng"
@@ -357,12 +357,12 @@ export function ListingForm({
 
       <section>
         <h2 className="mb-4 text-sm font-semibold tracking-wide text-slate-500 uppercase">
-          Tavsif
+          {copy.sectionDescription}
         </h2>
         <div className="grid gap-4">
           <div>
             <label className="label" htmlFor="descriptionUz">
-              {t.admin.fields.descriptionUz}
+              {copy.descriptionUz}
             </label>
             <textarea
               id="descriptionUz"
@@ -374,7 +374,7 @@ export function ListingForm({
           </div>
           <div>
             <label className="label" htmlFor="descriptionRu">
-              {t.admin.fields.descriptionRu}
+              {copy.descriptionRu}
             </label>
             <textarea
               id="descriptionRu"
@@ -389,10 +389,10 @@ export function ListingForm({
 
       <section>
         <h2 className="mb-4 text-sm font-semibold tracking-wide text-slate-500 uppercase">
-          {t.admin.photos}
+          {copy.photos}
         </h2>
         <label className="label" htmlFor="photos">
-          {t.admin.upload} (bir nechta rasm tanlash mumkin)
+          {copy.uploadLabel}
         </label>
         <input
           id="photos"
@@ -402,17 +402,15 @@ export function ListingForm({
           accept="image/*"
           className="field file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-700"
         />
-        <p className="mt-2 text-xs text-slate-500">
-          WebP formatiga avtomatik o'giriladi, 1920px dan katta rasmlar kichraytiriladi.
-        </p>
+        <p className="mt-2 text-xs text-slate-500">{copy.uploadHint}</p>
       </section>
 
       <div className="flex items-center gap-3 border-t border-slate-200 pt-5">
         <button type="submit" className="btn-primary">
-          {t.admin.save}
+          {copy.save}
         </button>
         <Link href="/admin/listings" className="btn-secondary">
-          Bekor qilish
+          {copy.cancel}
         </Link>
       </div>
     </form>

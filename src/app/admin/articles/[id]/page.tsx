@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { updateArticle } from "@/app/actions/admin";
 import { ArticleForm } from "@/components/admin/article-form";
-import { getDict } from "@/lib/i18n";
+import { articlesCopy } from "@/lib/admin-copy/articles";
+import { getAdminCopy } from "@/lib/admin-i18n";
 import { prisma } from "@/lib/prisma";
 
 type PageProps = {
@@ -22,18 +23,18 @@ export default async function EditArticlePage({ params, searchParams }: PageProp
     notFound();
   }
 
-  const t = getDict("uz");
+  const c = await getAdminCopy(articlesCopy);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link href="/admin/articles" className="text-xs font-medium text-brand-700">
-            ← {t.admin.articles}
+            ← {c.title}
           </Link>
           <h1 className="mt-2 text-xl font-bold text-slate-900">{article.titleUz}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            {t.admin.edit} · {article.slug}
+            {c.edit} · {article.slug}
           </p>
         </div>
         <Link
@@ -41,7 +42,7 @@ export default async function EditArticlePage({ params, searchParams }: PageProp
           className="btn-secondary text-xs"
           target="_blank"
         >
-          Saytda ko'rish ↗
+          {c.viewOnSite}
         </Link>
       </div>
 
