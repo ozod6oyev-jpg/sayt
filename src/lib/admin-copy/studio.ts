@@ -14,6 +14,7 @@ const lat = {
   previewEmpty: "Ko'rish uchun fayl yuklang",
   platformsTitle: "Platformalar",
   platformsHint: "Kerakli platformani yoqib, formatini tanlang.",
+  platformOff: "Bu platformaga joylash uchun yuqoridagi switch'ni yoqing.",
   enableIg: "Instagram'ga joylash",
   enableFb: "Facebook'ga joylash",
   enableThreads: "Threads'ga joylash",
@@ -66,6 +67,7 @@ const lat = {
   publish: "Joylash",
   publishing: "Joylanmoqda...",
   publishHint: "Har bir format alohida natija beradi.",
+  scheduledOk: "Post navbatga qo'yildi — vaqti kelganda avtomatik joylanadi.",
   selected: "ta format tanlandi",
   nothingSelected: "Kamida bitta platforma va format tanlang.",
   recentTitle: "Oxirgi joylanganlar",
@@ -91,7 +93,7 @@ const lat = {
   appOnlyText:
     "AI belgisi, Audience, Poll/Prompt, audio kutubxonasi, rejalashtirish, yuklab olishga ruxsat va andoza sozlamalari Graph API'da mavjud emas — ular ilovada qo'lda qo'yiladi.",
   scheduleLabel: "Rejalashtirish",
-  scheduleHint: "Bo'sh bo'lsa darhol chiqadi. Vaqti kelganda Facebook o'zi e'lon qiladi.",
+  scheduleHint: "Bo'sh bo'lsa darhol joylanadi. Vaqt qo'ysangiz tizim o'zi joylaydi.",
   fbAppOnlyTitle: "Facebook ilovasidagina",
   fbAppOnlyText:
     "Plevlist, guruhlarga ulashish, AI belgisi, odamlarni belgilash, hikoyaga ulashish, reklama (boost), A/B test, «kimlar ko'ra oladi», taglavhalar va monetizatsiya Graph API'da yo'q — ular ilovada qo'yiladi.",
@@ -113,6 +115,7 @@ const cyrl: typeof lat = {
   previewEmpty: "Кўриш учун файл юкланг",
   platformsTitle: "Платформалар",
   platformsHint: "Керакли платформани ёқиб, форматини танланг.",
+  platformOff: "Бу платформага жойлаш учун юқоридаги switch'ни ёқинг.",
   enableIg: "Instagram'га жойлаш",
   enableFb: "Facebook'га жойлаш",
   enableThreads: "Threads'га жойлаш",
@@ -165,6 +168,7 @@ const cyrl: typeof lat = {
   publish: "Жойлаш",
   publishing: "Жойланмоқда...",
   publishHint: "Ҳар бир формат алоҳида натижа беради.",
+  scheduledOk: "Пост навбатга қўйилди — вақти келганда автоматик жойланади.",
   selected: "та формат танланди",
   nothingSelected: "Камида битта платформа ва формат танланг.",
   recentTitle: "Охирги жойланганлар",
@@ -190,7 +194,7 @@ const cyrl: typeof lat = {
   appOnlyText:
     "AI белгиси, Audience, Poll/Prompt, аудио кутубхонаси, режалаштириш, юклаб олишга рухсат ва андооза созламалари Graph API'да мавжуд эмас — улар иловада қўлда қўйилади.",
   scheduleLabel: "Режалаштириш",
-  scheduleHint: "Бўш бўлса дарҳол чиқади. Вақти келганда Facebook ўзи эълон қилади.",
+  scheduleHint: "Бўш бўлса дарҳол жойланади. Вақт қўйсангиз тизим ўзи жойлайди.",
   fbAppOnlyTitle: "Facebook иловасидагина",
   fbAppOnlyText:
     "Плейлист, гуруҳларга улашиш, AI белгиси, одамларни белгилаш, ҳикояга улашиш, реклама (boost), A/B тест, «кимлар кўра олади», таглавҳалар ва монетизация Graph API'да йўқ — улар иловада қўйилади.",

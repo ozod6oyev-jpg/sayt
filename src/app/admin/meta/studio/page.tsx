@@ -66,7 +66,9 @@ export default async function StudioPage({ searchParams }: PageProps) {
   const banner =
     status === "ok"
       ? { tone: "ok" as const, text: c.sent }
-      : status === "partial"
+      : status === "scheduled"
+        ? { tone: "ok" as const, text: c.scheduledOk }
+        : status === "partial"
         ? { tone: "error" as const, text: c.partial }
         : status === "invalid"
           ? { tone: "error" as const, text: c.invalid }
@@ -147,6 +149,12 @@ export default async function StudioPage({ searchParams }: PageProps) {
                         ),
                       ].join(" ") || "—"}{" "}
                       ·{" "}
+                      {post.status === "scheduled" && post.scheduledAt
+                        ? `${c.scheduleLabel}: ${new Intl.DateTimeFormat("uz-UZ", {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          }).format(post.scheduledAt)} · `
+                        : ""}
                       {new Intl.DateTimeFormat("uz-UZ", {
                         dateStyle: "short",
                         timeStyle: "short",

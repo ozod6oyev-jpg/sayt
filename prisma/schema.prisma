@@ -248,7 +248,8 @@ model SocialPost {
   audioName       String?
   userTags        String?
   paidPartner     String?
-  fbScheduledAt   DateTime?
+  scheduledAt     DateTime?
+  status          String         @default("published")
   createdAt       DateTime       @default(now())
   targets         SocialTarget[]
 
@@ -261,7 +262,7 @@ model SocialTarget {
   postRefId  String
   post       SocialPost @relation(fields: [postRefId], references: [id], onDelete: Cascade)
   kind       String
-  status     String
+  status     String     @default("pending")
   externalId String?
   error      String?
   createdAt  DateTime   @default(now())

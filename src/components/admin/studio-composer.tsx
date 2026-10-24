@@ -559,7 +559,13 @@ export function StudioComposer({
                   </p>
                 )}
 
-                <div className={cn("space-y-4", !active && "opacity-50")}>
+                {!active && (
+                  <p className="rounded-lg bg-muted px-3 py-2 text-[11px] text-muted-foreground">
+                    {copy.platformOff}
+                  </p>
+                )}
+
+                <div className="space-y-4">
                   <div>
                     <p className="label">{copy.formatsTitle}</p>
                     <div className="flex flex-wrap gap-2">
@@ -794,19 +800,6 @@ export function StudioComposer({
                         <p className="mt-1 text-[11px] text-muted-foreground">{copy.fbTitleHint}</p>
                       </div>
 
-                      <div>
-                        <label className="label" htmlFor="fb-schedule">
-                          {copy.scheduleLabel}
-                        </label>
-                        <input
-                          id="fb-schedule"
-                          name="fbScheduleAt"
-                          type="datetime-local"
-                          className="field"
-                        />
-                        <p className="mt-1 text-[11px] text-muted-foreground">{copy.scheduleHint}</p>
-                      </div>
-
                       <div className="rounded-lg bg-muted/60 p-2 text-[11px] leading-4 text-muted-foreground">
                         <p className="font-semibold text-foreground">{copy.fbAppOnlyTitle}</p>
                         <p className="mt-0.5">{copy.fbAppOnlyText}</p>
@@ -847,16 +840,23 @@ export function StudioComposer({
           })}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border p-3">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground">
-              {count} {copy.selected}
-            </span>
+        <div className="flex flex-wrap items-end justify-between gap-3 border-t border-border p-3">
+          <div className="min-w-48">
+            <label className="label block text-left" htmlFor="studio-schedule">
+              {copy.scheduleLabel}
+            </label>
+            <input
+              id="studio-schedule"
+              name="scheduledAt"
+              type="datetime-local"
+              className="field w-full"
+            />
+            <p className="mt-0.5 text-[11px] text-muted-foreground">{copy.scheduleHint}</p>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="hidden text-[11px] text-muted-foreground sm:block">
-              {count === 0 ? copy.nothingSelected : copy.publishHint}
+            <span className="text-[11px] text-muted-foreground">
+              {count} {copy.selected}
             </span>
             <SubmitButton copy={copy} count={count} />
           </div>

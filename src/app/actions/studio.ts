@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOwner } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { publishToTarget, type SocialKind } from "@/lib/social-publish";
+import { publishPostTargets } from "@/lib/publish-post";
+import type { SocialKind } from "@/lib/social-publish";
 import { saveCoverImage, saveSocialMedia, type SavedMedia } from "@/lib/uploads";
 
 const KINDS: SocialKind[] = [
@@ -35,7 +36,7 @@ function normalizeHashtags(raw: string): string[] {
   return [...new Set(tags)].slice(0, 30);
 }
 
-/** Bitta media'ni tanlangan platformalarga joylash */
+/** Bitta media'ni tanlangan platformalarga joylash yoki navbatga qo'yish */
 export async function publishSocialAction(formData: FormData): Promise<void> {
   await requireOwner();
 
@@ -48,6 +49,7 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
   const hashtags = normalizeHashtags(text(formData, "hashtags"));
   const hashtagsFb = normalizeHashtags(text(formData, "hashtags_fb"));
   const hashtagsThreads = normalizeHashtags(text(formData, "hashtags_threads"));
+
   const file = formData.get("media");
   const targets = formData
     .getAll("targets")
@@ -68,12 +70,6 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
     redirect("/admin/meta/studio?post=media");
   }
 
-  const withTags = (value: string, tags: string[]) =>
-    [value, tags.join(" ")].filter(Boolean).join("\n\n");
-  const fullIg = withTags(captions.ig, hashtags);
-  const fullFb = withTags(captions.fb, hashtagsFb);
-  const fullThreads = withTags(captions.threads.slice(0, MAX_CAPTION.threads), hashtagsThreads);
-
   let coverUrl: string | null = null;
   const coverFile = formData.get("cover");
   if (coverFile instanceof File && coverFile.size > 0) {
@@ -83,6 +79,13 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
       coverUrl = null;
     }
   }
+
+  const rawSchedule = text(formData, "scheduledAt");
+  const scheduleDate = rawSchedule ? new Date(rawSchedule) : null;
+  const scheduledAt =
+    scheduleDate && !Number.isNaN(scheduleDate.getTime()) && scheduleDate.getTime() > Date.now() + 20_000
+      ? scheduleDate
+      : null;
 
   const collaborators = text(formData, "collaborators")
     .split(/[\s,]+/)
@@ -97,38 +100,11 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
     .filter(Boolean)
     .slice(0, 10);
 
-  const rawSchedule = text(formData, "fbScheduleAt");
-  const scheduleDate = rawSchedule ? new Date(rawSchedule) : null;
-  const fbScheduledAt =
-    scheduleDate && !Number.isNaN(scheduleDate.getTime()) && scheduleDate.getTime() > Date.now() + 60_000
-      ? scheduleDate
-      : null;
-
   const threadsTopic = text(formData, "threadsTopic")
     .replace(/^#+/, "")
     .replace(/[^\p{L}\p{N}_ ]/gu, "")
     .trim()
     .slice(0, 50);
-
-  const igLocationId = text(formData, "igLocation");
-  const fbLocationId = text(formData, "fbLocation");
-
-  const options = {
-    igLocationId: igLocationId || undefined,
-    fbPlaceId: fbLocationId || undefined,
-    altText: text(formData, "altText") || undefined,
-    coverUrl: coverUrl ?? undefined,
-    shareToFeed: formData.get("shareToFeed") === "on",
-    collaborators: collaborators || undefined,
-    fbTitle: text(formData, "fbTitle") || undefined,
-    threadsReply: text(formData, "threadsReply") || undefined,
-    threadsTopic: threadsTopic || undefined,
-    hideLikeCounts: formData.get("hideLikeCounts") === "on",
-    audioName: text(formData, "audioName") || undefined,
-    userTags,
-    paidPartner: text(formData, "paidPartner") || undefined,
-    fbScheduledAt: fbScheduledAt ? Math.floor(fbScheduledAt.getTime() / 1000) : undefined,
-  };
 
   const post = await prisma.socialPost.create({
     data: {
@@ -140,49 +116,36 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
       hashtagsThreads: hashtagsThreads.join(" ") || null,
       mediaType: media.type,
       mediaUrl: media.url,
-      igLocationId: igLocationId || null,
+      igLocationId: text(formData, "igLocation") || null,
       igLocationName: text(formData, "igLocationName") || null,
-      fbLocationId: fbLocationId || null,
+      fbLocationId: text(formData, "fbLocation") || null,
       fbLocationName: text(formData, "fbLocationName") || null,
-      altText: options.altText ?? null,
-      coverUrl: coverUrl ?? undefined,
-      shareToFeed: options.shareToFeed,
+      altText: text(formData, "altText") || null,
+      coverUrl,
+      shareToFeed: formData.get("shareToFeed") === "on",
       collaborators: collaborators || null,
-      fbTitle: options.fbTitle ?? null,
-      threadsReply: options.threadsReply ?? null,
+      fbTitle: text(formData, "fbTitle") || null,
+      threadsReply: text(formData, "threadsReply") || null,
       threadsTopic: threadsTopic || null,
-      hideLikeCounts: options.hideLikeCounts,
-      audioName: options.audioName ?? null,
+      hideLikeCounts: formData.get("hideLikeCounts") === "on",
+      audioName: text(formData, "audioName") || null,
       userTags: userTags.join(",") || null,
-      paidPartner: options.paidPartner ?? null,
-      fbScheduledAt,
+      paidPartner: text(formData, "paidPartner") || null,
+      scheduledAt,
+      status: scheduledAt ? "scheduled" : "publishing",
+      targets: {
+        create: targets.map((kind) => ({ kind, status: "pending" })),
+      },
     },
   });
 
-  for (const kind of targets) {
-    const caption = kind.startsWith("ig_")
-      ? fullIg
-      : kind.startsWith("fb_")
-        ? fullFb || fullIg
-        : fullThreads || fullIg;
-
-    const result = await publishToTarget(kind, media, caption, options);
-
-    await prisma.socialTarget.create({
-      data: {
-        postRefId: post.id,
-        kind,
-        status: result.ok ? "sent" : "failed",
-        externalId: result.ok ? result.id : null,
-        error: result.ok ? null : result.error.slice(0, 300),
-      },
-    });
+  if (scheduledAt) {
+    revalidatePath("/admin/meta/studio");
+    redirect("/admin/meta/studio?post=scheduled");
   }
 
-  const failed = await prisma.socialTarget.count({
-    where: { postRefId: post.id, status: "failed" },
-  });
+  const result = await publishPostTargets(post.id);
 
   revalidatePath("/admin/meta/studio");
-  redirect(`/admin/meta/studio?post=${failed > 0 ? "partial" : "ok"}`);
+  redirect(`/admin/meta/studio?post=${result.failed > 0 ? "partial" : "ok"}`);
 }
