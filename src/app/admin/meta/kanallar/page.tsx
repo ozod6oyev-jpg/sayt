@@ -1,8 +1,11 @@
 import {
+  publishToThreads,
   saveMetaSettingsAction,
   testMetaConnectionAction,
+  testThreadsConnectionAction,
 } from "@/app/actions/meta";
 import { connectTelegramWebhook, publishToChannel } from "@/app/actions/telegram";
+import { AtSign } from "lucide-react";
 import { TelegramIcon } from "@/components/icons";
 import { MetaLogo } from "@/components/meta-logo";
 import { metaCopy } from "@/lib/admin-copy/meta";
@@ -29,6 +32,7 @@ export default async function MetaChannelsPage({ searchParams }: PageProps) {
   const tgStatus = first(params.tg);
   const hookStatus = first(params.hook);
   const metaStatus = first(params.meta);
+  const threadsStatus = first(params.threads);
 
   const [bot, channel, webhook, settings] = await Promise.all([
     getBotInfo(),
@@ -54,6 +58,11 @@ export default async function MetaChannelsPage({ searchParams }: PageProps) {
   if (metaStatus === "ok") banners.push({ tone: "ok", text: c.metaOk });
   if (metaStatus === "missing") banners.push({ tone: "error", text: c.metaMissing });
   if (metaStatus === "error") banners.push({ tone: "error", text: c.metaError });
+  if (threadsStatus === "ok") banners.push({ tone: "ok", text: c.threadsOk });
+  if (threadsStatus === "sent") banners.push({ tone: "ok", text: c.threadsSent });
+  if (threadsStatus === "invalid") banners.push({ tone: "error", text: c.threadsInvalid });
+  if (threadsStatus === "error") banners.push({ tone: "error", text: c.threadsError });
+  if (threadsStatus === "failed") banners.push({ tone: "error", text: c.threadsFailed });
 
   return (
     <div className="space-y-5">
@@ -169,6 +178,31 @@ export default async function MetaChannelsPage({ searchParams }: PageProps) {
               autoComplete="off"
             />
           </div>
+          <div>
+            <label className="label" htmlFor="meta-threads-id">
+              {c.threadsUserId}
+            </label>
+            <input
+              id="meta-threads-id"
+              name="threadsUserId"
+              defaultValue={settings.threadsUserId ?? ""}
+              className="field"
+              autoComplete="off"
+            />
+          </div>
+          <div>
+            <label className="label" htmlFor="meta-threads-token">
+              {c.threadsToken}
+            </label>
+            <input
+              id="meta-threads-token"
+              name="threadsToken"
+              type="password"
+              autoComplete="off"
+              className="field"
+              placeholder={settings.threadsUserId ? "••••••••" : ""}
+            />
+          </div>
           <div className="flex items-end">
             <button type="submit" className="btn-primary text-xs">
               {c.metaSave}
@@ -193,6 +227,56 @@ export default async function MetaChannelsPage({ searchParams }: PageProps) {
           <form action={testMetaConnectionAction} className="mt-3">
             <button type="submit" className="btn-secondary text-xs">
               {c.metaTest}
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section className="card p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <span className="flex size-6 items-center justify-center rounded-md bg-neutral-900 text-white">
+              <AtSign className="size-3.5" />
+            </span>
+            {c.threadsName}
+          </h2>
+          <span
+            className={
+              settings.threadsUsername
+                ? "rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700"
+                : "rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500"
+            }
+          >
+            {settings.threadsUsername ? c.metaConnected : c.metaNotConnected}
+          </span>
+        </div>
+        <p className="mt-1 text-xs leading-5 text-slate-500">{c.threadsHint}</p>
+
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          {settings.threadsUsername && (
+            <span className="text-sm font-medium text-slate-800">{settings.threadsUsername}</span>
+          )}
+          <form action={testThreadsConnectionAction}>
+            <button type="submit" className="btn-secondary text-xs">
+              {c.threadsTest}
+            </button>
+          </form>
+        </div>
+
+        <div className="mt-4">
+          <h3 className="text-sm font-semibold text-slate-900">{c.threadsPostTitle}</h3>
+          <p className="mt-0.5 text-xs text-slate-500">{c.threadsPostHint}</p>
+          <form action={publishToThreads} className="mt-3 space-y-2">
+            <textarea
+              name="text"
+              required
+              maxLength={500}
+              rows={3}
+              placeholder={c.threadsPostPlaceholder}
+              className="field resize-y"
+            />
+            <button type="submit" className="btn-primary text-xs">
+              {c.threadsPostSend}
             </button>
           </form>
         </div>

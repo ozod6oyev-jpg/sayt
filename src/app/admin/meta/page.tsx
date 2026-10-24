@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AtSign } from "lucide-react";
 import { InstagramIcon, TelegramIcon } from "@/components/icons";
 import { MetaLogo } from "@/components/meta-logo";
 import { metaCopy } from "@/lib/admin-copy/meta";
@@ -57,6 +58,13 @@ export default async function MetaOverviewPage() {
       tile: "bg-[#E1306C]/10",
       connected: igConnected,
       detail: igConnected ? (settings.igUsername ?? "") : c.metaMissing,
+    },
+    {
+      name: c.threadsName,
+      icon: <AtSign className="size-4 text-white" />,
+      tile: "bg-neutral-900",
+      connected: Boolean(settings.threadsUsername),
+      detail: settings.threadsUsername ?? c.threadsHint,
     },
   ];
 

@@ -11,6 +11,8 @@ export type MetaSettings = {
   pageId: string | null;
   pageToken: string | null;
   igUserId: string | null;
+  threadsUserId: string | null;
+  threadsUsername: string | null;
   pageName: string | null;
   igUsername: string | null;
   verifyToken: string;
@@ -36,6 +38,8 @@ export async function getMetaSettings(): Promise<MetaSettings> {
     pageId: row.pageId,
     pageToken: decryptSecret(row.pageToken),
     igUserId: row.igUserId,
+    threadsUserId: row.threadsUserId,
+    threadsUsername: row.threadsUsername,
     pageName: row.pageName,
     igUsername: row.igUsername,
     verifyToken: row.verifyToken,
@@ -66,6 +70,8 @@ export async function saveMetaSettings(input: {
   pageId?: string;
   pageToken?: string;
   igUserId?: string;
+  threadsUserId?: string;
+  threadsToken?: string;
 }): Promise<void> {
   await getMetaSettings();
 
@@ -74,8 +80,10 @@ export async function saveMetaSettings(input: {
   if (input.appId !== undefined && input.appId !== "") data.appId = input.appId;
   if (input.pageId !== undefined && input.pageId !== "") data.pageId = input.pageId;
   if (input.igUserId !== undefined) data.igUserId = input.igUserId || null;
+  if (input.threadsUserId !== undefined) data.threadsUserId = input.threadsUserId || null;
   if (input.appSecret) data.appSecret = encryptSecret(input.appSecret);
   if (input.pageToken) data.pageToken = encryptSecret(input.pageToken);
+  if (input.threadsToken) data.threadsToken = encryptSecret(input.threadsToken);
 
   if (Object.keys(data).length === 0) return;
 

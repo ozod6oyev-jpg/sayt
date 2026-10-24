@@ -190,17 +190,20 @@ model TelegramMessage {
 
 /// Meta (Facebook sahifa + Instagram) integratsiyasi sozlamalari — bitta qator
 model MetaIntegration {
-  id          String    @id @default("default")
-  appId       String?
-  appSecret   String?
-  pageId      String?
-  pageToken   String?
-  igUserId    String?
-  pageName    String?
-  igUsername  String?
-  verifyToken String
-  connectedAt DateTime?
-  updatedAt   DateTime  @updatedAt
+  id              String    @id @default("default")
+  appId           String?
+  appSecret       String?
+  pageId          String?
+  pageToken       String?
+  igUserId        String?
+  threadsUserId   String?
+  threadsToken    String?
+  threadsUsername String?
+  pageName        String?
+  igUsername      String?
+  verifyToken     String
+  connectedAt     DateTime?
+  updatedAt       DateTime  @updatedAt
 }
 
 /// Facebook Messenger yoki Instagram Direct suhbati

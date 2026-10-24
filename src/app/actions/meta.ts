@@ -6,6 +6,7 @@ import { requireOwner } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkMetaConnection, saveMetaSettings, sendMetaMessage } from "@/lib/meta";
 import { getMetaSettings } from "@/lib/meta";
+import { checkThreadsConnection, publishThreadsPost } from "@/lib/threads";
 
 function text(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -22,6 +23,8 @@ export async function saveMetaSettingsAction(formData: FormData): Promise<void> 
     pageId: text(formData, "pageId"),
     pageToken: text(formData, "pageToken"),
     igUserId: text(formData, "igUserId"),
+    threadsUserId: text(formData, "threadsUserId"),
+    threadsToken: text(formData, "threadsToken"),
   });
 
   revalidatePath("/admin/meta");
@@ -40,6 +43,29 @@ export async function testMetaConnectionAction(): Promise<void> {
   const result = await checkMetaConnection();
   revalidatePath("/admin/meta");
   redirect(`/admin/meta?meta=${result.ok ? "ok" : "error"}`);
+}
+
+/** Threads tokeni bilan akkauntni tekshirish */
+export async function testThreadsConnectionAction(): Promise<void> {
+  await requireOwner();
+
+  const result = await checkThreadsConnection();
+  revalidatePath("/admin/meta/kanallar");
+  redirect(`/admin/meta/kanallar?threads=${result.ok ? "ok" : "error"}`);
+}
+
+/** Threads'ga matnli post joylash */
+export async function publishToThreads(formData: FormData): Promise<void> {
+  await requireOwner();
+
+  const body = text(formData, "text");
+  if (body.length < 1 || body.length > 500) {
+    redirect("/admin/meta/kanallar?threads=invalid");
+  }
+
+  const result = await publishThreadsPost(body);
+  revalidatePath("/admin/meta/kanallar");
+  redirect(`/admin/meta/kanallar?threads=${result.ok ? "sent" : "failed"}`);
 }
 
 /** Facebook yoki Instagram suhbatiga javob yozish */
