@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
 import sharp from "sharp";
+import { articles } from "./articles";
 
 const prisma = new PrismaClient();
 
@@ -203,127 +204,6 @@ const listings = [
   },
 ];
 
-const articles = [
-  {
-    slug: "toshkent-kvartira-narxlari-2026",
-    titleUz: "Toshkentda kvartira narxlari 2026: tumanlar bo'yicha tahlil",
-    titleRu: "Цены на квартиры в Ташкенте в 2026 году: анализ по районам",
-    excerptUz:
-      "Qaysi tumanda kvadrat metr eng qimmat, qayerda narx o'sishda davom etmoqda va xaridor uchun qaysi variant foydali — raqamlar bilan tahlil.",
-    excerptRu:
-      "Где квадратный метр самый дорогой, где цены продолжают расти и какой район выгоден покупателю — анализ в цифрах.",
-    bodyUz: `Toshkent uy-joy bozori 2026-yilda ham faol bo'lib qolmoqda. Yangi qurilgan uylar soni oshgani bilan, markazga yaqin tumanlarda talab barqaror.
-
-## Tumanlar bo'yicha o'rtacha narx
-
-Yunusobod va Mirzo Ulug'bek tumanlarida kvadrat metr narxi eng yuqori darajada saqlanib qolmoqda. Bu yerda yangi binolar, maktablar va savdo markazlari zich joylashgan.
-
-Chilonzor va Sergeli esa narx bo'yicha qulayroq variant bo'lib qolmoqda. Metro yaqinligi bu tumanlarda talabni yuqori ushlab turadi.
-
-## Xaridor nimalarga e'tibor berishi kerak
-
-- Uyning qurilgan yili va quruvchi kompaniyaning obro'si
-- Hujjatlarning tozaligi (kadastr, kommunal qarzlar)
-- Hovli va avtoturargoh holati
-- Maktab, bog'cha va transport masofasi
-
-## Xulosa
-
-Agar maqsad — o'z yashash joyi, markazga yaqinlik muhim bo'lsa, Yunusobod va Mirzo Ulug'bek mos. Byudjetni tejash kerak bo'lsa, Chilonzor va Sergelidagi yangi binolarni ko'rib chiqish arziydi.`,
-    bodyRu: `Рынок жилья Ташкента остаётся активным и в 2026 году. Количество новостроек растёт, но спрос в центральных районах стабилен.
-
-## Средние цены по районам
-
-Самая высокая цена за квадратный метр сохраняется в Юнусабадском и Мирзо-Улугбекском районах. Здесь сосредоточены новостройки, школы и торговые центры.
-
-Чиланзар и Сергели остаются более доступными. Близость метро поддерживает спрос в этих районах.
-
-## На что обратить внимание покупателю
-
-- Год постройки дома и репутация застройщика
-- Чистота документов (кадастр, долги по коммунальным)
-- Состояние двора и парковки
-- Расстояние до школы, садика и транспорта
-
-## Вывод
-
-Если важно жить ближе к центру — подойдут Юнусабад и Мирзо-Улугбек. Если бюджет ограничен — стоит посмотреть новостройки в Чиланзаре и Сергели.`,
-    category: "bozor",
-    authorName: "Aziz Karimov",
-    authorRole: "Ko'chmas mulk bo'yicha tahlilchi",
-  },
-  {
-    slug: "uy-sotib-olishda-7-xato",
-    titleUz: "Uy sotib olishda 7 ta xato va ulardan qanday qochish kerak",
-    titleRu: "7 ошибок при покупке жилья и как их избежать",
-    excerptUz:
-      "Hujjatlarni tekshirmaslikdan tortib, yashirin qarzlarni payqamaslikkacha — xaridorlar eng ko'p yo'l qo'yadigan xatolar.",
-    excerptRu:
-      "От непроверенных документов до скрытых долгов — самые частые ошибки покупателей жилья.",
-    bodyUz: `Uy sotib olish — hayotdagi eng katta xaridlardan biri. Quyidagi xatolar ko'p uchraydi va ularni oldindan bilish pul va asablarni saqlaydi.
-
-## 1. Hujjatlarni tekshirmaslik
-
-Kadastr raqami, mulkdorning shaxsi, garov va sud ishlari bo'yicha ma'lumotnoma olinishi shart. Bu 1-2 kun vaqt oladi, lekin eng katta xatarlarni yo'q qiladi.
-
-## 2. Kommunal qarzlarni tekshirmaslik
-
-Eski egasining suv, gaz va elektr qarzlari yangi egaga o'tishi mumkin. Shartnomada qarzlar bo'yicha band qo'shing.
-
-## 3. Faqat rasmga qarab qaror qabul qilish
-
-Rasmlar keng burchakli obyektiv bilan olingan bo'lishi mumkin. Uyni albatta o'zingiz ko'ring, kunduzi va kechqurun.
-
-## 4. Uyning texnik holatini tekshirmaslik
-
-Devorlardagi yoriqlar, namlik, tom va kanalizatsiya holati — bularni mutaxassis bilan ko'rish yaxshiroq.
-
-## 5. To'lov tartibini yozmaslik
-
-To'lov bosqichlari, avans miqdori va qaytarish shartlari shartnomada aniq yozilsin.
-
-## 6. Soliq va rasmiylashtirish xarajatlarini hisoblamaslik
-
-Notarius, davlat boji va ro'yxatdan o'tkazish xarajatlari umumiy byudjetning bir qismi.
-
-## 7. Shoshilish
-
-"Yana kimdir olib qo'yadi" degan bosim ostida qaror qabul qilmang. Yaxshi obyektlar ko'p.`,
-    bodyRu: `Покупка жилья — одна из самых крупных сделок в жизни. Эти ошибки встречаются чаще всего, и знание о них помогает сохранить деньги и нервы.
-
-## 1. Не проверить документы
-
-Кадастровый номер, личность собственника, справки о залоге и судебных делах обязательны. Это займёт 1–2 дня, но снимет главные риски.
-
-## 2. Не проверить долги по коммунальным
-
-Долги прежнего владельца за воду, газ и электричество могут перейти к новому. Пропишите это в договоре.
-
-## 3. Решать только по фотографиям
-
-Фото могут быть сняты широкоугольным объективом. Обязательно посмотрите объект лично, днём и вечером.
-
-## 4. Не проверить техническое состояние
-
-Трещины, влажность, состояние крыши и канализации лучше оценить со специалистом.
-
-## 5. Не прописать порядок оплаты
-
-Этапы оплаты, размер задатка и условия возврата должны быть чётко указаны в договоре.
-
-## 6. Не учесть налоги и расходы на оформление
-
-Нотариус, госпошлина и регистрация — часть общего бюджета.
-
-## 7. Спешка
-
-Не принимайте решение под давлением «сейчас заберут». Хороших объектов много.`,
-    category: "qollanma",
-    authorName: "Dilnoza Rahimova",
-    authorRole: "Yurist, ko'chmas mulk bo'yicha mutaxassis",
-  },
-];
-
 async function main() {
   await mkdir(uploadsDir, { recursive: true });
 
@@ -417,6 +297,13 @@ async function main() {
       update: {
         titleUz: article.titleUz,
         titleRu: article.titleRu,
+        excerptUz: article.excerptUz,
+        excerptRu: article.excerptRu,
+        bodyUz: article.bodyUz,
+        bodyRu: article.bodyRu,
+        category: article.category,
+        authorName: article.authorName,
+        authorRole: article.authorRole,
         published: true,
       },
       create: {
