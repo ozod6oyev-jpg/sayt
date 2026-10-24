@@ -134,7 +134,7 @@ export default async function ListingsPage({ params, searchParams }: Props) {
         <span className="text-slate-700">{t.nav.listings}</span>
       </nav>
 
-      <h1 className="mt-3 text-2xl font-bold sm:text-3xl">{t.nav.listings}</h1>
+      <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">{t.nav.listings}</h1>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
         {t.meta.listingsDescription}
       </p>
@@ -152,7 +152,7 @@ export default async function ListingsPage({ params, searchParams }: Props) {
           ))}
         </div>
       ) : (
-        <p className="mt-6 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-sm text-slate-500">
+        <p className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-sm text-slate-500">
           {t.search.empty}
         </p>
       )}
@@ -176,8 +176,8 @@ export default async function ListingsPage({ params, searchParams }: Props) {
                   aria-current={num === page ? "page" : undefined}
                   className={
                     num === page
-                      ? "btn bg-brand-600 text-white"
-                      : "btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                      ? "btn-primary"
+                      : "btn-secondary"
                   }
                 >
                   {num}

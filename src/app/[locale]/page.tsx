@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/article-card";
+import { CameraIcon, HeadphonesIcon, ShieldCheckIcon } from "@/components/icons";
 import { JsonLd } from "@/components/json-ld";
 import { ListingCard } from "@/components/listing-card";
 import { SearchForm } from "@/components/search-form";
+import { contact } from "@/lib/contact";
 import { getDict, isLocale, localePath, siteName, type Locale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { alternatesFor, robotsMeta, siteUrl, socialMetadata } from "@/lib/seo";
@@ -73,33 +76,44 @@ export default async function HomePage({ params }: Props) {
         }}
       />
 
-      <section className="bg-gradient-to-br from-brand-800 via-brand-700 to-brand-600 pb-10 text-white">
-        <div className="container-page pt-14 pb-24 sm:pt-20">
-          <p className="text-sm font-semibold tracking-wide text-brand-100 uppercase">
-            {siteName} · O'zbekiston
-          </p>
-          <h1 className="mt-3 max-w-2xl text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-            {t.hero.title}
-          </h1>
-          <p className="mt-4 max-w-xl text-base leading-7 text-brand-50">{t.hero.subtitle}</p>
-          <p className="mt-4 text-sm text-brand-100">
-            {t.search.results(totalActive)}
-          </p>
+      <section className="bg-brand-900">
+        <div className="container-page py-4 sm:py-6">
+          <Image
+            src="/banner.webp"
+            alt={`${siteName} — ${contact.address[locale]}, ${contact.phoneDisplay}`}
+            width={1500}
+            height={600}
+            priority
+            sizes="(max-width: 1152px) 100vw, 1152px"
+            className="h-[220px] w-full rounded-2xl object-cover object-center shadow-float sm:h-[300px] lg:h-[360px]"
+          />
         </div>
       </section>
 
-      <div className="container-page -mt-14">
-        <SearchForm locale={locale} districts={districts} />
-      </div>
+      <section className="container-page pt-8 sm:pt-10">
+        <div className="max-w-3xl">
+          <p className="text-xs font-bold tracking-[0.18em] text-brand-600 uppercase">
+            {siteName}
+          </p>
+          <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
+            {t.hero.title}
+          </h1>
+          <p className="mt-3 text-base leading-7 text-slate-600">{t.hero.subtitle}</p>
+        </div>
 
-      <section className="container-page mt-14">
+        <div className="mt-6">
+          <SearchForm locale={locale} districts={districts} />
+        </div>
+      </section>
+
+      <section className="container-page mt-12">
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 className="text-2xl font-bold">{t.nav.listings}</h2>
-          <Link
-            href={localePath(locale, "/elonlar")}
-            className="text-sm font-semibold text-brand-700 hover:text-brand-800"
-          >
-            {t.search.apply} →
+          <div>
+            <h2 className="section-heading">{t.nav.listings}</h2>
+            <p className="mt-1 text-sm text-slate-500">{t.search.results(totalActive)}</p>
+          </div>
+          <Link href={localePath(locale, "/elonlar")} className="link-more">
+            {locale === "ru" ? "Все объявления" : "Barcha e'lonlar"} →
           </Link>
         </div>
 
@@ -110,7 +124,7 @@ export default async function HomePage({ params }: Props) {
             ))}
           </div>
         ) : (
-          <p className="mt-6 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
+          <p className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
             {t.search.empty}
           </p>
         )}
@@ -119,11 +133,11 @@ export default async function HomePage({ params }: Props) {
       <section className="mt-16 bg-slate-50 py-14">
         <div className="container-page">
           <div className="flex flex-wrap items-end justify-between gap-3">
-            <h2 className="text-2xl font-bold">{t.nav.blog}</h2>
-            <Link
-              href={localePath(locale, "/blog")}
-              className="text-sm font-semibold text-brand-700 hover:text-brand-800"
-            >
+            <div>
+              <h2 className="section-heading">{t.nav.blog}</h2>
+              <p className="mt-1 text-sm text-slate-500">{t.meta.blogDescription}</p>
+            </div>
+            <Link href={localePath(locale, "/blog")} className="link-more">
               {t.blog.all} →
             </Link>
           </div>
@@ -140,10 +154,11 @@ export default async function HomePage({ params }: Props) {
         </div>
       </section>
 
-      <section className="container-page mt-14">
+      <section className="container-page mt-16">
         <div className="grid gap-4 sm:grid-cols-3">
           {[
             {
+              icon: ShieldCheckIcon,
               title: locale === "ru" ? "Проверенные объявления" : "Tekshirilgan e'lonlar",
               text:
                 locale === "ru"
@@ -151,6 +166,7 @@ export default async function HomePage({ params }: Props) {
                   : "Har bir obyekt nashr etishdan oldin tekshiriladi.",
             },
             {
+              icon: CameraIcon,
               title: locale === "ru" ? "Реальные фотографии" : "Haqiqiy rasmlar",
               text:
                 locale === "ru"
@@ -158,18 +174,25 @@ export default async function HomePage({ params }: Props) {
                   : "Obyektning o'z rasmlari, stok suratlar emas.",
             },
             {
+              icon: HeadphonesIcon,
               title: locale === "ru" ? "Помощь на каждом этапе" : "Har bosqichda yordam",
               text:
                 locale === "ru"
                   ? "От выбора до оформления документов."
                   : "Tanlashdan hujjatlashtirishgacha.",
             },
-          ].map((item) => (
-            <div key={item.title} className="card p-5">
-              <h3 className="text-base font-semibold">{item.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
-            </div>
-          ))}
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.title} className="rounded-2xl border border-slate-200 bg-white p-6">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <h3 className="mt-4 text-base font-bold text-slate-900">{item.title}</h3>
+                <p className="mt-1.5 text-sm leading-6 text-slate-600">{item.text}</p>
+              </div>
+            );
+          })}
         </div>
       </section>
     </>

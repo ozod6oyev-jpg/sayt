@@ -1,10 +1,14 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import "../globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { getDict, isLocale, siteName } from "@/lib/i18n";
 import { robotsMeta, siteUrl } from "@/lib/seo";
+
+export const viewport: Viewport = {
+  themeColor: "#033579",
+};
 
 type LayoutProps = {
   children: React.ReactNode;

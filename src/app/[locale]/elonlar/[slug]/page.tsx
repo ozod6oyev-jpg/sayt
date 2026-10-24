@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { submitLead } from "@/app/actions/leads";
 import { JsonLd } from "@/components/json-ld";
+import { MapPinIcon, PhoneIcon } from "@/components/icons";
 import { ListingCard } from "@/components/listing-card";
 import { listingDescription, listingTitle } from "@/lib/content";
 import { formatArea, formatFloor, formatNumber, formatPrice } from "@/lib/format";
@@ -183,7 +184,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
       <div className="mt-4 grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
           {cover ? (
-            <div className="overflow-hidden rounded-xl bg-slate-100">
+            <div className="overflow-hidden rounded-2xl bg-slate-100">
               <Image
                 src={cover.url}
                 alt={cover.alt || title}
@@ -203,7 +204,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
           {listing.photos.length > 1 && (
             <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
               {listing.photos.slice(1).map((photo) => (
-                <div key={photo.id} className="overflow-hidden rounded-lg bg-slate-100">
+                <div key={photo.id} className="overflow-hidden rounded-xl bg-slate-100">
                   <Image
                     src={photo.url}
                     alt={photo.alt || title}
@@ -220,9 +221,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
           <div className="mt-8">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h1 className="text-2xl font-bold sm:text-3xl">{title}</h1>
-                <p className="mt-2 text-sm text-slate-600">
-                  📍 {listing.address}, {listing.district}, {listing.region}
+                <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{title}</h1>
+                <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-600">
+                  <MapPinIcon className="h-4 w-4 shrink-0 text-brand-500" />
+                  {listing.address}, {listing.district}, {listing.region}
                 </p>
               </div>
               {listing.status === "sold" && (
@@ -232,7 +234,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
               )}
             </div>
 
-            <p className="mt-4 text-3xl font-bold text-brand-700">
+            <p className="mt-4 text-3xl font-extrabold tracking-tight text-brand-800">
               {formatPrice(listing.price, listing.currency, locale)}
             </p>
             {listing.area ? (
@@ -272,9 +274,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
                 href={`https://www.google.com/maps/search/?api=1&query=${listing.lat},${listing.lng}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-6 inline-flex text-sm font-semibold text-brand-700 hover:text-brand-800"
+                className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
               >
-                📍 {t.listing.map}
+                <MapPinIcon className="h-4 w-4" />
+                {t.listing.map}
               </a>
             )}
 
@@ -285,8 +288,8 @@ export default async function ListingPage({ params, searchParams }: Props) {
         </div>
 
         <aside id="aloqa" className="lg:sticky lg:top-24 lg:self-start">
-          <div className="card p-5">
-            <p className="text-2xl font-bold text-slate-900">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-float">
+            <p className="text-2xl font-extrabold text-slate-900">
               {formatPrice(listing.price, listing.currency, locale)}
             </p>
             <p className="mt-1 text-xs text-slate-500">
@@ -294,7 +297,8 @@ export default async function ListingPage({ params, searchParams }: Props) {
             </p>
 
             <a href={phoneHref} className="btn-primary mt-4 w-full">
-              📞 {listing.phone}
+              <PhoneIcon className="h-4 w-4" />
+              {listing.phone}
             </a>
 
             <hr className="my-5 border-slate-200" />
