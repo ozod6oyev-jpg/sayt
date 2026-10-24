@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { contact } from "@/lib/contact";
 import { getDict, isLocale } from "@/lib/i18n";
 import { alternatesFor, robotsMeta } from "@/lib/seo";
 
@@ -38,8 +39,8 @@ export default async function PrivacyPage({ params }: Props) {
             посещений. Вы можете отключить cookie в настройках браузера.
           </p>
           <p>
-            По вопросам удаления данных напишите на info@uyjoy.uz — мы удалим ваши данные в
-            течение 30 дней.
+            По вопросам удаления данных напишите в Telegram: {contact.telegramHandle} — мы
+            удалим ваши данные в течение 30 дней.
           </p>
         </div>
       ) : (
@@ -54,8 +55,8 @@ export default async function PrivacyPage({ params }: Props) {
             qilish uchun ishlatiladi. Brauzer sozlamalarida cookie'ni o'chirib qo'yishingiz mumkin.
           </p>
           <p>
-            Ma'lumotlarni o'chirish bo'yicha info@uyjoy.uz manziliga yozing — 30 kun ichida
-            ma'lumotlaringizni o'chiramiz.
+            Ma'lumotlarni o'chirish bo'yicha Telegram orqali bog'laning: {contact.telegramHandle} —
+            30 kun ichida ma'lumotlaringizni o'chiramiz.
           </p>
         </div>
       )}

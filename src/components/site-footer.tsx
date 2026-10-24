@@ -56,11 +56,6 @@ export function SiteFooter({ locale }: { locale: Locale }) {
               </a>
             </li>
             <li>
-              <a href={`mailto:${contact.email}`} className="hover:text-brand-700">
-                {contact.email}
-              </a>
-            </li>
-            <li>
               <a
                 href={contact.telegramUrl}
                 target="_blank"

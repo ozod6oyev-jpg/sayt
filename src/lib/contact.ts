@@ -3,7 +3,6 @@ export const contact = {
   name: "Shermat Qosimov",
   phoneDisplay: "+998 90 370 68 83",
   phoneHref: "tel:+998903706883",
-  email: "info@uyjoy.uz",
   telegramHandle: "@realsotamizadmin",
   telegramUrl: "https://t.me/realsotamizadmin",
   telegramChannelHandle: "@realsotamiz",

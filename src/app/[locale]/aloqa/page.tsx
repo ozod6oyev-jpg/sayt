@@ -35,7 +35,7 @@ export default async function ContactPage({ params }: Props) {
       <p className="mt-3 text-sm leading-7 text-slate-600">{t.footer.about}</p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <div className="card p-5">
+        <div className="card p-5 sm:col-span-2">
           <h2 className="text-sm font-semibold text-slate-900">Telefon</h2>
           <p className="mt-2 text-sm font-medium text-slate-900">{contact.name}</p>
           <a
@@ -45,19 +45,6 @@ export default async function ContactPage({ params }: Props) {
             {contact.phoneDisplay}
           </a>
           <p className="mt-1 text-xs text-slate-500">{contact.hours[locale]}</p>
-        </div>
-
-        <div className="card p-5">
-          <h2 className="text-sm font-semibold text-slate-900">Email</h2>
-          <a
-            href={`mailto:${contact.email}`}
-            className="mt-2 block text-lg font-semibold text-brand-700 hover:underline"
-          >
-            {contact.email}
-          </a>
-          <p className="mt-1 text-xs text-slate-500">
-            {locale === "ru" ? "Ответим в течение рабочего дня" : "Ish kuni ichida javob beramiz"}
-          </p>
         </div>
 
         <div className="card p-5 sm:col-span-2">
