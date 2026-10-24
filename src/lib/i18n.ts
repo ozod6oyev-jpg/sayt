@@ -45,6 +45,8 @@ const uz = {
     featured: "Tanlangan e'lon",
     prev: "Oldingi e'lon",
     next: "Keyingi e'lon",
+    enlarge: "E'lonni kattalashtirish",
+    close: "Yopish",
   },
   common: {
     loadMore: "Yana",
@@ -237,6 +239,8 @@ const ru: Dict = {
     featured: "Избранное объявление",
     prev: "Предыдущее объявление",
     next: "Следующее объявление",
+    enlarge: "Увеличить объявление",
+    close: "Закрыть",
   },
   common: {
     loadMore: "Ещё",
