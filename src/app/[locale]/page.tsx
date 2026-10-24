@@ -9,7 +9,6 @@ import { LoadMoreArticles } from "@/components/load-more-articles";
 import { LoadMoreListings } from "@/components/load-more-listings";
 import { SearchForm } from "@/components/search-form";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { toArticleCardData } from "@/lib/article-view";
 import { listingTitle, saleOptionLabel } from "@/lib/content";
 import { formatPrice } from "@/lib/format";
@@ -200,8 +199,8 @@ export default async function HomePage({ params }: Props) {
         </div>
       </section>
 
-      <section className="container-page mt-10">
-        <div className="grid gap-4 sm:grid-cols-3">
+      <section className="container-page mt-6 sm:mt-8">
+        <div className="grid overflow-hidden rounded-2xl border border-border bg-card sm:grid-cols-3">
           {[
             {
               icon: ShieldCheckIcon,
@@ -227,21 +226,23 @@ export default async function HomePage({ params }: Props) {
                   ? "От выбора до оформления документов."
                   : "Tanlashdan hujjatlashtirishgacha.",
             },
-          ].map((item) => {
+          ].map((item, index) => {
             const Icon = item.icon;
             return (
-              <Card
+              <div
                 key={item.title}
-                className="gap-0 p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-float"
+                className={`flex items-start gap-3 p-4 sm:p-5 ${
+                  index > 0 ? "border-t border-border sm:border-t-0 sm:border-l" : ""
+                }`}
               >
-                <CardContent className="p-0">
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <h3 className="mt-4 text-base font-bold text-slate-900">{item.title}</h3>
-                  <p className="mt-1.5 text-sm leading-6 text-slate-600">{item.text}</p>
-                </CardContent>
-              </Card>
+                <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+                  <Icon className="h-4.5 w-4.5" />
+                </span>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900">{item.title}</h3>
+                  <p className="mt-0.5 text-xs leading-5 text-slate-600">{item.text}</p>
+                </div>
+              </div>
             );
           })}
         </div>
