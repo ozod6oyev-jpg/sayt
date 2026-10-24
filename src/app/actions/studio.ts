@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireOwner } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { publishToTarget, type SocialKind } from "@/lib/social-publish";
-import { saveSocialMedia, type SavedMedia } from "@/lib/uploads";
+import { saveCoverImage, saveSocialMedia, type SavedMedia } from "@/lib/uploads";
 
 const KINDS: SocialKind[] = [
   "ig_reel",
@@ -72,9 +72,15 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
   const fullFb = withTags(captions.fb);
   const fullThreads = withTags(captions.threads.slice(0, MAX_CAPTION.threads));
 
-  const rawCover = Number.parseInt(text(formData, "coverOffset"), 10);
-  const coverOffset =
-    Number.isFinite(rawCover) && rawCover >= 0 && rawCover <= 3600 ? rawCover : null;
+  let coverUrl: string | null = null;
+  const coverFile = formData.get("cover");
+  if (coverFile instanceof File && coverFile.size > 0) {
+    try {
+      coverUrl = (await saveCoverImage(coverFile)).url;
+    } catch {
+      coverUrl = null;
+    }
+  }
 
   const collaborators = text(formData, "collaborators")
     .split(/[\s,]+/)
@@ -96,7 +102,7 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
     igLocationId: igLocationId || undefined,
     fbPlaceId: fbLocationId || undefined,
     altText: text(formData, "altText") || undefined,
-    coverOffset,
+    coverUrl: coverUrl ?? undefined,
     shareToFeed: formData.get("shareToFeed") === "on",
     collaborators: collaborators || undefined,
     fbTitle: text(formData, "fbTitle") || undefined,
@@ -117,7 +123,7 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
       fbLocationId: fbLocationId || null,
       fbLocationName: text(formData, "fbLocationName") || null,
       altText: options.altText ?? null,
-      coverOffset,
+      coverUrl: coverUrl ?? undefined,
       shareToFeed: options.shareToFeed,
       collaborators: collaborators || null,
       fbTitle: options.fbTitle ?? null,

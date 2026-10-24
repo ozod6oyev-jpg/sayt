@@ -131,3 +131,31 @@ export async function saveSocialMedia(file: File): Promise<SavedMedia> {
     localPath: path.join(uploadsDir, fileName),
   };
 }
+
+/** Reels muqovasi — o'z faylidan, 9:16 nisbatda kesiladi */
+export async function saveCoverImage(file: File): Promise<{ url: string; localPath: string }> {
+  if (!file || typeof file === "string" || file.size === 0) {
+    throw new Error("Muqova tanlanmagan");
+  }
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Muqova rasm bo'lishi kerak");
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error("Muqova hajmi 15 MB dan katta bo'lmasligi kerak");
+  }
+
+  const input = Buffer.from(await file.arrayBuffer());
+  const output = await sharp(input)
+    .rotate()
+    .resize({ width: 1080, height: 1920, fit: "cover", position: "centre" })
+    .jpeg({ quality: 90 })
+    .toBuffer();
+
+  const uploadsDir = uploadsRoot();
+  await mkdir(uploadsDir, { recursive: true });
+
+  const fileName = `cover-${crypto.randomUUID()}.jpg`;
+  await writeFile(path.join(uploadsDir, fileName), output);
+
+  return { url: `/uploads/${fileName}`, localPath: path.join(uploadsDir, fileName) };
+}

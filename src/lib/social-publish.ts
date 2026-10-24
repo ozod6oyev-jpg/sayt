@@ -36,8 +36,8 @@ export type PublishOptions = {
   fbPlaceId?: string;
   /** Rasm uchun muqobil matn */
   altText?: string;
-  /** Reels muqovasi — videoning nechanchi sekundidan olinadi */
-  coverOffset?: number | null;
+  /** Reels muqovasi — o'z rasmimiz (public URL) */
+  coverUrl?: string;
   /** Reels feed'da ham ko'rinsinmi */
   shareToFeed?: boolean;
   /** Instagram hamkorlari (@username, vergul bilan) */
@@ -177,9 +177,7 @@ async function publishInstagram(
   // Reels feed'da ham ko'rinsin va muqova sekundi
   if (kind === "ig_reel") {
     params.share_to_feed = options.shareToFeed === false ? "false" : "true";
-    if (typeof options.coverOffset === "number" && options.coverOffset >= 0) {
-      params.thumb_offset = String(options.coverOffset * 1000);
-    }
+    if (options.coverUrl) params.cover_url = publicMediaUrl(options.coverUrl);
   }
 
   // Hamkorlar (collab) — story uchun qo'llanmaydi

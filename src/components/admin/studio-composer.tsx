@@ -196,6 +196,131 @@ function LocationPicker({
   );
 }
 
+
+type TagSuggestion = { tag: string; uses: number };
+
+function HashtagPicker({ copy }: { copy: Copy }) {
+  const [tags, setTags] = useState<string[]>([]);
+  const [value, setValue] = useState("");
+  const [items, setItems] = useState<TagSuggestion[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const query = value.replace(/^#+/, "").trim();
+    if (!query) {
+      setItems([]);
+      return;
+    }
+
+    let alive = true;
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/admin/hashtags?q=${encodeURIComponent(query)}`);
+        const data = (await response.json()) as { items?: TagSuggestion[] };
+        if (alive) setItems(data.items ?? []);
+      } catch {
+        if (alive) setItems([]);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [value]);
+
+  function add(raw: string) {
+    const tag = raw.replace(/^#+/, "").replace(/[\s,;]+/g, "").trim();
+    if (!tag) return;
+    setTags((prev) => (prev.includes(tag) || prev.length >= 30 ? prev : [...prev, tag]));
+    setValue("");
+    setItems([]);
+  }
+
+  const hidden = [...tags, ...(value.trim() ? [value.trim().replace(/^#+/, "")] : [])];
+
+  return (
+    <div>
+      <label className="label" htmlFor="studio-hashtags">
+        {copy.hashtagsTitle}
+      </label>
+
+      <div className="relative">
+        <input
+          id="studio-hashtags"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " " || event.key === ",") {
+              event.preventDefault();
+              add(value);
+            } else if (event.key === "Backspace" && !value && tags.length > 0) {
+              setTags((prev) => prev.slice(0, -1));
+            }
+          }}
+          className="field"
+          autoComplete="off"
+          placeholder={copy.hashtagsPlaceholder}
+        />
+
+        {(items.length > 0 || loading) && (
+          <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-border bg-background shadow-sm">
+            {loading && items.length === 0 && (
+              <p className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground">
+                <Loader2 className="size-3.5 animate-spin" />
+                {copy.locationSearching}
+              </p>
+            )}
+
+            {items.map((item) => (
+              <button
+                key={item.tag}
+                type="button"
+                onClick={() => add(item.tag)}
+                className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-accent"
+              >
+                <span className="truncate">#{item.tag}</span>
+                {item.uses > 0 && (
+                  <span className="shrink-0 text-[11px] text-muted-foreground">
+                    {item.uses} {copy.hashtagUses}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {tags.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className="flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-800"
+            >
+              #{tag}
+              <button
+                type="button"
+                onClick={() => setTags((prev) => prev.filter((item) => item !== tag))}
+                className="text-brand-700/60 hover:text-brand-800"
+                aria-label={`#${tag} olib tashlash`}
+              >
+                ✕
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <p className="mt-1 text-[11px] text-muted-foreground">{copy.hashtagsHint}</p>
+      <input type="hidden" name="hashtags" value={hidden.join(" ")} />
+    </div>
+  );
+}
+
 function SubmitButton({ copy, count }: { copy: Copy; count: number }) {
   const { pending } = useFormStatus();
 
@@ -225,7 +350,8 @@ export function StudioComposer({
   const [preview, setPreview] = useState<string | null>(null);
   const [isVideo, setIsVideo] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [hashtags, setHashtags] = useState("");
+  const [cover, setCover] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [selected, setSelected] = useState<Record<string, boolean>>({ ig_post: true });
   const [igLocation, setIgLocation] = useState<Place | null>(null);
   const [fbLocation, setFbLocation] = useState<Place | null>(null);
@@ -240,6 +366,16 @@ export function StudioComposer({
     setPreview(url);
     return () => URL.revokeObjectURL(url);
   }, [file]);
+
+  useEffect(() => {
+    if (!cover) {
+      setCoverPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(cover);
+    setCoverPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [cover]);
 
   function pickFile(next: File | null) {
     setFile(next);
@@ -337,19 +473,7 @@ export function StudioComposer({
         </div>
 
         <div className="card p-4">
-          <label className="label" htmlFor="studio-hashtags">
-            {copy.hashtagsTitle}
-          </label>
-          <input
-            id="studio-hashtags"
-            name="hashtags"
-            value={hashtags}
-            onChange={(event) => setHashtags(event.target.value)}
-            className="field"
-            autoComplete="off"
-            placeholder={copy.hashtagsPlaceholder}
-          />
-          <p className="mt-1 text-[11px] text-muted-foreground">{copy.hashtagsHint}</p>
+          <HashtagPicker copy={copy} />
         </div>
       </div>
 
@@ -500,18 +624,25 @@ export function StudioComposer({
                     <div className="space-y-3 rounded-lg border border-border p-3">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div>
-                          <label className="label" htmlFor="ig-cover">
-                            {copy.coverLabel}
-                          </label>
-                          <input
-                            id="ig-cover"
-                            name="coverOffset"
-                            type="number"
-                            min={0}
-                            max={3600}
-                            className="field"
-                            placeholder="0"
-                          />
+                          <p className="label">{copy.coverLabel}</p>
+                          <div className="flex items-center gap-3">
+                            <label className="flex size-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted/40 hover:bg-accent">
+                              {coverPreview ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={coverPreview} alt="" className="size-full object-cover" />
+                              ) : (
+                                <Upload className="size-4 text-muted-foreground" />
+                              )}
+                              <input
+                                type="file"
+                                name="cover"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(event) => setCover(event.target.files?.[0] ?? null)}
+                              />
+                            </label>
+                            <p className="text-[11px] leading-4 text-muted-foreground">{copy.coverHint}</p>
+                          </div>
                         </div>
                         <div>
                           <label className="label" htmlFor="ig-collab">

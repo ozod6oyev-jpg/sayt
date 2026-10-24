@@ -236,7 +236,7 @@ model SocialPost {
   fbLocationId   String?
   fbLocationName String?
   altText        String?
-  coverOffset    Int?
+  coverUrl       String?
   shareToFeed    Boolean        @default(true)
   collaborators  String?
   fbTitle        String?
