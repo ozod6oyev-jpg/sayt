@@ -17,8 +17,7 @@ const KINDS: SocialKind[] = [
   "threads_post",
 ];
 
-const MAX_CAPTION = 2200; // Instagram chegarasi
-const MAX_HASHTAGS = 30;
+const MAX_CAPTION = { ig: 2200, fb: 5000, threads: 500 };
 
 function text(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -33,15 +32,19 @@ function normalizeHashtags(raw: string): string[] {
     .filter(Boolean)
     .map((tag) => `#${tag}`);
 
-  return [...new Set(tags)].slice(0, MAX_HASHTAGS);
+  return [...new Set(tags)].slice(0, 30);
 }
 
 /** Bitta media'ni tanlangan platformalarga joylash */
 export async function publishSocialAction(formData: FormData): Promise<void> {
   await requireOwner();
 
-  const caption = text(formData, "caption");
-  const captionFb = text(formData, "captionFb");
+  const captions = {
+    ig: text(formData, "ig_caption"),
+    fb: text(formData, "fb_caption"),
+    threads: text(formData, "threads_caption"),
+  };
+
   const hashtags = normalizeHashtags(text(formData, "hashtags"));
   const file = formData.get("media");
   const targets = formData
@@ -49,7 +52,7 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
     .filter((value): value is string => typeof value === "string")
     .filter((value): value is SocialKind => (KINDS as string[]).includes(value));
 
-  if (caption.length > MAX_CAPTION) {
+  if (captions.ig.length > MAX_CAPTION.ig || captions.fb.length > MAX_CAPTION.fb) {
     redirect("/admin/meta/studio?post=long");
   }
   if (!(file instanceof File) || file.size === 0 || targets.length === 0) {
@@ -63,13 +66,15 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
     redirect("/admin/meta/studio?post=media");
   }
 
-  const fullCaption = [caption, hashtags.join(" ")].filter(Boolean).join("\n\n");
-  const fullCaptionFb = captionFb
-    ? [captionFb, hashtags.join(" ")].filter(Boolean).join("\n\n")
-    : undefined;
+  const tags = hashtags.join(" ");
+  const withTags = (value: string) => [value, tags].filter(Boolean).join("\n\n");
+  const fullIg = withTags(captions.ig);
+  const fullFb = withTags(captions.fb);
+  const fullThreads = withTags(captions.threads.slice(0, MAX_CAPTION.threads));
 
   const rawCover = Number.parseInt(text(formData, "coverOffset"), 10);
-  const coverOffset = Number.isFinite(rawCover) && rawCover >= 0 && rawCover <= 3600 ? rawCover : null;
+  const coverOffset =
+    Number.isFinite(rawCover) && rawCover >= 0 && rawCover <= 3600 ? rawCover : null;
 
   const collaborators = text(formData, "collaborators")
     .split(/[\s,]+/)
@@ -84,9 +89,12 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
     .trim()
     .slice(0, 50);
 
+  const igLocationId = text(formData, "igLocation");
+  const fbLocationId = text(formData, "fbLocation");
+
   const options = {
-    captionFb: fullCaptionFb,
-    locationId: text(formData, "locationId") || undefined,
+    igLocationId: igLocationId || undefined,
+    fbPlaceId: fbLocationId || undefined,
     altText: text(formData, "altText") || undefined,
     coverOffset,
     shareToFeed: formData.get("shareToFeed") === "on",
@@ -98,12 +106,16 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
 
   const post = await prisma.socialPost.create({
     data: {
-      caption,
-      captionFb: captionFb || null,
-      hashtags: hashtags.join(" "),
+      caption: captions.ig,
+      captionFb: captions.fb || null,
+      captionThreads: captions.threads || null,
+      hashtags: tags,
       mediaType: media.type,
       mediaUrl: media.url,
-      locationId: options.locationId ?? null,
+      igLocationId: igLocationId || null,
+      igLocationName: text(formData, "igLocationName") || null,
+      fbLocationId: fbLocationId || null,
+      fbLocationName: text(formData, "fbLocationName") || null,
       altText: options.altText ?? null,
       coverOffset,
       shareToFeed: options.shareToFeed,
@@ -115,7 +127,13 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
   });
 
   for (const kind of targets) {
-    const result = await publishToTarget(kind, media, fullCaption, options);
+    const caption = kind.startsWith("ig_")
+      ? fullIg
+      : kind.startsWith("fb_")
+        ? fullFb || fullIg
+        : fullThreads || fullIg;
+
+    const result = await publishToTarget(kind, media, caption, options);
 
     await prisma.socialTarget.create({
       data: {

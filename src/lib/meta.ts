@@ -12,6 +12,7 @@ export type MetaSettings = {
   pageToken: string | null;
   igUserId: string | null;
   threadsUserId: string | null;
+  threadsToken: string | null;
   threadsUsername: string | null;
   pageName: string | null;
   igUsername: string | null;
@@ -39,6 +40,7 @@ export async function getMetaSettings(): Promise<MetaSettings> {
     pageToken: decryptSecret(row.pageToken),
     igUserId: row.igUserId,
     threadsUserId: row.threadsUserId,
+    threadsToken: decryptSecret(row.threadsToken),
     threadsUsername: row.threadsUsername,
     pageName: row.pageName,
     igUsername: row.igUsername,

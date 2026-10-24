@@ -30,8 +30,10 @@ export type PublishResult = { ok: true; id: string | null } | { ok: false; error
 
 /** Meta ilovasi so'raydigan qo'shimcha maydonlar */
 export type PublishOptions = {
-  /** Instagram/Facebook joylashuv ID */
-  locationId?: string;
+  /** Instagram joylashuv ID */
+  igLocationId?: string;
+  /** Facebook place ID */
+  fbPlaceId?: string;
   /** Rasm uchun muqobil matn */
   altText?: string;
   /** Reels muqovasi — videoning nechanchi sekundidan olinadi */
@@ -40,8 +42,7 @@ export type PublishOptions = {
   shareToFeed?: boolean;
   /** Instagram hamkorlari (@username, vergul bilan) */
   collaborators?: string;
-  /** Facebook uchun alohida tavsif va video sarlavhasi */
-  captionFb?: string;
+  /** Facebook video sarlavhasi */
   fbTitle?: string;
   /** Threads: kimlar javob yozishi mumkin */
   threadsReply?: string;
@@ -170,7 +171,7 @@ async function publishInstagram(
     params.image_url = publicMediaUrl(media.url);
   }
   if (!isStory && caption) params.caption = caption;
-  if (options.locationId) params.location_id = options.locationId;
+  if (options.igLocationId) params.location_id = options.igLocationId;
   if (options.altText && media.type === "image") params.alt_text = options.altText;
 
   // Reels feed'da ham ko'rinsin va muqova sekundi
@@ -252,7 +253,7 @@ async function publishFacebookVideo(
       file_url: publicMediaUrl(media.url),
       description: caption,
       ...(options.fbTitle ? { title: options.fbTitle } : {}),
-      ...(options.locationId ? { place: options.locationId } : {}),
+      ...(options.fbPlaceId ? { place: options.fbPlaceId } : {}),
     });
     return result.ok ? { ok: true, id: result.data.id ?? null } : { ok: false, error: result.error };
   }
@@ -292,7 +293,7 @@ async function publishFacebookImage(
     const result = await graphPost(`${pageId}/photos`, token, {
       url: publicMediaUrl(media.url),
       message: caption,
-      ...(options.locationId ? { place: options.locationId } : {}),
+      ...(options.fbPlaceId ? { place: options.fbPlaceId } : {}),
     });
     return result.ok ? { ok: true, id: result.data.id ?? null } : { ok: false, error: result.error };
   }
@@ -319,7 +320,6 @@ export async function publishToTarget(
   options: PublishOptions = {},
 ): Promise<PublishResult> {
   const settings = await getMetaSettings();
-  const fbCaption = options.captionFb?.trim() || caption;
 
   if (kind === "threads_post") {
     const result = await publishThreadsMedia({
@@ -350,7 +350,7 @@ export async function publishToTarget(
       settings.pageId,
       settings.pageToken,
       media,
-      fbCaption,
+      caption,
       options,
     );
   }
@@ -364,7 +364,7 @@ export async function publishToTarget(
     settings.pageId,
     settings.pageToken,
     media,
-    fbCaption,
+    caption,
     options,
   );
 }
