@@ -12,20 +12,20 @@ datasource db {
 }
 
 model AdminUser {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String    @id @default(cuid())
+  email        String    @unique
   name         String
   passwordHash String
   // owner | admin
-  role         String   @default("admin")
+  role         String    @default("admin")
   totpSecret   String
-  totpEnabled  Boolean  @default(true)
-  isActive     Boolean  @default(true)
+  totpEnabled  Boolean   @default(true)
+  isActive     Boolean   @default(true)
   lastLoginAt  DateTime?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime  @default(now())
 
-  createdById String?
-  createdBy   AdminUser?  @relation("AdminCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdById  String?
+  createdBy    AdminUser?  @relation("AdminCreator", fields: [createdById], references: [id], onDelete: SetNull)
   createdUsers AdminUser[] @relation("AdminCreator")
 }
 
@@ -45,39 +45,39 @@ model SaleOption {
 }
 
 model Listing {
-  id           String   @id @default(cuid())
-  slug         String   @unique
+  id            String      @id @default(cuid())
+  slug          String      @unique
   // Eski maydon, endi ishlatilmaydi (barcha e'lonlar sotuv)
-  type         String   @default("sale")
-  saleOptionId String?
-  saleOption   SaleOption? @relation(fields: [saleOptionId], references: [id], onDelete: SetNull)
+  type          String      @default("sale")
+  saleOptionId  String?
+  saleOption    SaleOption? @relation(fields: [saleOptionId], references: [id], onDelete: SetNull)
   // apartment | house | land | commercial
-  propertyType String   @default("apartment")
-  titleUz      String
-  titleRu      String
+  propertyType  String      @default("apartment")
+  titleUz       String
+  titleRu       String
   descriptionUz String
   descriptionRu String
-  price        BigInt
+  price         BigInt
   // UZS | USD
-  currency     String   @default("USD")
-  rooms        Int?
-  area         Int?
-  floor        Int?
-  totalFloors  Int?
-  yearBuilt    Int?
+  currency      String      @default("USD")
+  rooms         Int?
+  area          Int?
+  floor         Int?
+  totalFloors   Int?
+  yearBuilt     Int?
   // yangi | tamirlangan | ortacha | ta'mirtalab
-  condition    String?
-  region       String
-  district     String
-  address      String
-  lat          Float?
-  lng          Float?
-  phone        String
+  condition     String?
+  region        String
+  district      String
+  address       String
+  lat           Float?
+  lng           Float?
+  phone         String
   // draft | active | sold
-  status       String   @default("draft")
-  views        Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  status        String      @default("draft")
+  views         Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   photos Photo[]
   leads  Lead[]
@@ -156,4 +156,34 @@ model Lead {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+}
+
+/// Telegram orqali yozgan foydalanuvchi yoki kanal
+model TelegramChat {
+  id            String            @id @default(cuid())
+  chatId        String            @unique
+  title         String
+  username      String?
+  type          String            @default("private")
+  lastMessageAt DateTime          @default(now())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  messages      TelegramMessage[]
+
+  @@index([lastMessageAt])
+}
+
+/// Kelgan va yuborilgan Telegram xabarlari
+model TelegramMessage {
+  id          String       @id @default(cuid())
+  chatRefId   String
+  chat        TelegramChat @relation(fields: [chatRefId], references: [id], onDelete: Cascade)
+  tgMessageId Int?
+  direction   String
+  text        String
+  fromName    String?
+  createdAt   DateTime     @default(now())
+
+  @@unique([chatRefId, tgMessageId, direction])
+  @@index([chatRefId, createdAt])
 }
