@@ -25,20 +25,37 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const c = await getAdminCopy(shellCopy);
   const isDark = (await cookies()).get("uyjoy-theme")?.value === "dark";
 
-  const links = [
-    { href: "/admin", label: c.dashboard },
-    { href: "/admin/listings", label: c.listings },
-    { href: "/admin/sotuv-variantlari", label: c.saleOptions },
-    { href: "/admin/articles", label: c.articles },
-    { href: "/admin/leads", label: c.leads },
+  const groups = [
+    { links: [{ href: "/admin", label: c.dashboard }] },
+    {
+      label: c.groupContent,
+      links: [
+        { href: "/admin/listings", label: c.listings },
+        { href: "/admin/sotuv-variantlari", label: c.saleOptions },
+        { href: "/admin/articles", label: c.articles },
+      ],
+    },
+    {
+      label: c.groupClients,
+      links: [
+        { href: "/admin/leads", label: c.leads },
+        ...(user.role === "owner"
+          ? [{ href: "/admin/meta", label: c.meta, logo: "meta" as const }]
+          : []),
+      ],
+    },
     ...(user.role === "owner"
       ? [
-          { href: "/admin/users", label: c.users },
-          { href: "/admin/meta", label: c.meta, logo: "meta" as const },
-          { href: "/admin/kirish-huquqi", label: c.access },
+          {
+            label: c.groupAdmin,
+            links: [
+              { href: "/admin/users", label: c.users },
+              { href: "/admin/kirish-huquqi", label: c.access },
+            ],
+          },
         ]
       : []),
-    { href: "/admin/profil", label: c.profile },
+    { links: [{ href: "/admin/profil", label: c.profile }] },
   ];
 
   return (
@@ -66,7 +83,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 </span>
               </Link>
 
-              <AdminNavMenu links={links} label={c.sections} />
+              <AdminNavMenu groups={groups} label={c.sections} />
             </div>
 
             <div className="flex shrink-0 items-center gap-2 sm:gap-3">

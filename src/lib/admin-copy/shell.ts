@@ -16,6 +16,9 @@ const lat = {
   switchHint: "Panel tili",
   theme: "Tungi rejim",
   sections: "Bo'limlar",
+  groupContent: "Kontent",
+  groupClients: "Mijozlar",
+  groupAdmin: "Boshqaruv",
   owner: "Owner",
   adminRole: "Admin",
 };
@@ -36,6 +39,9 @@ const cyrl: typeof lat = {
   switchHint: "Панел тили",
   theme: "Тунги режим",
   sections: "Бўлимлар",
+  groupContent: "Контент",
+  groupClients: "Мижозлар",
+  groupAdmin: "Бошқарув",
   owner: "Эгаси",
   adminRole: "Админ",
 };
