@@ -11,7 +11,7 @@ import { MetaLogo } from "@/components/meta-logo";
 import { metaCopy } from "@/lib/admin-copy/meta";
 import { getAdminCopy } from "@/lib/admin-i18n";
 import { requireOwner } from "@/lib/auth";
-import { getMetaSettings, metaCallbackUrl } from "@/lib/meta";
+import { getMetaSettings, metaCallbackUrl, metaOAuthUrls } from "@/lib/meta";
 import { getBotInfo, getChannelInfo, getWebhookInfo, telegramWebhookUrl } from "@/lib/telegram";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +41,7 @@ export default async function MetaChannelsPage({ searchParams }: PageProps) {
     getMetaSettings(),
   ]);
 
+  const oauthUrls = metaOAuthUrls();
   const webhookUrl = telegramWebhookUrl();
   const webhookConnected = webhook.ok && webhook.result.url === webhookUrl;
   const metaWebhookUrl = metaCallbackUrl();
@@ -58,6 +59,9 @@ export default async function MetaChannelsPage({ searchParams }: PageProps) {
   if (metaStatus === "ok") banners.push({ tone: "ok", text: c.metaOk });
   if (metaStatus === "missing") banners.push({ tone: "error", text: c.metaMissing });
   if (metaStatus === "error") banners.push({ tone: "error", text: c.metaError });
+  if (metaStatus === "oauth_state") banners.push({ tone: "error", text: c.oauthState });
+  if (metaStatus === "oauth_pages") banners.push({ tone: "error", text: c.oauthPages });
+  if (metaStatus === "oauth_error") banners.push({ tone: "error", text: c.oauthError });
   if (threadsStatus === "ok") banners.push({ tone: "ok", text: c.threadsOk });
   if (threadsStatus === "sent") banners.push({ tone: "ok", text: c.threadsSent });
   if (threadsStatus === "invalid") banners.push({ tone: "error", text: c.threadsInvalid });
@@ -97,6 +101,20 @@ export default async function MetaChannelsPage({ searchParams }: PageProps) {
         </div>
         <p className="mt-1 text-xs leading-5 text-slate-500">{c.metaSettingsHint}</p>
 
+        <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs leading-5 text-slate-600">{c.oauthHint}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <a href="/api/meta/oauth/start" className="btn-primary text-xs">
+              <MetaLogo className="size-3.5" />
+              {c.connectFb}
+            </a>
+            <a href="/api/meta/threads/start" className="btn-secondary text-xs">
+              <AtSign className="size-3.5" />
+              {c.connectThreads}
+            </a>
+          </div>
+        </div>
+
         {metaConnected && (
           <dl className="mt-3 grid gap-3 text-xs sm:grid-cols-2">
             <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
@@ -114,7 +132,10 @@ export default async function MetaChannelsPage({ searchParams }: PageProps) {
           </dl>
         )}
 
-        <form action={saveMetaSettingsAction} className="mt-4 grid gap-3 sm:grid-cols-2">
+        <p className="mt-5 text-[11px] font-semibold tracking-wide text-slate-500 uppercase">
+          {c.manualTitle}
+        </p>
+        <form action={saveMetaSettingsAction} className="mt-2 grid gap-3 sm:grid-cols-2">
           <div>
             <label className="label" htmlFor="meta-app-id">
               {c.metaAppId}
@@ -229,6 +250,17 @@ export default async function MetaChannelsPage({ searchParams }: PageProps) {
               {c.metaTest}
             </button>
           </form>
+        </div>
+
+        <div className="mt-4 rounded-lg border border-slate-200 p-4">
+          <h3 className="text-sm font-semibold text-slate-900">{c.redirectTitle}</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-500">{c.redirectHint}</p>
+          <code className="mt-2 block font-mono text-[11px] break-all text-slate-700">
+            {oauthUrls.facebook}
+          </code>
+          <code className="mt-1 block font-mono text-[11px] break-all text-slate-700">
+            {oauthUrls.threads}
+          </code>
         </div>
       </section>
 

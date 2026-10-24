@@ -51,6 +51,15 @@ export async function metaVerifyToken(): Promise<string> {
   return (await getMetaSettings()).verifyToken;
 }
 
+/** Tashqi manzil (OAuth redirect va webhook uchun) */
+export function metaBaseUrl(): string {
+  const base =
+    process.env.META_PUBLIC_BASE_URL?.trim() ||
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    "http://localhost:3000";
+  return base.replace(/\/$/, "");
+}
+
 /**
  * Webhook callback manzili. Domen ishga tushmaguncha META_WEBHOOK_URL bilan
  * vaqtincha ishlaydigan manzilga yo'naltirish mumkin.
@@ -59,8 +68,15 @@ export function metaCallbackUrl(): string {
   const override = process.env.META_WEBHOOK_URL?.trim();
   if (override) return override;
 
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
-  return `${base}/api/webhooks/meta`;
+  return `${metaBaseUrl()}/api/webhooks/meta`;
+}
+
+/** Facebook OAuth va Threads OAuth uchun redirect manzillari */
+export function metaOAuthUrls(): { facebook: string; threads: string } {
+  return {
+    facebook: `${metaBaseUrl()}/api/meta/oauth/callback`,
+    threads: `${metaBaseUrl()}/api/meta/threads/callback`,
+  };
 }
 
 /** Bo'sh maydonlar eski qiymatni saqlab qoladi */
