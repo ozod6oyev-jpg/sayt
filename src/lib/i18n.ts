@@ -44,7 +44,7 @@ const uz = {
     next: "Keyingi e'lon",
   },
   common: {
-    loadMore: "Yana 5 ta ko'rsatish",
+    loadMore: "Yana",
     loading: "Yuklanmoqda...",
   },
   search: {
@@ -231,7 +231,7 @@ const ru: Dict = {
     next: "Следующее объявление",
   },
   common: {
-    loadMore: "Показать ещё 5",
+    loadMore: "Ещё",
     loading: "Загрузка...",
   },
   search: {

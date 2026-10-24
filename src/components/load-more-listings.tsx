@@ -51,7 +51,7 @@ export function LoadMoreListings({
             size="lg"
             onClick={loadMore}
             disabled={pending}
-            className="min-w-56"
+            className="min-w-36"
           >
             {pending && <Loader2 className="size-4 animate-spin" />}
             {pending ? t.common.loading : t.common.loadMore}
