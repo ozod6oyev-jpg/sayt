@@ -242,6 +242,10 @@ model SocialPost {
   fbTitle        String?
   threadsReply   String?
   threadsTopic   String?
+  hideLikeCounts Boolean        @default(false)
+  audioName      String?
+  userTags       String?
+  paidPartner    String?
   createdAt      DateTime       @default(now())
   targets        SocialTarget[]
 

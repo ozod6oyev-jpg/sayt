@@ -48,6 +48,14 @@ export type PublishOptions = {
   threadsReply?: string;
   /** Threads mavzu tegi */
   threadsTopic?: string;
+  /** Layk va ko'rishlar sonini yashirish */
+  hideLikeCounts?: boolean;
+  /** Reels audiosi nomi */
+  audioName?: string;
+  /** Rasmda belgilangan odamlar (username) */
+  userTags?: string[];
+  /** Brend kontent hamkori (Page/IG ID) */
+  paidPartner?: string;
 };
 
 const GRAPH_VERSION = process.env.META_GRAPH_VERSION?.trim() || "v21.0";
@@ -183,6 +191,24 @@ async function publishInstagram(
   // Hamkorlar (collab) — story uchun qo'llanmaydi
   if (!isStory && options.collaborators) {
     params.collaborators = options.collaborators;
+  }
+
+  if (options.hideLikeCounts) params.like_and_view_counts_disabled = "true";
+
+  if (kind === "ig_reel" && options.audioName) {
+    params.audio_name = options.audioName;
+  }
+
+  // Odamlarni belgilash Graph API'da faqat rasm postida ishlaydi
+  if (!isStory && media.type === "image" && options.userTags && options.userTags.length > 0) {
+    params.user_tags = JSON.stringify(
+      options.userTags.slice(0, 10).map((username) => ({ username, x: 0.5, y: 0.5 })),
+    );
+  }
+
+  if (!isStory && options.paidPartner) {
+    params.branded_content_sponsor_id = options.paidPartner;
+    params.is_paid_partnership = "true";
   }
 
   const container = await graphPost(`${settings.igUserId}/media`, settings.pageToken, params);

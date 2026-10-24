@@ -89,6 +89,12 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
     .slice(0, 3)
     .join(",");
 
+  const userTags = text(formData, "userTags")
+    .split(/[\s,]+/)
+    .map((name) => name.replace(/^@+/, "").trim())
+    .filter(Boolean)
+    .slice(0, 10);
+
   const threadsTopic = text(formData, "threadsTopic")
     .replace(/^#+/, "")
     .replace(/[^\p{L}\p{N}_ ]/gu, "")
@@ -108,6 +114,10 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
     fbTitle: text(formData, "fbTitle") || undefined,
     threadsReply: text(formData, "threadsReply") || undefined,
     threadsTopic: threadsTopic || undefined,
+    hideLikeCounts: formData.get("hideLikeCounts") === "on",
+    audioName: text(formData, "audioName") || undefined,
+    userTags,
+    paidPartner: text(formData, "paidPartner") || undefined,
   };
 
   const post = await prisma.socialPost.create({
@@ -129,6 +139,10 @@ export async function publishSocialAction(formData: FormData): Promise<void> {
       fbTitle: options.fbTitle ?? null,
       threadsReply: options.threadsReply ?? null,
       threadsTopic: threadsTopic || null,
+      hideLikeCounts: options.hideLikeCounts,
+      audioName: options.audioName ?? null,
+      userTags: userTags.join(",") || null,
+      paidPartner: options.paidPartner ?? null,
     },
   });
 

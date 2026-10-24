@@ -78,6 +78,20 @@ const lat = {
   statusSent: "Joylangan",
   statusFailed: "Xato",
   needConnection: "Joylashdan oldin «Kanallar» bo'limida Instagram va Facebook'ni ulang.",
+  moreTitle: "Yana imkoniyatlar",
+  hideLikesLabel: "Layk va ko'rishlar sonini yashirish",
+  hideLikesHint: "Raqamlar faqat sizga ko'rinadi.",
+  audioLabel: "Audio nomi (Reels)",
+  audioHint: "Yuklangan videoning audiosiga nom berish.",
+  tagsLabel: "Odamlarni belgilash",
+  tagsHint: "Username'lar, vergul bilan. API buni faqat rasm postida qo'llaydi.",
+  partnerLabel: "Hamkorlik (brend) ID",
+  partnerHint: "Brend kontent homiyi ID'si — ixtiyoriy.",
+  appOnlyTitle: "Instagram ilovasidagina",
+  appOnlyText:
+    "AI belgisi, Audience, Poll/Prompt, audio kutubxonasi, rejalashtirish, yuklab olishga ruxsat va andoza sozlamalari Graph API'da mavjud emas — ular ilovada qo'lda qo'yiladi.",
+  storyNote: "Story faqat yuklangan mediani oladi — stiker, poll va havolalar API'da yo'q.",
+
 };
 
 const cyrl: typeof lat = {
@@ -158,6 +172,20 @@ const cyrl: typeof lat = {
   statusSent: "Жойланган",
   statusFailed: "Хато",
   needConnection: "Жойлашдан олдин «Каналлар» бўлимида Instagram ва Facebook'ни уланг.",
+  moreTitle: "Яна имкониятлар",
+  hideLikesLabel: "Лайк ва кўришлар сонини яшириш",
+  hideLikesHint: "Рақамлар фақат сизга кўринади.",
+  audioLabel: "Аудио номи (Reels)",
+  audioHint: "Юкланган видеонинг аудиосига ном бериш.",
+  tagsLabel: "Одамларни белгилаш",
+  tagsHint: "Username'лар, вергул билан. API буни фақат расм постида қўллайди.",
+  partnerLabel: "Ҳамкорлик (бренд) ID",
+  partnerHint: "Бренд контент ҳомийси ID'си — ихтиёрий.",
+  appOnlyTitle: "Instagram иловасидагина",
+  appOnlyText:
+    "AI белгиси, Audience, Poll/Prompt, аудио кутубхонаси, режалаштириш, юклаб олишга рухсат ва андооза созламалари Graph API'да мавжуд эмас — улар иловада қўлда қўйилади.",
+  storyNote: "Story фақат юкланган медиани олади — стикер, poll ва ҳаволалар API'да йўқ.",
+
 };
 
 export const studioCopy: CopyPair<typeof lat> = { lat, cyrl };

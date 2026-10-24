@@ -621,7 +621,8 @@ export function StudioComposer({
                   )}
 
                   {platform.id === "ig" && (
-                    <div className="space-y-3 rounded-lg border border-border p-3">
+                    <>
+                      <div className="space-y-3 rounded-lg border border-border p-3">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div>
                           <p className="label">{copy.coverLabel}</p>
@@ -680,6 +681,79 @@ export function StudioComposer({
                         </span>
                       </label>
                     </div>
+
+                    <details className="rounded-lg border border-border p-3">
+                      <summary className="cursor-pointer text-xs font-semibold text-foreground">
+                        {copy.moreTitle}
+                      </summary>
+
+                      <div className="mt-3 space-y-3">
+                        <label className="flex items-start gap-2 text-sm text-foreground">
+                          <input
+                            type="checkbox"
+                            name="hideLikeCounts"
+                            className="mt-0.5 size-4 rounded border-border"
+                          />
+                          <span>
+                            {copy.hideLikesLabel}
+                            <span className="block text-[11px] text-muted-foreground">
+                              {copy.hideLikesHint}
+                            </span>
+                          </span>
+                        </label>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div>
+                            <label className="label" htmlFor="ig-audio">
+                              {copy.audioLabel}
+                            </label>
+                            <input
+                              id="ig-audio"
+                              name="audioName"
+                              className="field"
+                              autoComplete="off"
+                              placeholder="Original audio"
+                            />
+                            <p className="mt-1 text-[11px] text-muted-foreground">{copy.audioHint}</p>
+                          </div>
+
+                          <div>
+                            <label className="label" htmlFor="ig-tags">
+                              {copy.tagsLabel}
+                            </label>
+                            <input
+                              id="ig-tags"
+                              name="userTags"
+                              className="field"
+                              autoComplete="off"
+                              placeholder="@kimdir, @boshqa"
+                            />
+                            <p className="mt-1 text-[11px] text-muted-foreground">{copy.tagsHint}</p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="label" htmlFor="ig-partner">
+                            {copy.partnerLabel}
+                          </label>
+                          <input
+                            id="ig-partner"
+                            name="paidPartner"
+                            className="field"
+                            autoComplete="off"
+                            inputMode="numeric"
+                          />
+                          <p className="mt-1 text-[11px] text-muted-foreground">{copy.partnerHint}</p>
+                        </div>
+
+                        <div className="rounded-lg bg-muted/60 p-2 text-[11px] leading-4 text-muted-foreground">
+                          <p className="font-semibold text-foreground">{copy.appOnlyTitle}</p>
+                          <p className="mt-0.5">{copy.appOnlyText}</p>
+                          <p className="mt-1">{copy.storyNote}</p>
+                        </div>
+                      </div>
+                    </details>
+                    </>
                   )}
 
                   {platform.id === "fb" && (
