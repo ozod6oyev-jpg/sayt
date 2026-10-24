@@ -5,7 +5,9 @@ import { notFound } from "next/navigation";
 import { ArticleBody } from "@/components/article-body";
 import { ArticleCard } from "@/components/article-card";
 import { JsonLd } from "@/components/json-ld";
+import { SimilarListings } from "@/components/similar-listings";
 import { toArticleCardData } from "@/lib/article-view";
+import { toListingCardData } from "@/lib/listing-view";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,7 +76,7 @@ export default async function ArticlePage({ params }: PageProps) {
   const description = articleExcerpt(article, locale);
   const body = articleBody(article, locale);
 
-  const related = await prisma.article.findMany({
+  const sameCategory = await prisma.article.findMany({
     where: {
       published: true,
       category: article.category,
@@ -83,6 +85,28 @@ export default async function ArticlePage({ params }: PageProps) {
     orderBy: { publishedAt: "desc" },
     take: 3,
   });
+
+  // Shu bo'limda boshqa maqola bo'lmasa, boshqa maqolalarni taklif qilamiz
+  const related =
+    sameCategory.length > 0
+      ? sameCategory
+      : await prisma.article.findMany({
+          where: { published: true, id: { not: article.id } },
+          orderBy: { publishedAt: "desc" },
+          take: 3,
+        });
+
+  const similarListings = await prisma.listing.findMany({
+    where: { status: "active", photos: { some: {} } },
+    orderBy: [{ views: "desc" }, { updatedAt: "desc" }],
+    take: 6,
+    include: {
+      photos: { orderBy: { sort: "asc" }, take: 1 },
+      saleOption: true,
+    },
+  });
+
+  const similarCards = similarListings.map((listing) => toListingCardData(listing, locale));
 
   const articleUrl = absoluteUrl(`/${locale}/blog/${article.slug}`);
 
@@ -207,15 +231,27 @@ export default async function ArticlePage({ params }: PageProps) {
         <ArticleBody body={body} />
       </div>
 
-      <footer className="mx-auto mt-10 max-w-3xl border-t border-border pt-6">
+      <div className="mx-auto mt-10 max-w-3xl border-t border-border pt-6">
         <Button asChild variant="outline" size="sm">
           <Link href={localePath(locale, "/blog")}>← {t.blog.all}</Link>
         </Button>
-      </footer>
+      </div>
 
       {related.length > 0 && (
         <section className="mx-auto mt-12 max-w-5xl">
-          <h2 className="text-xl font-bold text-slate-900">{t.blog.related}</h2>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">{t.blog.related}</h2>
+              <p className="mt-1 text-xs text-slate-500">{t.blog.relatedHint}</p>
+            </div>
+            <Link
+              href={localePath(locale, "/blog")}
+              className="text-xs font-semibold whitespace-nowrap text-brand-700 hover:underline"
+            >
+              {t.blog.all} →
+            </Link>
+          </div>
+
           <div className="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((item) => (
               <ArticleCard
@@ -227,6 +263,38 @@ export default async function ArticlePage({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      {similarCards.length > 0 && (
+        <section className="mx-auto mt-12 max-w-5xl">
+          <SimilarListings
+            items={similarCards}
+            locale={locale}
+            title={t.blog.similarListings}
+            subtitle={t.blog.similarListingsHint}
+            allHref={localePath(locale, "/elonlar")}
+            allLabel={t.blog.allListings}
+            prevLabel={t.slider.prev}
+            nextLabel={t.slider.next}
+          />
+        </section>
+      )}
+
+      <section className="mx-auto mt-10 max-w-5xl">
+        <div className="flex flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50/70 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div>
+            <p className="text-sm font-semibold text-slate-900">{t.blog.ctaTitle}</p>
+            <p className="mt-1 text-xs leading-5 text-slate-600">{t.blog.ctaText}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild size="sm">
+              <Link href={localePath(locale, "/elonlar")}>{t.blog.ctaListings}</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href={localePath(locale, "/aloqa")}>{t.blog.ctaContact}</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
     </article>
   );
 }
