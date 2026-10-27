@@ -25,7 +25,7 @@ function failure(request: Request, code: string) {
 
 export async function GET(request: Request) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "owner") {
+  if (!user) {
     return NextResponse.redirect(new URL("/kirish", metaBaseUrl()));
   }
 

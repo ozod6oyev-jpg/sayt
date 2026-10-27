@@ -121,10 +121,7 @@ export async function requireAdmin(): Promise<AdminUser> {
   return user;
 }
 
+/** Boshqaruv panelining barcha bo'limlari owner va admin uchun teng ochiq */
 export async function requireOwner(): Promise<AdminUser> {
-  const user = await requireAdmin();
-  if (user.role !== "owner") {
-    redirect("/admin");
-  }
-  return user;
+  return requireAdmin();
 }

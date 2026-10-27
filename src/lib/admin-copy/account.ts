@@ -20,6 +20,40 @@ const lat = {
   roleOwner: "Owner",
   roleAdmin: "Admin",
   lastLoginLabel: "Oxirgi kirish",
+  telegramTitle: "Telegram (shaxsiy inbox)",
+  telegramHint:
+    "Har bir admin o'z Telegram akkauntini alohida ulaydi. Kelgan mijoz xabarlari faqat shu hisobning panelida ko'rinadi — Facebook va Instagram esa barcha adminlar uchun umumiy.",
+  telegramLinked: "Ulangan",
+  telegramOff: "Ulanmagan",
+  telegramNotLinked: "Hali ulanmagan. Havolani yaratib, telefonda «Start» tugmasini bosing.",
+  telegramLinkAction: "Telegramni ulash",
+  telegramLinkReady: "Havolani telefonda oching va «Start» tugmasini bosing:",
+  telegramLinkAgain: "Yangi havola",
+  telegramUnlink: "Ulanishni uzish",
+  telegramUnlinked: "Telegram ulanishi uzildi.",
+  telegramLinkMade: "Havola tayyor — quyidagini telefonda oching.",
+  telegramBotMissing:
+    "Bot tokeni sozlanmagan (TELEGRAM_BOT_TOKEN) — ulash havolasini yasab bo'lmaydi.",
+
+  // Shaxsiy bot (har bir admin uchun alohida)
+  botTitle: "Shaxsiy Telegram bot",
+  botHint:
+    "Har bir admin o'z boti bilan ishlaydi. @BotFather'da /newbot bilan bot yaratib, tokenini shu yerga kiriting — kelgan xabarlar faqat sizning panelingizda ko'rinadi.",
+  botTokenLabel: "Bot token",
+  botTokenPlaceholder: "1234567890:AA...",
+  botSave: "Botni ulash",
+  botConnected: "Ulangan",
+  botNotConnected: "Ulanmagan",
+  botChange: "Tokenni almashtirish",
+  botRemove: "Botni uzish",
+  botSaved: "Bot ulandi. Endi Telegram → Settings → Business → Chatbots bo'limida shu botni qo'shing.",
+  botRemoved: "Bot uzildi.",
+  botInvalid: "Token noto'g'ri yoki bot topilmadi.",
+  botTaken: "Bu bot boshqa admin hisobiga ulangan.",
+  botWebhook: "Webhookni ulab bo'lmadi — tokenni tekshiring.",
+  botOwner: "Bu hisob owner — uning boti serverda (.env) sozlangan.",
+  botBusinessHint:
+    "Telegram → Settings → Business → Chatbots → shu botni tanlab «ADD» qiling. Shunda shaxsiy akkauntingizdagi mijoz yozishmalari panelga tushadi.",
   authenticatorTitle: "Google Authenticator",
   authenticatorHint:
     "Ilovada «+» → «Kirish kodi» → «Kalitni qo'lda kiritish» ni tanlab, quyidagi kalitni kiriting (bo'shliqlarsiz).",
@@ -75,6 +109,40 @@ const cyrl: typeof lat = {
   roleOwner: "Эгаси",
   roleAdmin: "Админ",
   lastLoginLabel: "Охирги кириш",
+  telegramTitle: "Telegram (шахсий inbox)",
+  telegramHint:
+    "Ҳар бир админ ўз Telegram аккаунтини алоҳида улайди. Келган мижоз хабарлари фақат шу ҳисобнинг панелида кўринади — Facebook ва Instagram эса барча админлар учун умумий.",
+  telegramLinked: "Уланган",
+  telegramOff: "Уланмаган",
+  telegramNotLinked: "Ҳали уланмаган. Ҳаволани яратиб, телефонда «Start» тугмасини босинг.",
+  telegramLinkAction: "Telegramни улаш",
+  telegramLinkReady: "Ҳаволани телефонда очинг ва «Start» тугмасини босинг:",
+  telegramLinkAgain: "Янги ҳавола",
+  telegramUnlink: "Уланишни узиш",
+  telegramUnlinked: "Telegram уланиши узилди.",
+  telegramLinkMade: "Ҳавола тайёр — қуйидагини телефонда очинг.",
+  telegramBotMissing:
+    "Бот токени созланмаган (TELEGRAM_BOT_TOKEN) — улаш ҳаволасини ясаб бўлмайди.",
+
+  // Шахсий бот (ҳар бир админ учун алоҳида)
+  botTitle: "Шахсий Telegram бот",
+  botHint:
+    "Ҳар бир админ ўз боти билан ишлайди. @BotFather'да /newbot билан бот яратиб, токенини шу ерга киритинг — келган хабарлар фақат сизнинг панелингизда кўринади.",
+  botTokenLabel: "Бот токени",
+  botTokenPlaceholder: "1234567890:AA...",
+  botSave: "Ботни улаш",
+  botConnected: "Уланган",
+  botNotConnected: "Уланмаган",
+  botChange: "Токенни алмаштириш",
+  botRemove: "Ботни узиш",
+  botSaved: "Бот уланди. Энди Telegram → Settings → Business → Chatbots бўлимида шу ботни қўшинг.",
+  botRemoved: "Бот узилди.",
+  botInvalid: "Токен нотўғри ёки бот топилмади.",
+  botTaken: "Бу бот бошқа админ ҳисобига уланган.",
+  botWebhook: "Webhookни улаб бўлмади — токенни текширинг.",
+  botOwner: "Бу ҳисоб owner — унинг боти серверда (.env) созланган.",
+  botBusinessHint:
+    "Telegram → Settings → Business → Chatbots → шу ботни танлаб «ADD» қилинг. Шунда шахсий аккаунтингиздаги мижоз ёзишмалари панелга тушади.",
   authenticatorTitle: "Google Authenticator",
   authenticatorHint:
     "Иловада «+» → «Кириш коди» → «Калитни қўлда киритиш» ни танлаб, қуйидаги калитни киритинг (бўшлиқларсиз).",

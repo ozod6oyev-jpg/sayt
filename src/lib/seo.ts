@@ -84,6 +84,36 @@ export function socialMetadata(options: {
 }
 
 /**
+ * E'lon tavsifidan qidiruv kalit so'zlarini ajratadi: takrorlanmaydigan,
+ * 3+ harfli so'zlar — eng ko'p uchragani oldinda.
+ */
+export function keywordsFrom(text: string, limit = 20): string[] {
+  const stopWords = new Set([
+    "va", "bilan", "uchun", "ham", "bu", "shu", "bir", "bor", "yoq", "juda",
+    "yoki", "ammo", "lekin", "keyin", "oldin", "eng", "har", "kabi", "deb",
+    "esa", "faqat", "barcha", "hamma", "mavjud", "joylashgan", "ichida",
+    "ustida", "ostida", "yaqin", "hamda", "singari", "o'z", "oz",
+    "и", "в", "на", "с", "по", "для", "от", "до", "что", "как", "это", "не",
+    "или", "а", "но", "из", "к", "у", "же", "есть", "также", "очень", "при",
+    "около", "после", "перед", "между", "свой", "свои", "этот", "эта", "все",
+    "весь", "который", "которые", "где", "когда", "чтобы", "они", "он", "она",
+    "мы", "вы", "я", "ты", "данный", "данного", "также",
+  ]);
+
+  const counts = new Map<string, number>();
+
+  for (const word of text.toLowerCase().match(/[a-zа-яё‘’ʻ'’-]{3,}/g) ?? []) {
+    if (stopWords.has(word)) continue;
+    counts.set(word, (counts.get(word) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([word]) => word);
+}
+
+/**
  * Discover uchun muhim: max-image-preview:large bo'lmasa katta rasmlar
  * qidiruv natijasida ko'rinmaydi.
  */

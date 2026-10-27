@@ -1,7 +1,14 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { getMetaSettings, metaBaseUrl, metaOAuthUrls, saveMetaSettings } from "@/lib/meta";
+import {
+  getMetaSettings,
+  metaBaseUrl,
+  metaOAuthUrls,
+  saveMetaSettings,
+  subscribeInstagramWebhooks,
+} from "@/lib/meta";
+import { getAdsSettings, normalizeAdAccountId, saveAdsSettings } from "@/lib/meta-ads";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -29,19 +36,30 @@ function failure(request: Request, code: string) {
   return NextResponse.redirect(new URL(`/admin/meta/kanallar?meta=${code}`, metaBaseUrl()));
 }
 
+function adsFailure(code: string) {
+  return NextResponse.redirect(new URL(`/admin/reklama?ads=${code}`, metaBaseUrl()));
+}
+
+type AdsAccountsResponse = {
+  data?: { id?: string; name?: string; currency?: string }[];
+  error?: { message?: string };
+};
+
 export async function GET(request: Request) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "owner") {
+  if (!user) {
     return NextResponse.redirect(new URL("/kirish", metaBaseUrl()));
   }
 
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
-  const cookieState = (await cookies()).get("meta_oauth_state")?.value;
+  const jar = await cookies();
+  const cookieState = jar.get("meta_oauth_state")?.value;
+  const adsMode = jar.get("meta_oauth_mode")?.value === "ads";
 
   if (!code || !state || !cookieState || state !== cookieState) {
-    return failure(request, "oauth_state");
+    return adsMode ? adsFailure("state") : failure(request, "oauth_state");
   }
 
   const settings = await getMetaSettings();
@@ -59,7 +77,7 @@ export async function GET(request: Request) {
 
   const shortToken = await getJson<TokenResponse>(shortTokenUrl);
   if (!shortToken?.access_token) {
-    return failure(request, "oauth_error");
+    return adsMode ? adsFailure("error") : failure(request, "oauth_error");
   }
 
   // Uzoq muddatli foydalanuvchi tokeni (60 kun)
@@ -71,6 +89,43 @@ export async function GET(request: Request) {
 
   const longToken = await getJson<TokenResponse>(longTokenUrl);
   const userToken = longToken?.access_token ?? shortToken.access_token;
+
+  // Reklama rejimi: token va ad accountni saqlab, kampaniyalar bo'limiga qaytamiz
+  if (adsMode) {
+    const accountsUrl = new URL(`${GRAPH}/me/adaccounts`);
+    accountsUrl.searchParams.set("fields", "id,name,currency");
+    accountsUrl.searchParams.set("limit", "100");
+
+    // Token sarlavhada yuboriladi (URL'da qolmaydi)
+    const accountsResponse = await fetch(accountsUrl, {
+      headers: { authorization: `Bearer ${userToken}` },
+      cache: "no-store",
+      signal: AbortSignal.timeout(15_000),
+    }).catch(() => null);
+
+    const accounts = accountsResponse?.ok
+      ? (((await accountsResponse.json().catch(() => null)) as AdsAccountsResponse | null)?.data ?? [])
+      : [];
+    const current = await getAdsSettings();
+    const ids = accounts.map((item) => normalizeAdAccountId(item.id ?? "")).filter(Boolean);
+
+    // Joriy akkaunt ro'yxatda bo'lsa saqlanadi, aks holda birinchisi olinadi
+    const adAccountId = ids.includes(current.adAccountId ?? "")
+      ? (current.adAccountId as string)
+      : (ids[0] ?? current.adAccountId ?? "");
+
+    await saveAdsSettings({ adAccountId, adsToken: userToken });
+
+    const response = NextResponse.redirect(
+      new URL(
+        `/admin/reklama?ads=${ids.length > 0 ? "connected" : "none"}`,
+        metaBaseUrl(),
+      ),
+    );
+    response.cookies.delete("meta_oauth_state");
+    response.cookies.delete("meta_oauth_mode");
+    return response;
+  }
 
   const accountsUrl = new URL(`${GRAPH}/me/accounts`);
   accountsUrl.searchParams.set(
@@ -115,7 +170,13 @@ export async function GET(request: Request) {
     },
   });
 
+  // Instagram xabarlari webhook orqali kelishi uchun akkauntni obuna qilamiz
+  if (page.instagram_business_account?.id) {
+    await subscribeInstagramWebhooks(page.instagram_business_account.id, page.access_token);
+  }
+
   const response = NextResponse.redirect(new URL("/admin/meta/kanallar?meta=ok", metaBaseUrl()));
   response.cookies.delete("meta_oauth_state");
+  response.cookies.delete("meta_oauth_mode");
   return response;
 }

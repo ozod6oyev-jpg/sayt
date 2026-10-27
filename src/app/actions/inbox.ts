@@ -12,7 +12,12 @@ function text(formData: FormData, key: string): string {
 
 /** Suhbatdagi yoki butun inbox'dagi kelgan xabarlarni o'qilgan deb belgilash */
 export async function markInboxRead(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const user = await requireAdmin();
+  const notificationScope = { OR: [{ adminUserId: null }, { adminUserId: user.id }] };
+  const telegramScope =
+    user.role === "owner"
+      ? { OR: [{ adminUserId: user.id }, { adminUserId: null }] }
+      : { adminUserId: user.id };
 
   const kind = text(formData, "kind");
   const chatId = text(formData, "chatId");
@@ -28,18 +33,24 @@ export async function markInboxRead(formData: FormData): Promise<void> {
 
   if (all) {
     await Promise.all([
-      prisma.telegramMessage.updateMany({ where, data: { readAt: now } }),
+      prisma.telegramMessage.updateMany({
+        where: { ...where, chat: telegramScope },
+        data: { readAt: now },
+      }),
       prisma.metaMessage.updateMany({ where, data: { readAt: now } }),
-      prisma.adminNotification.updateMany({ where: { readAt: null }, data: { readAt: now } }),
+      prisma.adminNotification.updateMany({
+        where: { readAt: null, ...notificationScope },
+        data: { readAt: now },
+      }),
     ]);
   } else if (kind === "telegram") {
     await Promise.all([
       prisma.telegramMessage.updateMany({
-        where: { ...where, chatRefId: chatId },
+        where: { ...where, chatRefId: chatId, chat: telegramScope },
         data: { readAt: now },
       }),
       prisma.adminNotification.updateMany({
-        where: { kind: "telegram", readAt: null },
+        where: { kind: "telegram", readAt: null, ...notificationScope },
         data: { readAt: now },
       }),
     ]);
@@ -50,7 +61,7 @@ export async function markInboxRead(formData: FormData): Promise<void> {
         data: { readAt: now },
       }),
       prisma.adminNotification.updateMany({
-        where: { kind: "meta", readAt: null },
+        where: { kind: "meta", readAt: null, ...notificationScope },
         data: { readAt: now },
       }),
     ]);

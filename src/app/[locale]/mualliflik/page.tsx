@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { contact } from "@/lib/contact";
 import { getDict, isLocale } from "@/lib/i18n";
-import { alternatesFor, robotsMeta } from "@/lib/seo";
+import { alternatesFor, robotsMeta, socialMetadata } from "@/lib/seo";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -12,10 +12,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!isLocale(locale)) return {};
   const t = getDict(locale);
 
+  const description = t.meta.copyrightDescription;
+
   return {
     title: t.footer.copyright,
+    description,
     alternates: alternatesFor(locale, "/mualliflik"),
     robots: { ...robotsMeta, index: true },
+    ...socialMetadata({
+      title: t.footer.copyright,
+      description,
+      path: `/${locale}/mualliflik`,
+      locale,
+    }),
   };
 }
 

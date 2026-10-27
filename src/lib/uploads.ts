@@ -159,3 +159,42 @@ export async function saveCoverImage(file: File): Promise<{ url: string; localPa
 
   return { url: `/uploads/${fileName}`, localPath: path.join(uploadsDir, fileName) };
 }
+
+/** Telegram'dan kelgan yoki chatga yuboriladigan media faylni saqlash */
+export async function saveMediaBuffer(
+  buffer: Buffer,
+  extension: string,
+): Promise<{ url: string; localPath: string }> {
+  const safeExt = extension.replace(/[^a-zA-Z0-9]/g, "").toLowerCase().slice(0, 5) || "bin";
+  const fileName = `${crypto.randomUUID()}.${safeExt}`;
+  const uploadsDir = uploadsRoot();
+
+  await mkdir(uploadsDir, { recursive: true });
+  await writeFile(path.join(uploadsDir, fileName), buffer);
+
+  return { url: `/uploads/${fileName}`, localPath: path.join(uploadsDir, fileName) };
+}
+
+/** MIME turidan fayl kengaytmasi */
+export function extensionFromMime(mime: string): string {
+  const map: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+    "image/heic": "heic",
+    "video/mp4": "mp4",
+    "video/quicktime": "mov",
+    "video/webm": "webm",
+    "audio/mpeg": "mp3",
+    "audio/ogg": "ogg",
+    "audio/webm": "webm",
+    "audio/mp4": "m4a",
+    "audio/x-m4a": "m4a",
+    "audio/aac": "aac",
+    "audio/wav": "wav",
+    "audio/x-wav": "wav",
+  };
+
+  return map[mime] ?? (mime.startsWith("image/") ? "jpg" : mime.startsWith("video/") ? "mp4" : "bin");
+}

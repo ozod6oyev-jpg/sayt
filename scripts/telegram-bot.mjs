@@ -97,11 +97,68 @@ async function reply(chatId, text) {
   });
 }
 
+const MONTHS = {
+  Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+  Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+};
+
+/** Saytga kelgan so'rovlar: oxirgi 1 daqiqa va 5 daqiqalik o'rtacha */
+async function trafficStats() {
+  const log = "/var/log/nginx/access.log";
+
+  try {
+    const { stdout } = await execFileAsync("tail", ["-n", "20000", log], {
+      maxBuffer: 12 * 1024 * 1024,
+    });
+
+    const now = Date.now();
+    let minute = 0;
+    let fiveMin = 0;
+
+    for (const line of stdout.split("\n")) {
+      const match = line.match(/\[(\d{2})\/([A-Za-z]{3})\/(\d{4}):(\d{2}):(\d{2}):(\d{2}) \+0000\]/);
+      if (!match) continue;
+
+      const stamp = Date.UTC(
+        Number(match[3]),
+        MONTHS[match[2]] ?? 0,
+        Number(match[1]),
+        Number(match[4]),
+        Number(match[5]),
+        Number(match[6]),
+      );
+      const age = now - stamp;
+
+      if (age < 0 || age > 5 * 60 * 1000) continue;
+      if (age <= 60 * 1000) minute += 1;
+      fiveMin += 1;
+    }
+
+    return { minute, average: Math.round(fiveMin / 5) };
+  } catch {
+    return null;
+  }
+}
+
+async function serviceState(name) {
+  try {
+    const { stdout } = await execFileAsync("systemctl", ["is-active", name]);
+    return stdout.trim();
+  } catch {
+    return "inactive";
+  }
+}
+
 async function systemStatus() {
   const prisma = new PrismaClient();
   let stats = { listings: 0, articles: 0, devices: 0 };
+  let dbMs = 0;
 
   try {
+    const started = Date.now();
+    await prisma.$queryRaw`SELECT 1`;
+    dbMs = Date.now() - started;
+
     const [listings, articles, devices] = await Promise.all([
       prisma.listing.count(),
       prisma.article.count(),
@@ -112,15 +169,11 @@ async function systemStatus() {
     await prisma.$disconnect();
   }
 
-  const services = {};
-  for (const name of ["uyjoy", "uyjoy2", "nginx"]) {
-    try {
-      const { stdout } = await execFileAsync("systemctl", ["is-active", name]);
-      services[name] = stdout.trim();
-    } catch {
-      services[name] = "inactive";
-    }
-  }
+  const [uyjoy, uyjoy2, nginx] = await Promise.all([
+    serviceState("uyjoy"),
+    serviceState("uyjoy2"),
+    serviceState("nginx"),
+  ]);
 
   let dbSize = 0;
   try {
@@ -130,19 +183,48 @@ async function systemStatus() {
     dbSize = 0;
   }
 
+  const traffic = await trafficStats();
   const mem = process.memoryUsage();
-  const uptimeHours = (process.uptime() / 3600).toFixed(1);
-  const disk = await execFileAsync("df", ["-h", "/"]).then(({ stdout }) =>
-    stdout.trim().split("\n")[1]?.replace(/\s+/g, " "),
-  );
+  const siteUptime = await execFileAsync("systemctl", ["show", "-p", "MainPID", "--value", "uyjoy.service"])
+    .then(({ stdout }) => execFileAsync("ps", ["-o", "etimes=", "-p", stdout.trim() || "0"]))
+    .then(({ stdout }) => Number(stdout.trim()))
+    .catch(() => Number.NaN);
+  const uptimeHours = Number.isFinite(siteUptime)
+    ? (siteUptime / 3600).toFixed(1)
+    : (process.uptime() / 3600).toFixed(1);
+  const disk = await execFileAsync("df", ["-h", "/"])
+    .then(({ stdout }) => stdout.trim().split("\n")[1]?.replace(/\s+/g, " "))
+    .catch(() => null);
+
+  const mark = (state) => (state === "active" ? `${state} ✅` : `${state} ❌`);
+  const allOk = uyjoy === "active" && uyjoy2 === "active" && nginx === "active";
 
   return [
-    "<b>Holat</b>",
-    `uyjoy: ${services.uyjoy} · uyjoy2: ${services.uyjoy2} · nginx: ${services.nginx}`,
-    `E'lonlar: ${stats.listings} · Maqolalar: ${stats.articles} · Qurilmalar: ${stats.devices}`,
-    `Baza: ${(dbSize / 1024).toFixed(0)} KB · RSS: ${(mem.rss / 1024 / 1024).toFixed(0)} MB · Uptime: ${uptimeHours} soat`,
-    `Disk: ${disk ?? "?"}`,
-  ].join("\n");
+    "🖥 <b>Server xizmatlari</b>",
+    `uyjoy (3000): ${mark(uyjoy)}`,
+    `uyjoy2 (3001): ${mark(uyjoy2)}`,
+    `nginx: ${mark(nginx)}`,
+    "",
+    "🌐 <b>Sayt yuklanishi</b>",
+    traffic
+      ? `So'rovlar: ${traffic.minute} ta/daqiqa`
+      : "So'rovlar: ma'lumot yo'q (log o'qilmadi)",
+    traffic ? `5 daqiqalik o'rtacha: ${traffic.average} ta/daqiqa` : null,
+    "",
+    "🗄 <b>Baza</b>",
+    `Hajmi: ${(dbSize / 1024).toFixed(0)} KB · Javob vaqti: ${dbMs} ms`,
+    `E'lonlar: ${stats.listings}`,
+    `Maqolalar: ${stats.articles}`,
+    `Qurilmalar: ${stats.devices}`,
+    "",
+    "💾 <b>Resurslar</b>",
+    `RSS: ${(mem.rss / 1024 / 1024).toFixed(0)} MB · Uptime: ${uptimeHours} soat`,
+    disk ? `Disk: ${disk}` : "Disk: ma'lumot yo'q",
+    "",
+    allOk ? "✅ <b>Xulosa:</b> hammasi ishlayapti" : "⚠️ <b>Xulosa:</b> ba'zi xizmatlar ishlamayapti",
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
 }
 
 async function makeBackup(chatId) {

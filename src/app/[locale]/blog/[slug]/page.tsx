@@ -129,7 +129,7 @@ export default async function ArticlePage({ params }: PageProps) {
         name: siteName,
         logo: {
           "@type": "ImageObject",
-          url: `${siteUrl}/favicon.svg`,
+          url: `${siteUrl}/logo-mark.png`,
         },
       },
       mainEntityOfPage: {

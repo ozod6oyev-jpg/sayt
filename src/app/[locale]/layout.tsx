@@ -30,6 +30,17 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
       template: `%s | ${siteName}`,
     },
     description: t.meta.homeDescription,
+    manifest: "/manifest.webmanifest",
+    icons: {
+      icon: [{ url: "/logo-mark.png", sizes: "512x512", type: "image/png" }],
+      apple: [{ url: "/logo-mark.png", sizes: "512x512" }],
+      shortcut: "/logo-mark.png",
+    },
+    appleWebApp: {
+      capable: true,
+      title: "Sotamiz",
+      statusBarStyle: "default",
+    },
     robots: robotsMeta,
     openGraph: {
       siteName,

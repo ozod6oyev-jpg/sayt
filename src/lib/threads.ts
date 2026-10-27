@@ -163,6 +163,41 @@ export async function publishThreadsMedia(options: {
   return { ok: true, result: published.result };
 }
 
+/** Threads'da post yoki izohga javob yozish (container → publish) */
+export async function publishThreadsReply(
+  text: string,
+  replyToId: string,
+): Promise<ThreadsResult<{ id: string }>> {
+  const row = await prisma.metaIntegration.findUnique({ where: { id: "default" } });
+  const token = row?.threadsToken ? decryptSecret(row.threadsToken) : null;
+
+  if (!row?.threadsUserId || !token) {
+    return { ok: false, description: "Threads user ID yoki token o'rnatilmagan" };
+  }
+
+  const container = await threadsCall<{ id: string }>(`${row.threadsUserId}/threads`, {
+    method: "POST",
+    token,
+    body: { media_type: "TEXT", text: text.slice(0, 500), reply_to_id: replyToId },
+  });
+
+  if (!container.ok) {
+    return { ok: false, description: container.description, code: container.code };
+  }
+
+  const published = await threadsCall<{ id: string }>(`${row.threadsUserId}/threads_publish`, {
+    method: "POST",
+    token,
+    body: { creation_id: container.result.id },
+  });
+
+  if (!published.ok) {
+    return { ok: false, description: published.description, code: published.code };
+  }
+
+  return { ok: true, result: published.result };
+}
+
 /** Threads'ga matnli post joylash (container → publish) */
 export async function publishThreadsPost(text: string): Promise<ThreadsResult<{ id: string }>> {
   const row = await prisma.metaIntegration.findUnique({ where: { id: "default" } });

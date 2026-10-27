@@ -3,7 +3,7 @@ import { MetaTabs } from "@/components/admin/meta-tabs";
 import { MetaLogo } from "@/components/meta-logo";
 import { metaCopy } from "@/lib/admin-copy/meta";
 import { getAdminCopy } from "@/lib/admin-i18n";
-import { requireOwner } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Meta | Boshqaruv paneli",
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MetaLayout({ children }: { children: React.ReactNode }) {
-  await requireOwner();
+  await requireAdmin();
 
   const c = await getAdminCopy(metaCopy);
 

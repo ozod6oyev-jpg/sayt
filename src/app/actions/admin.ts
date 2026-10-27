@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
+import { notifyIndexNow } from "@/lib/indexnow";
 import { prisma } from "@/lib/prisma";
+import { sendPush } from "@/lib/push";
 import { saveImage } from "@/lib/uploads";
 
 const LISTING_STATUSES = ["draft", "active", "sold"] as const;
@@ -256,6 +258,24 @@ function parseListing(formData: FormData): { error: string } | { data: ListingDa
   };
 }
 
+/** Yangi e'lon yoki maqola chiqqanda sayt obunachilariga telefon bildirishnomasi */
+async function pushPublished(
+  kind: "listing" | "article",
+  slug: string,
+  title: string,
+): Promise<void> {
+  await sendPush(
+    {
+      title: kind === "listing" ? "Yangi e'lon" : "Yangi maqola",
+      body: title,
+      href: kind === "listing" ? `/uz/elonlar/${slug}` : `/uz/blog/${slug}`,
+      tag: `site-${kind}`,
+      action: kind === "listing" ? "E'lonni ko'rish" : "Maqolani ko'rish",
+    },
+    "site",
+  ).catch(() => null);
+}
+
 export async function createListing(formData: FormData): Promise<void> {
   await requireAdmin();
 
@@ -272,6 +292,12 @@ export async function createListing(formData: FormData): Promise<void> {
 
   await uploadListingPhotos(listing.id, formData, 0, parsed.data.titleUz);
 
+  if (listing.status === "active") {
+    await pushPublished("listing", listing.slug, listing.titleUz);
+    // Yangi e'lon darhol sitemap'ga tushadi va qidiruv tizimlariga xabar beriladi
+    await notifyIndexNow([`/uz/elonlar/${listing.slug}`, `/ru/elonlar/${listing.slug}`]);
+  }
+
   revalidatePublic();
   revalidatePath("/admin");
   revalidatePath("/admin/listings");
@@ -283,7 +309,7 @@ export async function updateListing(id: string, formData: FormData): Promise<voi
 
   const existing = await prisma.listing.findUnique({
     where: { id },
-    select: { id: true, slug: true },
+    select: { id: true, slug: true, status: true },
   });
 
   if (!existing) {
@@ -300,10 +326,18 @@ export async function updateListing(id: string, formData: FormData): Promise<voi
     ? await uniqueListingSlug(requestedSlug, id)
     : existing.slug;
 
-  await prisma.listing.update({
+  const updated = await prisma.listing.update({
     where: { id },
     data: { ...parsed.data, slug },
   });
+
+  if (updated.status === "active" && existing.status !== "active") {
+    await pushPublished("listing", updated.slug, updated.titleUz);
+  }
+
+  if (updated.status === "active") {
+    await notifyIndexNow([`/uz/elonlar/${updated.slug}`, `/ru/elonlar/${updated.slug}`]);
+  }
 
   const max = await prisma.photo.aggregate({
     where: { listingId: id },
@@ -320,7 +354,16 @@ export async function updateListing(id: string, formData: FormData): Promise<voi
 export async function deleteListing(id: string): Promise<void> {
   await requireAdmin();
 
+  const removed = await prisma.listing
+    .findUnique({ where: { id }, select: { slug: true } })
+    .catch(() => null);
+
   await prisma.listing.delete({ where: { id } });
+
+  if (removed) {
+    // Sahifa 404 bo'ldi — qidiruv tizimi tezroq o'chiradi
+    await notifyIndexNow([`/uz/elonlar/${removed.slug}`, `/ru/elonlar/${removed.slug}`]);
+  }
 
   revalidatePublic();
   revalidatePath("/admin");
@@ -428,7 +471,7 @@ export async function createArticle(formData: FormData): Promise<void> {
   const saved = await saveImage(cover);
   const slug = await uniqueArticleSlug(text(formData, "slug") || parsed.data.titleUz);
 
-  await prisma.article.create({
+  const article = await prisma.article.create({
     data: {
       ...parsed.data,
       slug,
@@ -437,6 +480,11 @@ export async function createArticle(formData: FormData): Promise<void> {
       coverHeight: saved.height,
     },
   });
+
+  if (article.published) {
+    await pushPublished("article", article.slug, article.titleUz);
+    await notifyIndexNow([`/uz/blog/${article.slug}`, `/ru/blog/${article.slug}`]);
+  }
 
   revalidatePublic(["/uz/blog", "/ru/blog"]);
   revalidatePath("/admin");
@@ -449,7 +497,7 @@ export async function updateArticle(id: string, formData: FormData): Promise<voi
 
   const existing = await prisma.article.findUnique({
     where: { id },
-    select: { id: true, slug: true },
+    select: { id: true, slug: true, published: true },
   });
 
   if (!existing) {
@@ -473,7 +521,7 @@ export async function updateArticle(id: string, formData: FormData): Promise<voi
     coverData = await saveImage(cover);
   }
 
-  await prisma.article.update({
+  const updatedArticle = await prisma.article.update({
     where: { id },
     data: {
       ...parsed.data,
@@ -487,6 +535,14 @@ export async function updateArticle(id: string, formData: FormData): Promise<voi
         : {}),
     },
   });
+
+  if (updatedArticle.published && !existing.published) {
+    await pushPublished("article", updatedArticle.slug, updatedArticle.titleUz);
+  }
+
+  if (updatedArticle.published) {
+    await notifyIndexNow([`/uz/blog/${slug}`, `/ru/blog/${slug}`]);
+  }
 
   revalidatePublic([
     "/uz/blog",
@@ -516,14 +572,19 @@ export async function toggleArticlePublished(id: string): Promise<void> {
 
   const article = await prisma.article.findUnique({
     where: { id },
-    select: { published: true },
+    select: { published: true, slug: true, titleUz: true },
   });
 
   if (article) {
-    await prisma.article.update({
+    const next = await prisma.article.update({
       where: { id },
       data: { published: !article.published },
     });
+
+    if (next.published) {
+      await pushPublished("article", next.slug, next.titleUz);
+      await notifyIndexNow([`/uz/blog/${next.slug}`, `/ru/blog/${next.slug}`]);
+    }
   }
 
   revalidatePublic(["/uz/blog", "/ru/blog"]);

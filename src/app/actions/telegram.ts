@@ -6,11 +6,14 @@ import { requireOwner } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
   sendChannelPost,
+  sendTelegramMedia,
   sendTelegramMessage,
   setTelegramWebhook,
   telegramErrorCode,
   telegramWebhookUrl,
 } from "@/lib/telegram";
+import { botTokenForAdmin } from "@/lib/telegram-account";
+import { extensionFromMime, saveMediaBuffer } from "@/lib/uploads";
 
 function text(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -54,18 +57,52 @@ export async function replyToTelegramChat(formData: FormData): Promise<void> {
 
   const chatRefId = text(formData, "chatRefId");
   const body = text(formData, "text");
-  if (!chatRefId || body.length < 1 || body.length > 4000) {
-    redirect("/admin/meta?reply=invalid");
+  const rawReturn = text(formData, "returnTo");
+  const back = rawReturn.startsWith("/admin/meta/xabarlar") ? rawReturn : "/admin/meta/xabarlar";
+  const withStatus = (key: string, value: string) =>
+    `${back}${back.includes("?") ? "&" : "?"}${key}=${value}`;
+
+  const mediaEntry = formData.get("media");
+  const file = mediaEntry instanceof File && mediaEntry.size > 0 ? mediaEntry : null;
+  const isVideo = Boolean(file?.type.startsWith("video/"));
+  const isImage = Boolean(file?.type.startsWith("image/"));
+
+  if (file) {
+    const limit = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if ((!isVideo && !isImage) || file.size > limit || body.length > 1024) {
+      redirect(withStatus("reply", "invalid"));
+    }
+  }
+
+  if (!chatRefId || (!file && (body.length < 1 || body.length > 4000))) {
+    redirect(withStatus("reply", "invalid"));
   }
 
   const chat = await prisma.telegramChat.findUnique({ where: { id: chatRefId } });
   if (!chat) {
-    redirect("/admin/meta?reply=invalid");
+    redirect(withStatus("reply", "invalid"));
   }
 
-  const result = await sendTelegramMessage(chat.chatId, body);
+  const bot = await botTokenForAdmin(chat.adminUserId);
+
+  let localMedia: string | null = null;
+  let mediaType: string | null = null;
+  let result;
+
+  if (file) {
+    const saved = await saveMediaBuffer(
+      Buffer.from(await file.arrayBuffer()),
+      extensionFromMime(file.type),
+    );
+    localMedia = saved.url;
+    mediaType = isVideo ? "video" : "photo";
+    result = await sendTelegramMedia(chat.chatId, file, body, chat.businessConnectionId, bot);
+  } else {
+    result = await sendTelegramMessage(chat.chatId, body, chat.businessConnectionId, bot);
+  }
+
   if (!result.ok) {
-    redirect("/admin/meta?reply=error");
+    redirect(withStatus("reply", "error"));
   }
 
   await prisma.telegramMessage.create({
@@ -75,6 +112,8 @@ export async function replyToTelegramChat(formData: FormData): Promise<void> {
       direction: "out",
       text: body,
       fromName: "Panel",
+      mediaType,
+      mediaPath: localMedia,
     },
   });
 
@@ -84,5 +123,6 @@ export async function replyToTelegramChat(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/admin/meta");
-  redirect("/admin/meta?reply=sent");
+  revalidatePath(`/admin/meta/xabarlar/${chat.id}`);
+  redirect(withStatus("reply", "sent"));
 }

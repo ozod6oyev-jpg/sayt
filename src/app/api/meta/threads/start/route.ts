@@ -9,7 +9,7 @@ const SCOPES = ["threads_basic", "threads_content_publish"];
 
 export async function GET(request: Request) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "owner") {
+  if (!user) {
     return NextResponse.redirect(new URL("/kirish", metaBaseUrl()));
   }
 

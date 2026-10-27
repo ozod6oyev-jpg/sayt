@@ -6,6 +6,7 @@ import { submitLead } from "@/app/actions/leads";
 import { JsonLd } from "@/components/json-ld";
 import { MapPinIcon, PhoneIcon, TelegramIcon } from "@/components/icons";
 import { ListingCard } from "@/components/listing-card";
+import { ListingGallery } from "@/components/listing-gallery";
 import { toListingCardData } from "@/lib/listing-view";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ import { prisma } from "@/lib/prisma";
 import {
   absoluteUrl,
   alternatesFor,
+  keywordsFrom,
   robotsMeta,
   siteUrl,
   socialMetadata,
@@ -47,13 +49,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const listing = await getListing(slug);
   if (!listing) return {};
 
+  const t = getDict(locale);
   const title = listingTitle(listing, locale);
-  const description = listingDescription(listing, locale).slice(0, 160);
+  const body = listingDescription(listing, locale);
+  const propertyType = t.propertyType[listing.propertyType as keyof typeof t.propertyType];
+
+  // Snippet: sarlavha + tuman/shahar + tavsif — qidiruv so'zlari tavsifdan olinadi
+  const plain = body.replace(/\s+/g, " ").trim();
+  const head = [title, [listing.district, listing.region].filter(Boolean).join(", "), propertyType]
+    .filter(Boolean)
+    .join(". ");
+  const full = `${head}. ${plain}`.replace(/\s+/g, " ").trim();
+  const description =
+    full.length <= 158 ? full : `${full.slice(0, 158).replace(/\s+\S*$/, "")}…`;
+  const keywords = keywordsFrom(`${title} ${propertyType ?? ""} ${plain}`, 20);
   const cover = listing.photos[0];
 
   return {
     title,
     description,
+    keywords,
     alternates: alternatesFor(locale, `/elonlar/${slug}`),
     robots: robotsMeta,
     ...socialMetadata({
@@ -84,7 +99,6 @@ export default async function ListingPage({ params, searchParams }: Props) {
 
   const title = listingTitle(listing, locale);
   const description = listingDescription(listing, locale);
-  const cover = listing.photos[0];
   const canonical = `${siteUrl}/${locale}/elonlar/${listing.slug}`;
   const phoneHref = `tel:${listing.phone.replace(/[^\d+]/g, "")}`;
 
@@ -191,40 +205,18 @@ export default async function ListingPage({ params, searchParams }: Props) {
 
       <div className="mt-4 grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          {cover ? (
-            <div className="overflow-hidden rounded-2xl bg-slate-100">
-              <Image
-                src={cover.url}
-                alt={cover.alt || title}
-                width={cover.width}
-                height={cover.height}
-                priority
-                sizes="(max-width: 1024px) 100vw, 66vw"
-                className="h-auto w-full object-cover"
-              />
-            </div>
-          ) : (
-            <div className="flex aspect-[4/3] items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-400">
-              {t.admin.noPhotos}
-            </div>
-          )}
-
-          {listing.photos.length > 1 && (
-            <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
-              {listing.photos.slice(1).map((photo) => (
-                <div key={photo.id} className="overflow-hidden rounded-xl bg-slate-100">
-                  <Image
-                    src={photo.url}
-                    alt={photo.alt || title}
-                    width={photo.width}
-                    height={photo.height}
-                    sizes="(max-width: 640px) 33vw, 20vw"
-                    className="aspect-[4/3] w-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          )}            <div className="mt-8">
+          <ListingGallery
+            photos={listing.photos.map((photo) => ({
+              id: photo.id,
+              url: photo.url,
+              alt: photo.alt,
+              width: photo.width,
+              height: photo.height,
+            }))}
+            title={title}
+            labels={t.gallery}
+            emptyLabel={t.admin.noPhotos}
+          />            <div className="mt-8">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="mb-2.5 flex flex-wrap gap-1.5">

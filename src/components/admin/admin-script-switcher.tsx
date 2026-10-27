@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ADMIN_SCRIPT_COOKIE, adminScriptOptions, type AdminScript } from "@/lib/admin-script";
+import { ADMIN_SCRIPT_COOKIE, type AdminScript } from "@/lib/admin-script";
 import { cn } from "@/lib/utils";
 
 export function AdminScriptSwitcher({
@@ -22,32 +22,20 @@ export function AdminScriptSwitcher({
     startTransition(() => router.refresh());
   }
 
+  const next = script === "lat" ? "cyrl" : "lat";
+
   return (
-    <div
-      className={cn(
-        "flex items-center gap-0.5 rounded-full border border-slate-200 bg-card p-0.5",
-        pending && "opacity-60",
-      )}
-      role="group"
+    <button
+      type="button"
+      onClick={() => change(next)}
       aria-label={hint}
       title={hint}
+      className={cn(
+        "grid size-8 shrink-0 place-items-center rounded-lg border border-slate-200 bg-card text-[11px] font-bold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900",
+        pending && "opacity-60",
+      )}
     >
-      {adminScriptOptions.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          onClick={() => change(option.value)}
-          aria-pressed={script === option.value}
-          className={cn(
-            "rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors",
-            script === option.value
-              ? "bg-brand-800 text-white"
-              : "text-slate-500 hover:bg-slate-100 hover:text-slate-800",
-          )}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
+      {script === "lat" ? "L" : "К"}
+    </button>
   );
 }

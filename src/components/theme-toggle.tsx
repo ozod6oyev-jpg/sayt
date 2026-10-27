@@ -13,7 +13,7 @@ type DocumentWithTransitions = Document & {
   startViewTransition?: (callback: () => void) => PageTransition;
 };
 
-export function ThemeToggle({ label }: { label: string }) {
+export function ThemeToggle({ label, compact = false }: { label: string; compact?: boolean }) {
   const [dark, setDark] = useState(false);
   const runId = useRef(0);
 
@@ -74,7 +74,7 @@ export function ThemeToggle({ label }: { label: string }) {
     <Button
       type="button"
       variant="outline"
-      size="icon-sm"
+      size={compact ? "icon-xs" : "icon-sm"}
       onClick={toggleTheme}
       aria-label={label}
       aria-pressed={dark}

@@ -32,7 +32,19 @@ export type SentMessage = {
   chat: { id: number; title?: string; username?: string };
 };
 
-function botToken(): string {
+export type BusinessConnectionInfo = {
+  id: string;
+  user: { id: number; first_name?: string; last_name?: string; username?: string };
+  user_chat_id: number;
+  date: number;
+  can_reply?: boolean;
+  is_enabled: boolean;
+};
+
+/** Bot tokeni: berilsa — adminning shaxsiy boti, aks holda serverdagi (owner) boti */
+function botToken(explicit?: string | null): string {
+  const own = explicit?.trim();
+  if (own) return own;
   return process.env.TELEGRAM_BOT_TOKEN?.trim() ?? "";
 }
 
@@ -62,8 +74,9 @@ export function telegramWebhookUrl(): string {
 export async function telegramCall<T>(
   method: string,
   payload?: Record<string, unknown>,
+  bot?: string | null,
 ): Promise<TelegramResponse<T>> {
-  const token = botToken();
+  const token = botToken(bot);
   if (!token) {
     return { ok: false, description: "TELEGRAM_BOT_TOKEN o'rnatilmagan" };
   }
@@ -97,8 +110,118 @@ export async function telegramCall<T>(
   }
 }
 
-export function getBotInfo() {
-  return telegramCall<BotInfo>("getMe");
+/** Multipart yuklash (rasm/video) — JSON emas, FormData bilan */
+async function telegramUpload<T>(
+  method: string,
+  form: FormData,
+  bot?: string | null,
+): Promise<TelegramResponse<T>> {
+  const token = botToken(bot);
+  if (!token) {
+    return { ok: false, description: "TELEGRAM_BOT_TOKEN o'rnatilmagan" };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/bot${token}/${method}`, {
+      method: "POST",
+      body: form,
+      signal: AbortSignal.timeout(90_000),
+    });
+
+    const data = (await response.json().catch(() => null)) as
+      | { ok: true; result: T }
+      | { ok: false; description?: string; error_code?: number }
+      | null;
+
+    if (!data || !data.ok) {
+      return {
+        ok: false,
+        description: data && "description" in data ? (data.description ?? "Telegram xatosi") : "Telegram javob bermadi",
+        code: data && "error_code" in data ? data.error_code : undefined,
+      };
+    }
+
+    return { ok: true, result: data.result };
+  } catch {
+    return { ok: false, description: "Telegram bilan aloqa yo'q" };
+  }
+}
+
+/** Telegram serveridan faylni yuklab olish (rasm, video, hujjat) */
+export async function downloadTelegramFile(
+  fileId: string,
+  bot?: string | null,
+): Promise<{ buffer: Buffer; extension: string } | null> {
+  const token = botToken(bot);
+  if (!token) return null;
+
+  const info = await telegramCall<{ file_path?: string }>("getFile", { file_id: fileId }, bot);
+  if (!info.ok || !info.result.file_path) return null;
+
+  try {
+    const response = await fetch(`${API_BASE}/file/bot${token}/${info.result.file_path}`, {
+      signal: AbortSignal.timeout(45_000),
+    });
+    if (!response.ok) return null;
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const extension = info.result.file_path.split(".").pop()?.slice(0, 5) ?? "jpg";
+
+    return { buffer, extension };
+  } catch {
+    return null;
+  }
+}
+
+/** Foydalanuvchining profil rasmlari */
+export function getUserProfilePhotos(userId: string, limit = 1, bot?: string | null) {
+  return telegramCall<{ total_count: number; photos: { file_id: string; width: number; height: number }[][] }>(
+    "getUserProfilePhotos",
+    { user_id: userId, limit },
+    bot,
+  );
+}
+
+/** Rasm yoki videoni chatga yuborish (caption — izoh) */
+export function sendTelegramMedia(
+  chatId: string,
+  file: File,
+  caption: string,
+  businessConnectionId?: string | null,
+  bot?: string | null,
+) {
+  const isVideo = file.type.startsWith("video/");
+  const form = new FormData();
+
+  form.append("chat_id", chatId);
+  form.append(isVideo ? "video" : "photo", file, file.name || (isVideo ? "video.mp4" : "photo.jpg"));
+  if (caption.trim()) form.append("caption", caption.trim().slice(0, 1000));
+  if (businessConnectionId) form.append("business_connection_id", businessConnectionId);
+  if (isVideo) form.append("supports_streaming", "true");
+
+  return telegramUpload<SentMessage>(isVideo ? "sendVideo" : "sendPhoto", form, bot);
+}
+
+/** Ovozli xabar yuborish — fayl OGG/OPUS formatida bo'lishi kerak */
+export function sendTelegramVoice(
+  chatId: string,
+  file: File,
+  caption: string,
+  businessConnectionId?: string | null,
+  bot?: string | null,
+) {
+  const form = new FormData();
+
+  form.append("chat_id", chatId);
+  form.append("voice", file, file.name || "voice.ogg");
+  if (caption.trim()) form.append("caption", caption.trim().slice(0, 1000));
+  if (businessConnectionId) form.append("business_connection_id", businessConnectionId);
+
+  return telegramUpload<SentMessage>("sendVoice", form, bot);
+}
+
+export function getBotInfo(bot?: string | null) {
+  return telegramCall<BotInfo>("getMe", undefined, bot);
 }
 
 export function getChannelInfo() {
@@ -113,16 +236,47 @@ export function getChannelInfo() {
   return telegramCall<ChannelInfo>("getChat", { chat_id: channelId });
 }
 
-export function getWebhookInfo() {
-  return telegramCall<WebhookInfo>("getWebhookInfo");
+export function getChannelMemberCount() {
+  const channelId = telegramChannelId();
+  if (!channelId) {
+    return Promise.resolve<TelegramResponse<number>>({
+      ok: false,
+      description: "TELEGRAM_CHANNEL_ID o'rnatilmagan",
+    });
+  }
+
+  return telegramCall<number>("getChatMemberCount", { chat_id: channelId });
 }
 
-export function sendTelegramMessage(chatId: string, text: string) {
-  return telegramCall<SentMessage>("sendMessage", {
-    chat_id: chatId,
-    text,
-    disable_web_page_preview: true,
-  });
+export function getWebhookInfo(bot?: string | null) {
+  return telegramCall<WebhookInfo>("getWebhookInfo", undefined, bot);
+}
+
+export function sendTelegramMessage(
+  chatId: string,
+  text: string,
+  businessConnectionId?: string | null,
+  bot?: string | null,
+) {
+  return telegramCall<SentMessage>(
+    "sendMessage",
+    {
+      chat_id: chatId,
+      text,
+      disable_web_page_preview: true,
+      business_connection_id: businessConnectionId || undefined,
+    },
+    bot,
+  );
+}
+
+/** Business ulanish holatini Telegram'dan so'rash */
+export function getBusinessConnection(businessConnectionId: string, bot?: string | null) {
+  return telegramCall<BusinessConnectionInfo>(
+    "getBusinessConnection",
+    { business_connection_id: businessConnectionId },
+    bot,
+  );
 }
 
 export function sendChannelPost(text: string) {
@@ -141,14 +295,34 @@ export function sendChannelPost(text: string) {
   });
 }
 
-export function setTelegramWebhook(url: string) {
-  const secret = process.env.TELEGRAM_WEBHOOK_SECRET?.trim() ?? "";
-  return telegramCall<boolean>("setWebhook", {
-    url,
-    secret_token: secret || undefined,
-    allowed_updates: ["message", "edited_message", "callback_query"],
-    drop_pending_updates: false,
-  });
+export function setTelegramWebhook(
+  url: string,
+  options: { bot?: string | null; secret?: string | null } = {},
+) {
+  const secret = options.secret !== undefined
+    ? (options.secret ?? "")
+    : (process.env.TELEGRAM_WEBHOOK_SECRET?.trim() ?? "");
+  return telegramCall<boolean>(
+    "setWebhook",
+    {
+      url,
+      secret_token: secret || undefined,
+      allowed_updates: [
+        "message",
+        "edited_message",
+        "callback_query",
+        "business_connection",
+        "business_message",
+        "edited_business_message",
+      ],
+      drop_pending_updates: false,
+    },
+    options.bot,
+  );
+}
+
+export function deleteTelegramWebhook(bot?: string | null) {
+  return telegramCall<boolean>("deleteWebhook", { drop_pending_updates: false }, bot);
 }
 
 export function telegramErrorCode(description: string): "nochat" | "norights" | "error" {

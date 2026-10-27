@@ -1,7 +1,10 @@
 import { changeOwnPassword, regenerateOwnTotp } from "@/app/actions/auth";
+import { startTelegramLink, stopTelegramLink } from "@/app/actions/telegram-account";
+import { removeOwnTelegramBot, saveOwnTelegramBot } from "@/app/actions/telegram-bot";
 import { requireAdmin } from "@/lib/auth";
 import { getAdminCopy } from "@/lib/admin-i18n";
 import { accountCopy } from "@/lib/admin-copy/account";
+import { telegramLinkUrl } from "@/lib/telegram-account";
 import { formatSecret, otpauthUrl } from "@/lib/totp";
 
 type PageProps = {
@@ -20,6 +23,8 @@ export default async function ProfilePage({ searchParams }: PageProps) {
   const saved = first(query.saved);
   const error = first(query.error);
   const isSetup = first(query.setup) === "1";
+  const tgStatus = first(query.tg);
+  const botStatus = first(query.bot);
 
   const savedMessages: Record<string, string> = {
     password: c.savedPassword,
@@ -34,6 +39,19 @@ export default async function ProfilePage({ searchParams }: PageProps) {
 
   const secret = formatSecret(user.totpSecret);
   const uri = otpauthUrl(user.totpSecret, user.email);
+
+  // Owner boti serverda — unga shaxsiy account havolasi ko'rsatiladi
+  const tgLinkUrl =
+    user.role !== "owner" || user.telegramUserId
+      ? null
+      : await telegramLinkUrl(user.telegramLinkToken ?? "");
+
+  const botErrors: Record<string, string> = {
+    invalid: c.botInvalid,
+    taken: c.botTaken,
+    webhook: c.botWebhook,
+    owner: c.botOwner,
+  };
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -56,6 +74,20 @@ export default async function ProfilePage({ searchParams }: PageProps) {
       )}
       {error && errorMessages[error] && (
         <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{errorMessages[error]}</p>
+      )}
+      {tgStatus === "unlinked" && (
+        <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">
+          {c.telegramUnlinked}
+        </p>
+      )}
+      {botStatus === "saved" && (
+        <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">{c.botSaved}</p>
+      )}
+      {botStatus === "removed" && (
+        <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">{c.botRemoved}</p>
+      )}
+      {botStatus && botErrors[botStatus] && (
+        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{botErrors[botStatus]}</p>
       )}
 
       <section className="card p-6">
@@ -88,6 +120,148 @@ export default async function ProfilePage({ searchParams }: PageProps) {
           </div>
         </dl>
       </section>
+
+      {user.role === "owner" && (
+      <section className="card p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-900">{c.telegramTitle}</h2>
+          <span
+            className={
+              user.telegramUserId
+                ? "rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700"
+                : "rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500"
+            }
+          >
+            {user.telegramUserId ? c.telegramLinked : c.telegramOff}
+          </span>
+        </div>
+        <p className="mt-1 text-xs leading-5 text-slate-500">{c.telegramHint}</p>
+
+        {user.telegramUserId ? (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-sm font-medium text-slate-800">
+              {user.telegramUsername ? `@${user.telegramUsername}` : user.telegramUserId}
+            </p>
+            <form action={stopTelegramLink}>
+              <button type="submit" className="btn-secondary text-xs">
+                {c.telegramUnlink}
+              </button>
+            </form>
+          </div>
+        ) : tgLinkUrl ? (
+          <div className="mt-4 rounded-lg border border-brand-200 bg-brand-50 p-4">
+            <p className="text-xs leading-5 text-brand-800">
+              {tgStatus === "link" ? c.telegramLinkMade : c.telegramLinkReady}
+            </p>
+            <a
+              href={tgLinkUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-block font-mono text-xs break-all text-brand-700 hover:underline"
+            >
+              {tgLinkUrl}
+            </a>
+            <form action={startTelegramLink} className="mt-3">
+              <button type="submit" className="btn-secondary text-xs">
+                {c.telegramLinkAgain}
+              </button>
+            </form>
+          </div>
+        ) : (
+          <div className="mt-4">
+            <p className="text-xs leading-5 text-slate-500">{c.telegramNotLinked}</p>
+            <p className="mt-1 text-[11px] text-amber-700">{c.telegramBotMissing}</p>
+            <form action={startTelegramLink} className="mt-3">
+              <button type="submit" className="btn-primary text-xs">
+                {c.telegramLinkAction}
+              </button>
+            </form>
+          </div>
+        )}
+      </section>
+      )}
+
+      {user.role !== "owner" && (
+        <section className="card p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold text-slate-900">{c.botTitle}</h2>
+            <span
+              className={
+                user.telegramBotId
+                  ? "rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700"
+                  : "rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500"
+              }
+            >
+              {user.telegramBotId ? c.botConnected : c.botNotConnected}
+            </span>
+          </div>
+          <p className="mt-1 text-xs leading-5 text-slate-500">{c.botHint}</p>
+
+          {user.telegramBotId ? (
+            <>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                <p className="text-sm font-medium text-slate-800">
+                  {user.telegramBotUsername
+                    ? `@${user.telegramBotUsername}`
+                    : user.telegramBotId}
+                </p>
+                <form action={removeOwnTelegramBot}>
+                  <button type="submit" className="btn-secondary text-xs">
+                    {c.botRemove}
+                  </button>
+                </form>
+              </div>
+              <p className="mt-3 text-[11px] leading-5 text-slate-500">{c.botBusinessHint}</p>
+
+              <details className="mt-3">
+                <summary className="cursor-pointer text-xs font-semibold text-slate-700">
+                  {c.botChange}
+                </summary>
+                <form action={saveOwnTelegramBot} className="mt-2 flex flex-wrap items-end gap-2">
+                  <div className="min-w-0 flex-1">
+                    <label className="label" htmlFor="bot-token-new">
+                      {c.botTokenLabel}
+                    </label>
+                    <input
+                      id="bot-token-new"
+                      name="token"
+                      required
+                      autoComplete="off"
+                      className="field font-mono"
+                      placeholder={c.botTokenPlaceholder}
+                    />
+                  </div>
+                  <button type="submit" className="btn-primary text-xs">
+                    {c.botSave}
+                  </button>
+                </form>
+              </details>
+            </>
+          ) : (
+            <>
+              <form action={saveOwnTelegramBot} className="mt-4 flex flex-wrap items-end gap-2">
+                <div className="min-w-0 flex-1">
+                  <label className="label" htmlFor="bot-token">
+                    {c.botTokenLabel}
+                  </label>
+                  <input
+                    id="bot-token"
+                    name="token"
+                    required
+                    autoComplete="off"
+                    className="field font-mono"
+                    placeholder={c.botTokenPlaceholder}
+                  />
+                </div>
+                <button type="submit" className="btn-primary text-xs">
+                  {c.botSave}
+                </button>
+              </form>
+              <p className="mt-3 text-[11px] leading-5 text-slate-500">{c.botBusinessHint}</p>
+            </>
+          )}
+        </section>
+      )}
 
       <section className="card p-6">
         <h2 className="text-sm font-semibold text-slate-900">{c.authenticatorTitle}</h2>

@@ -40,19 +40,19 @@ export function AdminUserMenu({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-full border border-border bg-background py-1 pr-2 pl-1 transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/40"
+          className="flex items-center gap-1.5 rounded-full border border-border bg-background py-0.5 pr-1.5 pl-0.5 transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/40"
           aria-label={name}
         >
-          <Avatar className="size-8">
-            <AvatarFallback className="bg-brand-800 text-[11px]">{initials(name)}</AvatarFallback>
+          <Avatar className="size-7">
+            <AvatarFallback className="bg-brand-800 text-[10px]">{initials(name)}</AvatarFallback>
           </Avatar>
-          <span className="hidden text-left leading-tight sm:block">
+          <span className="hidden text-left leading-tight md:block">
             <span className="block max-w-[140px] truncate text-xs font-semibold text-foreground">
               {name}
             </span>
-            <span className="block text-[10px] text-muted-foreground">{roleLabel}</span>
+            <span className="hidden text-[10px] text-muted-foreground lg:block">{roleLabel}</span>
           </span>
-          <ChevronDown className="hidden size-3.5 text-muted-foreground sm:block" />
+          <ChevronDown className="hidden size-3.5 text-muted-foreground md:block" />
         </button>
       </DropdownMenuTrigger>
 

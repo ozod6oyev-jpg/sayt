@@ -24,6 +24,12 @@ const uz = {
     blogTitle: "Maqolalar",
     blogDescription:
       "Uy-joy bozori tahlili, uy sotib olish qo'llanmalari, ipoteka va qurilish bo'yicha maslahatlar.",
+    privacyDescription:
+      "Maxfiylik siyosati: qanday ma'lumotlar yig'iladi, qayerda saqlanadi va uchinchi tomonga berilmaydi.",
+    rulesDescription:
+      "Saytdan foydalanish qoidalari, e'lon joylashtirish shartlari va foydalanuvchi javobgarligi.",
+    copyrightDescription:
+      "Sayt materiallariga mualliflik huquqi, rasmlar va matnlardan foydalanish shartlari.",
   },
   nav: {
     home: "Bosh sahifa",
@@ -47,6 +53,12 @@ const uz = {
     next: "Keyingi e'lon",
     enlarge: "E'lonni kattalashtirish",
     close: "Yopish",
+  },
+  gallery: {
+    enlarge: "Rasmni kattalashtirish",
+    close: "Yopish",
+    prev: "Oldingi rasm",
+    next: "Keyingi rasm",
   },
   common: {
     loadMore: "Yana",
@@ -226,6 +238,12 @@ const ru: Dict = {
     blogTitle: "Статьи",
     blogDescription:
       "Аналитика рынка недвижимости, руководства по покупке жилья, ипотека и советы по строительству.",
+    privacyDescription:
+      "Политика конфиденциальности: какие данные собираются, где хранятся и не передаются третьим лицам.",
+    rulesDescription:
+      "Правила использования сайта, условия размещения объявлений и ответственность пользователя.",
+    copyrightDescription:
+      "Авторские права на материалы сайта, условия использования фотографий и текстов.",
   },
   nav: {
     home: "Главная",
@@ -249,6 +267,12 @@ const ru: Dict = {
     next: "Следующее объявление",
     enlarge: "Увеличить объявление",
     close: "Закрыть",
+  },
+  gallery: {
+    enlarge: "Увеличить фото",
+    close: "Закрыть",
+    prev: "Предыдущее фото",
+    next: "Следующее фото",
   },
   common: {
     loadMore: "Ещё",

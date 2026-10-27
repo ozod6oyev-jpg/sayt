@@ -7,7 +7,18 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/kirish", "/verifydev", "/api/"],
+        // Faqat ommaviy sahifalar indekslanadi. Boshqaruv paneli, kirish,
+        // qurilma tasdiqlash va API qidiruvga umuman tushmasligi kerak.
+        disallow: [
+          "/admin",
+          "/admin/",
+          "/kirish",
+          "/kirish/",
+          "/verifydev",
+          "/verifydev/",
+          "/api",
+          "/api/",
+        ],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

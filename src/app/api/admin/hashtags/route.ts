@@ -13,7 +13,7 @@ type Suggestion = { tag: string; uses: number; source: "local" | "instagram" };
  */
 export async function GET(request: Request) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "owner") {
+  if (!user) {
     return NextResponse.json({ ok: false, items: [] }, { status: 401 });
   }
 

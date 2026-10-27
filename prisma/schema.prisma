@@ -22,6 +22,18 @@ model AdminUser {
   totpEnabled  Boolean   @default(true)
   isActive     Boolean   @default(true)
   lastLoginAt  DateTime?
+  /// Shaxsiy Telegram akkaunti — har admin uchun alohida inbox
+  telegramUserId    String?   @unique
+  telegramUsername  String?
+  telegramLinkToken String?   @unique
+  telegramLinkedAt  DateTime?
+  /// Adminning shaxsiy boti (token shifrlangan) — har bir admin alohida bot
+  telegramBotToken    String?
+  telegramBotUsername String?
+  telegramBotId       String?   @unique
+  /// Shu botning webhook siri — kelgan update qaysi adminga tegishli ekanini aniqlaydi
+  telegramBotSecret   String?   @unique
+  telegramBotAt       DateTime?
   createdAt    DateTime  @default(now())
 
   createdById  String?
@@ -165,12 +177,40 @@ model TelegramChat {
   title         String
   username      String?
   type          String            @default("private")
+  /// Shaxsiy (Business) akkaunt orqali kelgan suhbat bo'lsa — ulanish ID
+  businessConnectionId String?
+  /// Business akkaunt egasining Telegram user ID (o'z xabarlarini ajratish uchun)
+  businessOwnerId      String?
+  /// Suhbat qaysi admin hisobiga tegishli (har adminda o'z Telegrami)
+  adminUserId          String?
+  /// Mijozning profil rasmi (/uploads/...)
+  avatarPath        String?
+  avatarCheckedAt   DateTime?
   lastMessageAt DateTime          @default(now())
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   messages      TelegramMessage[]
 
   @@index([lastMessageAt])
+  @@index([businessConnectionId])
+  @@index([adminUserId, lastMessageAt])
+}
+
+/// Botga ulangan Telegram Business (shaxsiy) akkauntlar
+model TelegramBusiness {
+  id        String   @id
+  ownerId   String
+  ownerName String?
+  username  String?
+  /// Panel hisobi — ulanish qaysi adminga tegishli
+  adminUserId String?
+  canReply  Boolean  @default(true)
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isEnabled])
+  @@index([adminUserId])
 }
 
 /// Kelgan va yuborilgan Telegram xabarlari
@@ -182,6 +222,8 @@ model TelegramMessage {
   direction   String
   text        String
   fromName    String?
+  mediaType   String?
+  mediaPath   String?
   readAt      DateTime?
   createdAt   DateTime     @default(now())
 
@@ -197,6 +239,12 @@ model MetaIntegration {
   pageId          String?
   pageToken       String?
   igUserId        String?
+  adAccountId     String?
+  adsToken        String?
+  /// Reklama hamyoniga to'langan summa (so'mda) — dollar byudjet shundan hisoblanadi
+  adsBudgetUzs    Int?
+  /// Hamyondan 2% soliq qachon ajratilgani (target birinchi marta yoqilganda)
+  adsTaxChargedAt DateTime?
   threadsUserId   String?
   threadsToken    String?
   threadsUsername String?
@@ -204,17 +252,21 @@ model MetaIntegration {
   igUsername      String?
   verifyToken     String
   connectedAt     DateTime?
+  /// Tarix yuklashda oxirgi sahifa kursori
+  historyCursor   String?
   updatedAt       DateTime  @updatedAt
 }
 
 /// Facebook Messenger yoki Instagram Direct suhbati
 model MetaChat {
-  id            String        @id @default(cuid())
-  platform      String
-  externalId    String
-  name          String
-  username      String?
-  lastMessageAt DateTime      @default(now())
+  id              String        @id @default(cuid())
+  platform        String
+  externalId      String
+  name            String
+  username        String?
+  avatarPath      String?
+  avatarCheckedAt DateTime?
+  lastMessageAt   DateTime      @default(now())
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   messages      MetaMessage[]
@@ -279,11 +331,43 @@ model MetaMessage {
   externalId String?
   direction  String
   text       String
+  mediaType  String?
+  mediaPath  String?
   readAt     DateTime?
   createdAt  DateTime  @default(now())
 
   @@unique([chatRefId, externalId, direction])
   @@index([chatRefId, createdAt])
+}
+
+/// Meta (Facebook/Instagram) reklama kampaniyalari
+model MetaAd {
+  id          String   @id @default(cuid())
+  campaignId  String
+  adSetId     String?
+  adId        String?
+  name        String
+  objective   String
+  status      String   @default("PAUSED")
+  dailyBudget Int
+  currency    String   @default("USD")
+  /// Targetning jami byudjeti (daily × days), minimal birlikda
+  totalBudget Int?
+  days        Int?
+  /// Nechta Reels video ulangan
+  videos      Int      @default(0)
+  /// Har bir video uchun e'lon ma'lumotlari (JSON)
+  creatives   String?
+  /// Kampaniya toifasi (housing, finance, leads, assets)
+  category    String?
+  /// Faol bo'lgan paytdan boshlab kunlik sarf shu yerdan yechiladi
+  startedAt   DateTime?
+  /// Undirilgan kunlar va sarflangan summa (minimal birlikda)
+  chargedDays Int      @default(0)
+  spentAmount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 /// Admin panel bildirishnomalari (yangi mijoz xabari va h.k.)
@@ -293,8 +377,26 @@ model AdminNotification {
   title     String
   body      String?
   href      String
+  /// Faqat shu adminga ko'rinadi (null — barcha adminlar uchun)
+  adminUserId String?
   readAt    DateTime?
   createdAt DateTime  @default(now())
 
   @@index([readAt, createdAt])
+  @@index([adminUserId, readAt])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String
+  p256dh    String
+  auth      String
+  scope     String   @default("admin")
+  userAgent String?
+  adminId   String?
+  createdAt DateTime @default(now())
+  lastAt    DateTime @default(now())
+
+  @@unique([endpoint, scope])
+  @@index([scope, createdAt])
 }

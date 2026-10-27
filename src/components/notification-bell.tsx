@@ -4,6 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Bell, BellRing, Check, X } from "lucide-react";
+import {
+  disablePush,
+  ensurePush,
+  hasLocalSubscription,
+  pushState,
+  resetPush,
+  type PushState,
+} from "@/lib/push-browser";
 import { localePath, type Locale } from "@/lib/i18n";
 
 type ListingItem = {
@@ -29,8 +37,6 @@ type ArticleItem = {
 
 type Payload = { listings: ListingItem[]; articles: ArticleItem[] };
 
-type Permission = "default" | "granted" | "denied" | "unsupported";
-
 const SEEN_KEY = "uyjoy-notifications-seen";
 const POLL_MS = 60_000;
 
@@ -46,6 +52,7 @@ const COPY = {
     hint: "Yangi e'lon va maqolalar haqida birinchi bo'lib biling.",
     enable: "Bildirishnomalarni yoqish",
     enabled: "Bildirishnomalar yoqilgan",
+    disable: "O'chirish",
     denied: "Brauzerda bildirishnomalar bloklangan. Sayt sozlamalaridan ruxsat bering.",
     unsupported: "Bu brauzer bildirishnomalarni qo'llamaydi.",
     allListings: "Barcha e'lonlar",
@@ -64,6 +71,7 @@ const COPY = {
     hint: "Узнавайте первыми о новых объявлениях и статьях.",
     enable: "Включить уведомления",
     enabled: "Уведомления включены",
+    disable: "Отключить",
     denied: "Уведомления заблокированы в браузере. Разрешите их в настройках сайта.",
     unsupported: "Этот браузер не поддерживает уведомления.",
     allListings: "Все объявления",
@@ -78,37 +86,10 @@ export function NotificationBell({ locale }: { locale: Locale }) {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<Payload>({ listings: [], articles: [] });
   const [unread, setUnread] = useState(0);
-  const [permission, setPermission] = useState<Permission>("default");
+  const [push, setPush] = useState<PushState>("off");
   const [seenAt, setSeenAt] = useState<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const knownIds = useRef<Set<string> | null>(null);
   const seenInitialized = useRef(false);
-
-  const notify = useCallback(
-    (item: { title: string; href: string; image: string | null }, kind: "listing" | "article") => {
-      if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
-
-      try {
-        const notification = new Notification(
-          kind === "listing" ? copy.newListing : copy.newArticle,
-          {
-            body: item.title,
-            icon: item.image ?? "/logo-mark.png",
-            badge: "/logo-mark.png",
-            tag: item.href,
-          },
-        );
-        notification.onclick = () => {
-          window.focus();
-          window.location.href = item.href;
-          notification.close();
-        };
-      } catch {
-        // Ba'zi brauzerlar to'g'ridan-to'g'ri Notification'ni qo'llamaydi
-      }
-    },
-    [copy.newArticle, copy.newListing],
-  );
 
   const load = useCallback(async () => {
     try {
@@ -127,26 +108,22 @@ export function NotificationBell({ locale }: { locale: Locale }) {
       }
       setUnread(seen ? all.filter((item) => item.createdAt > seen).length : 0);
 
-      if (knownIds.current) {
-        const fresh = all.filter((item) => !knownIds.current?.has(item.id));
-        if (fresh.length > 0 && typeof Notification !== "undefined" && Notification.permission === "granted") {
-          const newest = fresh[0];
-          const isListing = next.listings.some((item) => item.id === newest.id);
-          notify(newest, isListing ? "listing" : "article");
-        }
-      }
-      knownIds.current = new Set(all.map((item) => item.id));
     } catch {
       // tarmoq xatosi — keyingi urinishda qayta yuklanadi
     }
-  }, [locale, notify]);
+  }, [locale]);
 
   useEffect(() => {
-    if (typeof Notification === "undefined") {
-      setPermission("unsupported");
-    } else {
-      setPermission(Notification.permission as Permission);
-    }
+    void (async () => {
+      let next = await pushState("site");
+
+      // Brauzerda obuna bor, serverda yozuv yo'q bo'lsa — qayta ro'yxatdan o'tkazamiz
+      if (next === "off" && typeof Notification !== "undefined" && Notification.permission === "granted") {
+        next = await ensurePush("site");
+      }
+
+      setPush(next);
+    })();
 
     void load();
 
@@ -195,17 +172,13 @@ export function NotificationBell({ locale }: { locale: Locale }) {
   }
 
   async function enable() {
-    if (typeof Notification === "undefined") return;
+    setPush("working");
+    setPush(await resetPush("site"));
+  }
 
-    const result = await Notification.requestPermission();
-    setPermission(result as Permission);
-
-    if (result === "granted") {
-      const latest = data.listings[0] ?? data.articles[0];
-      if (latest) {
-        notify(latest, data.listings.length > 0 ? "listing" : "article");
-      }
-    }
+  async function disable() {
+    setPush("working");
+    setPush(await disablePush("site"));
   }
 
   const isNew = (createdAt: string) => Boolean(seenAt && createdAt > seenAt);
@@ -243,11 +216,11 @@ export function NotificationBell({ locale }: { locale: Locale }) {
           </div>
 
           <div className="max-h-[26rem] overflow-y-auto">
-            {permission !== "granted" && (
+            {push !== "on" && (
               <div className="border-b border-border bg-muted/50 px-4 py-3">
-                {permission === "unsupported" || permission === "denied" ? (
+                {push === "unsupported" || push === "denied" || push === "working" ? (
                   <p className="text-xs leading-5 text-muted-foreground">
-                    {permission === "denied" ? copy.denied : copy.unsupported}
+                    {push === "denied" ? copy.denied : push === "working" ? copy.enable : copy.unsupported}
                   </p>
                 ) : (
                   <>
@@ -265,11 +238,20 @@ export function NotificationBell({ locale }: { locale: Locale }) {
               </div>
             )}
 
-            {permission === "granted" && (
-              <p className="flex items-center gap-1.5 border-b border-border bg-muted/50 px-4 py-2 text-[11px] font-medium text-emerald-600">
-                <Check className="size-3.5" />
-                {copy.enabled}
-              </p>
+            {push === "on" && (
+              <div className="flex items-center justify-between gap-2 border-b border-border bg-muted/50 px-4 py-2 text-[11px] font-medium text-emerald-600">
+                <span className="flex items-center gap-1.5">
+                  <Check className="size-3.5" />
+                  {copy.enabled}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => void disable()}
+                  className="text-[11px] font-medium text-muted-foreground hover:text-foreground"
+                >
+                  {copy.disable}
+                </button>
+              </div>
             )}
 
             <div className="px-4 py-3">

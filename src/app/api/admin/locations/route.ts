@@ -15,7 +15,7 @@ type PlaceSearch = {
 /** Studio'dagi "Joylashuv qo'shish" uchun Facebook place qidiruvi */
 export async function GET(request: Request) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "owner") {
+  if (!user) {
     return NextResponse.json({ ok: false, items: [] }, { status: 401 });
   }
 
