@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { toggleAdTarget } from "@/app/actions/ads";
 import type { AdsCopy } from "@/lib/admin-copy/ads";
-import type { AdCreative, AdTarget } from "@/lib/ads-targets";
+import type { AdTarget } from "@/lib/ads-targets";
+import { buildReels } from "@/lib/ads-reels";
 
 function num(value: number, digits = 0): string {
   return value.toLocaleString("uz-UZ", { maximumFractionDigits: digits });
@@ -12,12 +13,6 @@ function num(value: number, digits = 0): string {
 function money(value: number, currency: string): string {
   return `${num(value, 2)} ${currency}`;
 }
-
-type Reel = {
-  key: string;
-  creative: AdCreative;
-  target: AdTarget;
-};
 
 /**
  * Lokal targetlar: kampaniya nomi va jami byudjet bir marta, har bir Reels
@@ -39,24 +34,15 @@ export function TargetsPanel({
   returnTo: string;
 }) {
   const [openDetails, setOpenDetails] = useState<Record<string, boolean>>({});
-  const [statsNotice, setStatsNotice] = useState<Record<string, boolean>>({});
+  const [statsOpen, setStatsOpen] = useState<Record<string, boolean>>({});
 
   const campaign = targets[0];
   const anyActive = targets.some((target) => target.active);
   // Byudjet bitta kampaniyaniki — targetlar/videolar soniga ko'paytirilmaydi
   const campaignBudget = campaign.totalBudget / factor;
 
-  // Bir xil video bir nechta targetda takrorlanmasin — ro'yxat bitta bo'lib qoladi
-  const reels: Reel[] = [];
-  const seen = new Set<string>();
-  for (const target of targets) {
-    for (const creative of target.creatives) {
-      const key = creative.video || `${creative.headline}|${creative.link}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      reels.push({ key, creative, target });
-    }
-  }
+  // Bir xil video bir nechta targetda takrorlanmasin; sarf videolarga bo'linadi
+  const reels = buildReels(targets, factor);
 
   return (
     <section className="card overflow-hidden">
@@ -101,9 +87,9 @@ export function TargetsPanel({
       <ul className="space-y-1.5 border-t border-slate-100 px-4 py-3">
         {reels.map((reel, index) => {
           const details = openDetails[reel.key] ?? false;
-          const notice = statsNotice[reel.key] ?? false;
+          const showStats = statsOpen[reel.key] ?? false;
           const daily = reel.target.dailyBudget / factor;
-          const spent = reel.target.spentAmount / factor;
+          const { spent, stats } = reel;
 
           return (
             <li
@@ -135,11 +121,11 @@ export function TargetsPanel({
                   <span
                     className={
                       reel.target.active
-                        ? "shrink-0 rounded-full bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
+                        ? "shrink-0 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
                         : "shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-600"
                     }
                   >
-                    {reel.target.active ? copy.inReview : copy.paused}
+                    {reel.target.active ? copy.activeBadge : copy.paused}
                   </span>
                 </div>
 
@@ -175,7 +161,7 @@ export function TargetsPanel({
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                   <button
                     type="button"
-                    onClick={() => setStatsNotice((prev) => ({ ...prev, [reel.key]: !prev[reel.key] }))}
+                    onClick={() => setStatsOpen((prev) => ({ ...prev, [reel.key]: !prev[reel.key] }))}
                     className="rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 hover:bg-slate-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
                   >
                     {copy.statsButton}
@@ -190,14 +176,32 @@ export function TargetsPanel({
                   </button>
                 </div>
 
-                {notice && (
-                  <p className="mt-1.5 rounded-md bg-amber-50 px-2 py-1 text-[10px] leading-4 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
-                    {copy.statsUnavailable}
-                  </p>
+                {showStats && (
+                  <dl className="mt-1.5 grid grid-cols-3 gap-1.5 rounded-md border border-slate-200 bg-card p-2 text-[10px]">
+                    {[
+                      { label: copy.kpiImpressions, value: num(stats.impressions) },
+                      { label: copy.kpiClicks, value: num(stats.clicks) },
+                      {
+                        label: copy.kpiCtr,
+                        value: `${num(stats.impressions ? (stats.clicks / stats.impressions) * 100 : 0, 2)}%`,
+                      },
+                      { label: copy.kpiCpc, value: money(stats.clicks ? spent / stats.clicks : 0, currency) },
+                      {
+                        label: copy.kpiCpm,
+                        value: money(stats.impressions ? (spent / stats.impressions) * 1000 : 0, currency),
+                      },
+                      { label: copy.kpiReach, value: num(stats.reach) },
+                    ].map((item) => (
+                      <div key={item.label} className="min-w-0">
+                        <dt className="font-semibold text-slate-500">{item.label}</dt>
+                        <dd className="truncate font-semibold text-slate-800">{item.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
                 )}
 
                 {details && (
-                  <dl className="mt-1.5 grid gap-1.5 rounded-md border border-slate-200 bg-white p-2 text-[10px] dark:border-zinc-700 dark:bg-zinc-800">
+                  <dl className="mt-1.5 grid gap-1.5 rounded-md border border-slate-200 bg-card p-2 text-[10px]">
                     <div>
                       <dt className="font-semibold text-slate-500">{copy.detailHeadline}</dt>
                       <dd className="break-words text-slate-800">{reel.creative.headline || "—"}</dd>

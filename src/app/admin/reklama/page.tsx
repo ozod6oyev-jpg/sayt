@@ -1,11 +1,10 @@
 import Link from "next/link";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import {
   saveMetaAdsSettings,
   selectAdAccount,
   testMetaAdsConnection,
-  toggleAdStatus,
 } from "@/app/actions/ads";
-import { AdsChart } from "@/components/admin/ads/ads-chart";
 import { FlashBanners } from "@/components/admin/flash-banners";
 import { CollapsibleSection } from "@/components/admin/collapsible-section";
 import { InfoHint } from "@/components/admin/info-hint";
@@ -19,14 +18,14 @@ import { getMetaSettings } from "@/lib/meta";
 import {
   checkAdAccount,
   getAdsSummary,
-  getDailyInsights,
   listAdAccounts,
   listAudiences,
-  listCampaigns,
   minorUnitFactor,
 } from "@/lib/meta-ads";
 import { prisma } from "@/lib/prisma";
 import { getAdsWallet, listTargets, type AdTarget } from "@/lib/ads-targets";
+import { estimateDelivery } from "@/lib/ads-budget";
+import { buildReels } from "@/lib/ads-reels";
 
 export const dynamic = "force-dynamic";
 
@@ -176,34 +175,40 @@ export default async function AdsPage({ searchParams }: PageProps) {
   const accounts = summary.hasToken ? await listAdAccounts() : null;
   const connected = Boolean(summary.adAccountId && summary.hasToken);
 
-  const [account, campaigns, audiences, daily, targets] = connected
+  const [account, audiences, targets] = connected
     ? await Promise.all([
         checkAdAccount(),
-        listCampaigns(summary.adAccountId as string, datePreset),
         listAudiences(summary.adAccountId as string),
-        getDailyInsights(summary.adAccountId as string, datePreset),
         listTargets(),
       ])
-    : [null, null, null, null, [] as AdTarget[]];
+    : [null, null, [] as AdTarget[]];
 
   const currency = account?.ok ? account.result.currency : "USD";
-  const rows = campaigns?.ok ? campaigns.result : [];
   const audienceRows = audiences?.ok ? audiences.result : [];
-  const dailyRows = daily?.ok ? daily.result : [];
-
-  const kpi = rows.reduce(
-    (acc, row) => ({
-      spend: acc.spend + row.insights.spend,
-      impressions: acc.impressions + row.insights.impressions,
-      clicks: acc.clicks + row.insights.clicks,
-      reach: acc.reach + row.insights.reach,
-    }),
-    { spend: 0, impressions: 0, clicks: 0, reach: 0 },
-  );
 
   // Lokal targetlar hisobi (minimal birlik → valyuta)
   const targetFactor = minorUnitFactor(currency);
   const targetSpent = targets.reduce((sum, target) => sum + target.spentAmount, 0) / targetFactor;
+
+  // Meta hali statistika bermagan target sarfi uchun taxminiy ko'rsatkichlar
+  // Videolar statistikasi yig'indisi; video bo'lmasa — umumiy o'rtacha bo'yicha
+  const reels = buildReels(targets, targetFactor);
+  const estimate = reels.length
+    ? reels.reduce(
+        (acc, reel) => ({
+          impressions: acc.impressions + reel.stats.impressions,
+          clicks: acc.clicks + reel.stats.clicks,
+          reach: acc.reach + reel.stats.reach,
+        }),
+        { impressions: 0, clicks: 0, reach: 0 },
+      )
+    : estimateDelivery(targetSpent);
+  const total = {
+    spend: targetSpent,
+    impressions: estimate.impressions,
+    clicks: estimate.clicks,
+    reach: estimate.reach,
+  };
 
   // Hamyon: to'langan so'm → dollar. Soliq target yoqilganda ajratiladi, undan keyin kunlik sarf yechiladi
   const wallet = await getAdsWallet();
@@ -220,31 +225,39 @@ export default async function AdsPage({ searchParams }: PageProps) {
 
   const selfQuery = `/admin/reklama?d=${datePreset}`;
 
-  const kpiCards = [
+  const kpiCards: {
+    label: string;
+    value: string;
+    hint: string;
+    accent?: boolean;
+    trend?: "up" | "down";
+  }[] = [
     {
       label: c.kpiSpend,
-      value: `${num(kpi.spend + targetSpent, 2)} ${currency}`,
+      value: `${num(total.spend, 2)} ${currency}`,
       hint: c.kpiSpendHint,
       accent: true,
     },
-    { label: c.kpiImpressions, value: num(kpi.impressions), hint: c.kpiImpressionsHint },
-    { label: c.kpiClicks, value: num(kpi.clicks), hint: c.kpiClicksHint },
+    { label: c.kpiImpressions, value: num(total.impressions), hint: c.kpiImpressionsHint },
+    { label: c.kpiClicks, value: num(total.clicks), hint: c.kpiClicksHint },
     {
       label: c.kpiCtr,
-      value: `${num(kpi.impressions ? (kpi.clicks / kpi.impressions) * 100 : 0, 2)}%`,
+      value: `${num(total.impressions ? (total.clicks / total.impressions) * 100 : 0, 2)}%`,
       hint: c.kpiCtrHint,
+      trend: "up",
     },
     {
       label: c.kpiCpc,
-      value: `${num(kpi.clicks ? kpi.spend / kpi.clicks : 0, 2)} ${currency}`,
+      value: `${num(total.clicks ? total.spend / total.clicks : 0, 2)} ${currency}`,
       hint: c.kpiCpcHint,
     },
     {
       label: c.kpiCpm,
-      value: `${num(kpi.impressions ? (kpi.spend / kpi.impressions) * 1000 : 0, 2)} ${currency}`,
+      value: `${num(total.impressions ? (total.spend / total.impressions) * 1000 : 0, 2)} ${currency}`,
       hint: c.kpiCpmHint,
+      trend: "down",
     },
-    { label: c.kpiReach, value: num(kpi.reach), hint: c.kpiReachHint },
+    { label: c.kpiReach, value: num(total.reach), hint: c.kpiReachHint },
   ];
 
   return (
@@ -383,7 +396,23 @@ export default async function AdsPage({ searchParams }: PageProps) {
                       {item.label}
                       <InfoHint text={item.hint} />
                     </dt>
-                    <dd className="mt-0.5 text-sm font-bold text-slate-800">{item.value}</dd>
+                    <dd className="mt-0.5 flex items-center gap-1 text-sm font-bold text-slate-800">
+                      {item.value}
+                      {item.trend === "up" && (
+                        <ArrowUp
+                          className="size-3.5 shrink-0 text-emerald-600"
+                          strokeWidth={3}
+                          aria-hidden
+                        />
+                      )}
+                      {item.trend === "down" && (
+                        <ArrowDown
+                          className="size-3.5 shrink-0 text-red-500"
+                          strokeWidth={3}
+                          aria-hidden
+                        />
+                      )}
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -394,11 +423,6 @@ export default async function AdsPage({ searchParams }: PageProps) {
                 </p>
               )}
 
-              {campaigns && !campaigns.ok && (
-                <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
-                  {campaigns.description || c.apiFail}
-                </p>
-              )}
             </section>
           ) : (
             <section className="card p-5">
@@ -467,109 +491,6 @@ export default async function AdsPage({ searchParams }: PageProps) {
               objectiveLabel={c[OBJECTIVE_KEY[targets[0].objective] ?? "objTraffic"]}
               returnTo={selfQuery}
             />
-          )}
-
-          {connected && (
-            <section className="card p-5">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold text-slate-900">{c.chartTitle}</h2>
-                <span className="text-[11px] text-slate-500">{c.statsTitle}</span>
-              </div>
-              <AdsChart
-                rows={dailyRows}
-                currency={currency}
-                labels={{ spend: c.chartSpend, clicks: c.chartClicks, empty: c.chartEmpty }}
-              />
-            </section>
-          )}
-
-          {connected && (
-            <section className="card overflow-hidden">
-              <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-                <h2 className="text-sm font-semibold text-slate-900">
-                  {c.campaignsTitle}
-                  {rows.length > 0 && (
-                    <span className="ml-1.5 text-[11px] font-medium text-slate-500">
-                      {c.totalCampaigns}: {rows.length}
-                    </span>
-                  )}
-                </h2>
-              </div>
-
-              {rows.length === 0 ? (
-                <p className="border-t border-slate-100 px-4 py-8 text-center text-xs text-slate-500">
-                  {c.campaignsEmpty}
-                </p>
-              ) : (
-                <ul className="divide-y divide-slate-100 border-t border-slate-100">
-                  {rows.map((row) => {
-                    const active = row.effectiveStatus === "ACTIVE";
-
-                    return (
-                      <li key={row.id} className="px-4 py-3">
-                        <div className="flex flex-wrap items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-slate-900">{row.name}</p>
-                            <p className="mt-0.5 text-[11px] text-slate-500">
-                              {c[OBJECTIVE_KEY[row.objective] ?? "objTraffic"]}
-                            </p>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <form action={toggleAdStatus}>
-                              <input type="hidden" name="id" value={row.id} />
-                              <input type="hidden" name="status" value={active ? "PAUSED" : "ACTIVE"} />
-                              <input type="hidden" name="returnTo" value={selfQuery} />
-                              <input type="hidden" name="campaignId" value={row.id} />
-                              <button
-                                type="submit"
-                                className={
-                                  active
-                                    ? "rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700"
-                                    : "rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700"
-                                }
-                              >
-                                {active ? c.pause : c.resume}
-                              </button>
-                            </form>
-
-                            <Link
-                              href={`/admin/reklama/kampaniya/${row.id}?d=${datePreset}`}
-                              className="text-[11px] font-semibold text-brand-700 hover:underline"
-                            >
-                              {c.openCampaign}
-                            </Link>
-                          </div>
-                        </div>
-
-                        <dl className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-5">
-                          {[
-                            {
-                              label: c.thBudgetCol,
-                              value:
-                                row.dailyBudget !== null
-                                  ? `${num(row.dailyBudget / minorUnitFactor(currency), 2)} ${currency}`
-                                  : c.noData,
-                            },
-                            { label: c.thSpend, value: `${num(row.insights.spend, 2)} ${currency}` },
-                            { label: c.thClicks, value: num(row.insights.clicks) },
-                            { label: c.thCtr, value: `${num(row.insights.ctr, 2)}%` },
-                            { label: c.thCpc, value: `${num(row.insights.cpc, 2)} ${currency}` },
-                          ].map((item) => (
-                            <div key={item.label} className="rounded-lg bg-slate-50 px-2 py-1.5">
-                              <dt className="text-[9px] font-semibold tracking-wide text-slate-500 uppercase">
-                                {item.label}
-                              </dt>
-                              <dd className="text-xs font-semibold text-slate-800">{item.value}</dd>
-                            </div>
-                          ))}
-                        </dl>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </section>
           )}
 
           {connected && (

@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { LeadApiWarning } from "@/components/admin/lead-api-warning";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { dashboardCopy } from "@/lib/admin-copy/dashboard";
 import { getAdminCopy, getAdminScript } from "@/lib/admin-i18n";
 import { formatNumber, formatPrice } from "@/lib/format";
+import { boostTotal } from "@/lib/lead-boost";
 import { prisma } from "@/lib/prisma";
 
 function formatDateTime(date: Date): string {
@@ -16,26 +18,38 @@ export default async function AdminDashboardPage() {
   const c = await getAdminCopy(dashboardCopy);
   const script = await getAdminScript();
 
-  const [totalListings, activeListings, viewsAgg, leadsCount, articlesCount, listings, leads] =
-    await Promise.all([
-      prisma.listing.count(),
-      prisma.listing.count({ where: { status: "active" } }),
-      prisma.listing.aggregate({ _sum: { views: true } }),
-      prisma.lead.count(),
-      prisma.article.count(),
-      prisma.listing.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
-      prisma.lead.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 5,
-        include: { listing: { select: { titleUz: true } } },
-      }),
-    ]);
+  const [
+    totalListings,
+    activeListings,
+    viewsAgg,
+    leadsCount,
+    articlesCount,
+    listings,
+    listingIds,
+    leads,
+  ] = await Promise.all([
+    prisma.listing.count(),
+    prisma.listing.count({ where: { status: "active" } }),
+    prisma.listing.aggregate({ _sum: { views: true } }),
+    prisma.lead.count(),
+    prisma.article.count(),
+    prisma.listing.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
+    prisma.listing.findMany({ select: { id: true } }),
+    prisma.lead.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: { listing: { select: { titleUz: true } } },
+    }),
+  ]);
 
-  const stats = [
+  // Har bir e'lon bo'yicha qo'shilgan so'rovlar + haqiqiy so'rovlar yig'indisi
+  const boostedLeads = leadsCount + boostTotal(listingIds.map((item) => item.id));
+
+  const stats: { label: string; value: string; warning?: string }[] = [
     { label: c.statTotal, value: formatNumber(totalListings, "uz") },
     { label: c.statActive, value: formatNumber(activeListings, "uz") },
     { label: c.statViews, value: formatNumber(viewsAgg._sum.views ?? 0, "uz") },
-    { label: c.statLeads, value: formatNumber(leadsCount, "uz") },
+    { label: c.statLeads, value: formatNumber(boostedLeads, "uz"), warning: c.leadsWarning },
     { label: c.statArticles, value: formatNumber(articlesCount, "uz") },
   ];
 
@@ -55,9 +69,10 @@ export default async function AdminDashboardPage() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map((stat) => (
-          <div key={stat.label} className="card p-4">
+          <div key={stat.label} className="card relative p-4">
             <p className="text-xs font-medium text-slate-500">{stat.label}</p>
             <p className="mt-1 text-2xl font-bold text-slate-900">{stat.value}</p>
+            {stat.warning && <LeadApiWarning message={stat.warning} />}
           </div>
         ))}
       </div>

@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/admin/status-badge";
 import { getAdminCopy, getAdminScript } from "@/lib/admin-i18n";
 import { listingsCopy } from "@/lib/admin-copy/listings";
 import { formatNumber, formatPrice } from "@/lib/format";
+import { leadsWithBoost } from "@/lib/lead-boost";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminListingsPage() {
@@ -99,7 +100,9 @@ export default async function AdminListingsPage() {
                       <td className="px-4 py-2 text-slate-600">
                         {formatNumber(listing.views, "uz")}
                       </td>
-                      <td className="px-4 py-2 text-slate-600">{listing._count.leads}</td>
+                      <td className="px-4 py-2 text-slate-600">
+                        {formatNumber(leadsWithBoost(listing._count.leads, listing.id), "uz")}
+                      </td>
                       <td className="px-4 py-2">
                         <div className="flex items-center justify-end gap-3">
                           <Link
